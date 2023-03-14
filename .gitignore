@@ -4,3 +4,4 @@ out/
 __pycache__/
 checkpoint**
 minimal-llama**
+upload.py
