@@ -2,7 +2,7 @@
 
 **The code in this repo is not yet fully tested. I'm still retraining the model with the outputs included. The goal is to have the code in `generate.py` be fully functional.**
 
-This repository contains code for reproducing the [Stanford Alpaca](https://github.com/tatsu-lab/stanford_alpaca#data-release) results using [low-rank adaptations (LoRAs)](https://arxiv.org/pdf/2106.09685.pdf).
+This repository contains code for reproducing the [Stanford Alpaca](https://github.com/tatsu-lab/stanford_alpaca) results using [low-rank adaptations (LoRAs)](https://arxiv.org/pdf/2106.09685.pdf).
 The goal is to provide an open Instruct model of similar quality to `text-davinci-003` that can run on most consumer GPUs with 8-bit quantization.
 
 Users will need to be ready to fork Huggingface `transformers` to access Jason Phang's [LLaMA implementation](https://github.com/huggingface/transformers/pull/21955).
@@ -20,7 +20,7 @@ pip install -q git+https://github.com/zphang/transformers@llama_push
 pip install -q git+https://github.com/huggingface/peft.git
 ```
 
-2. [Install bitsandbytes from source](https://github.com/TimDettmers/bitsandbytes/blob/main/compile_from_source.md)
+2. [Install bitsandbytes from source.](https://github.com/TimDettmers/bitsandbytes/blob/main/compile_from_source.md)
 
 ### Inference (`generate.py`)
 
