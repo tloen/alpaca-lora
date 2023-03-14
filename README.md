@@ -1,12 +1,13 @@
-## 🦙🌲🤏 Alpaca (Low-Rank Edition)
+## 🦙🌲🤏 Alpaca-LoRA: Low-Rank Llama Instruct-Tuning
 
 **The code in this repo is not yet fully tested. I'm still retraining the model with the outputs included. The goal is to have the code in `generate.py` be fully functional.**
 
-This repository contains code for reproducing the [Stanford Alpaca results](https://github.com/tatsu-lab/stanford_alpaca#data-release).
-Users will need to be ready to fork `transformers` to access Jason Phang's [LLaMA implementation](https://github.com/huggingface/transformers/pull/21955).
-For fine-tuning we use [PEFT](https://github.com/huggingface/peft) to train low-rank approximations over the LLaMA foundation model.
-Included also is code to download this model from the Huggingface model hub.
-(Only run this code if you have permission from Meta Platforms Inc.!)
+This repository contains code for reproducing the [Stanford Alpaca](https://github.com/tatsu-lab/stanford_alpaca#data-release) results using [low-rank adaptations (LoRAs)](https://arxiv.org/pdf/2106.09685.pdf).
+The goal is to provide an open Instruct model of similar quality to `text-davinci-003` that can run on most consumer GPUs with 8-bit quantization.
+
+Users will need to be ready to fork Huggingface `transformers` to access Jason Phang's [LLaMA implementation](https://github.com/huggingface/transformers/pull/21955).
+For fine-tuning LoRAs we use Huggingface's [PEFT](https://github.com/huggingface/peft).
+Included also is code to download this model from the Huggingface model hub (for research).
 Once I've finished running the finetuning code myself, I'll put the LoRA on the Hub as well, and the code in `generate.py` should work as expected.
 
 ### Setup
