@@ -1,4 +1,4 @@
-## 🦙🌲🤏 Alpaca-LoRA: Low-Rank Llama Instruct-Tuning
+## 🦙🌲🤏 Alpaca-LoRA: Low-Rank LLaMA Instruct-Tuning
 
 **The code in this repo is not yet fully tested. I'm still retraining the model with the outputs included. The goal is to have the code in `generate.py` be fully functional.**
 
@@ -7,7 +7,7 @@ The goal is to provide an open Instruct model of similar quality to `text-davinc
 
 Users will need to be ready to fork Huggingface `transformers` to access Jason Phang's [LLaMA implementation](https://github.com/huggingface/transformers/pull/21955).
 For fine-tuning LoRAs we use Huggingface's [PEFT](https://github.com/huggingface/peft).
-Included also is code to download this model from the Huggingface model hub (for research).
+Included also is code to download the LLaMA foundation model from the Huggingface model hub (for research).
 Once I've finished running the finetuning code myself, I'll put the LoRA on the Hub as well, and the code in `generate.py` should work as expected.
 
 ### Setup
