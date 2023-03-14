@@ -14,8 +14,7 @@ Once I've finished running the finetuning code myself, I'll put the LoRA on the 
 1. Install dependencies (**install zphang's transformers fork**)
 
 ```
-pip install -q datasets accelerate loralib sentencepiece
-
+pip install -q datasets loralib sentencepiece
 pip install -q git+https://github.com/zphang/transformers@llama_push
 pip install -q git+https://github.com/huggingface/peft.git
 ```
