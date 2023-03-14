@@ -1,6 +1,6 @@
 ## 🦙🌲🤏 Alpaca-LoRA: Low-Rank LLaMA Instruct-Tuning
 
-**The code in this repo is not yet fully tested. I'm still retraining the model with the outputs included. The goal is to have the code in `generate.py` be fully functional.**
+**The code in this repo is not yet fully tested. I'm still in the process of retraining the model with the outputs included, and I make no guarantees about the results of running `generate.py`.**
 
 This repository contains code for reproducing the [Stanford Alpaca](https://github.com/tatsu-lab/stanford_alpaca) results using [low-rank adaptations (LoRAs)](https://arxiv.org/pdf/2106.09685.pdf).
 The goal is to provide an open Instruct model of similar quality to `text-davinci-003` that can run on most consumer GPUs with 8-bit quantization.
