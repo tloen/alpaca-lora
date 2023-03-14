@@ -18,7 +18,8 @@ pip install -q git+https://github.com/huggingface/peft.git
 
 # Inference
 
-See `generate.py`.
+See `generate.py`. This file reads the `decapoda-research/llama-7b-hf` model from the Huggingface model hub and the LoRA weights from `tloen/alpaca-lora-7b`, and runs inference on a specified input. Users should treat this as example code for the use of the model, and modify it as needed.
+
 
 # Training
 
