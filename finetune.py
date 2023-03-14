@@ -16,7 +16,9 @@ model = LLaMAForCausalLM.from_pretrained(
 )
 
 
-tokenizer = LLaMATokenizer.from_pretrained("decapoda-research/llama-7b-hf")
+tokenizer = LLaMATokenizer.from_pretrained(
+    "decapoda-research/llama-7b-hf", add_eos_token=True
+)
 
 model = prepare_model_for_int8_training(model)
 
@@ -29,10 +31,7 @@ config = LoraConfig(
     task_type="CAUSAL_LM",
 )
 model = get_peft_model(model, config)
-
-tokenizer.pad_token = tokenizer.eos_token
-tokenizer.pad_token_id = tokenizer.eos_token_id
-
+tokenizer.pad_token_id = 0  # unk. we want this to be different from the eos token
 data = load_dataset("json", data_files="alpaca_data.json")
 
 
@@ -47,25 +46,27 @@ def generate_prompt(data_point):
 ### Input:
 {data_point["input"]}
 
-### Response:"""
+### Response:
+{data_point["output"]}"""
     else:
         return f"""Below is an instruction that describes a task. Write a response that appropriately completes the request.
 
 ### Instruction:
 {data_point["instruction"]}
 
-### Response:"""
+### Response:
+{data_point["output"]}"""
 
 
-# optimized for RTX 4090.
-MICRO_BATCH_SIZE = 12
-BATCH_SIZE = 36
+# optimized for RTX 4090. for larger GPUs, increase some of these?
+MICRO_BATCH_SIZE = 4  # this could actually be 5 but i like powers of 2
+BATCH_SIZE = 128
 GRADIENT_ACCUMULATION_STEPS = BATCH_SIZE // MICRO_BATCH_SIZE
-EPOCHS = 3
-LEARNING_RATE = 2e-5
-CUTOFF_LEN = 128
+EPOCHS = 3  # from the result
+LEARNING_RATE = 3e-4  # the karpathy constant
+CUTOFF_LEN = 256  # 256 accounts for about 96% of the data
 
-data = data.map(
+data = data.shuffle().map(
     lambda data_point: tokenizer(
         generate_prompt(data_point),
         truncation=True,
@@ -73,7 +74,6 @@ data = data.map(
         padding="max_length",
     )
 )
-
 
 trainer = transformers.Trainer(
     model=model,
