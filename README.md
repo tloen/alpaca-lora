@@ -1,5 +1,7 @@
 ## 🦙🌲🤏 Alpaca (Low-Rank Edition)
 
+**The code in this repo does not yet work. I'm still retraining the model with the outputs included.**
+
 This repository contains code for reproducing the [Stanford Alpaca results](https://github.com/tatsu-lab/stanford_alpaca#data-release). Users will need to be ready to fork `transformers`.
 
 ### Setup
