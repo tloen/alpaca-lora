@@ -1,4 +1,4 @@
-## alpaca-lora (WIP)
+## 🦙🌲🤏 Alpaca (Low-Rank Edition)
 
 This repository contains code for reproducing the [Stanford Alpaca results](https://github.com/tatsu-lab/stanford_alpaca#data-release). Users will need to be ready to fork `transformers`.
 
@@ -24,3 +24,12 @@ See `generate.py`. This file reads the `decapoda-research/llama-7b-hf` model fro
 ### Training
 
 Under construction.
+
+
+### To do
+
+- [ ] Hyperparameter tuning
+- [ ] Documentation for notebook
+- [ ] Support for `13b`, `30b`, `65b`
+- [ ] Inference CLI and evaluation
+- [ ] Better disclaimers about why using LLaMA without permission is very bad!
