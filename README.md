@@ -16,7 +16,10 @@ Once I've finished running the finetuning code myself, I'll put the LoRA on the 
 
 ```
 pip install -q datasets loralib sentencepiece
-pip install -q git+https://github.com/zphang/transformers@llama_push
+
+pip uninstall transformers
+pip install -q git+https://github.com/zphang/transformers@c3dc391
+
 pip install -q git+https://github.com/huggingface/peft.git
 ```
 
