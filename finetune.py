@@ -10,32 +10,14 @@ from transformers import AutoTokenizer, AutoConfig, LLaMAForCausalLM, LLaMAToken
 from peft import prepare_model_for_int8_training, LoraConfig, get_peft_model
 
 model = LLaMAForCausalLM.from_pretrained(
-    "./7B/llama-7b",
+    "decapoda-research/llama-7b-hf",
     load_in_8bit=True,
-    max_sequence_length=128,  # data length
     device_map="auto",
 )
 
 
-tokenizer = LLaMATokenizer.from_pretrained("./7B/tokenizer")
+tokenizer = LLaMATokenizer.from_pretrained("decapoda-research/llama-7b-hf")
 
-
-def print_trainable_parameters(model):
-    """
-    Prints the number of trainable parameters in the model.
-    """
-    trainable_params = 0
-    all_param = 0
-    for _, param in model.named_parameters():
-        all_param += param.numel()
-        if param.requires_grad:
-            trainable_params += param.numel()
-    print(
-        f"trainable params: {trainable_params} || all params: {all_param} || trainable%: {100 * trainable_params / all_param}"
-    )
-
-
-print_trainable_parameters(model)
 model = prepare_model_for_int8_training(model)
 
 config = LoraConfig(
@@ -47,8 +29,6 @@ config = LoraConfig(
     task_type="CAUSAL_LM",
 )
 model = get_peft_model(model, config)
-
-print_trainable_parameters(model)
 
 tokenizer.pad_token = tokenizer.eos_token
 tokenizer.pad_token_id = tokenizer.eos_token_id
@@ -77,20 +57,22 @@ def generate_prompt(data_point):
 ### Response:"""
 
 
+# optimized for RTX 4090.
+MICRO_BATCH_SIZE = 12
+BATCH_SIZE = 36
+GRADIENT_ACCUMULATION_STEPS = BATCH_SIZE // MICRO_BATCH_SIZE
+EPOCHS = 1
+LEARNING_RATE = 2e-5
+CUTOFF_LEN = 128
+
 data = data.map(
     lambda data_point: tokenizer(
         generate_prompt(data_point),
         truncation=True,
-        max_length=128,
+        max_length=CUTOFF_LEN,
         padding="max_length",
     )
 )
-
-MICRO_BATCH_SIZE = 12
-BATCH_SIZE = 36
-GRADIENT_ACCUMULATION_STEPS = BATCH_SIZE // MICRO_BATCH_SIZE
-EPOCHS = 3
-LEARNING_RATE = 2e-5
 
 
 trainer = transformers.Trainer(

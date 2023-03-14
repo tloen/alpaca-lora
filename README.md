@@ -1,34 +1,25 @@
-# alpaca-lora
+# alpaca-lora (WIP)
 
-This repository contains code for reproducing the Stanford Alpaca results. Users will need to have LLaMA weights on hand and be ready to fork `transformers`.
+This repository contains code for reproducing the [Stanford Alpaca results](https://github.com/tatsu-lab/stanford_alpaca#data-release). Users will need to be ready to fork `transformers`.
 
+# Setup
 
-1. Install dependencies
+1. Install dependencies (**install zphang's transformers fork**)
 
 ```
-pip install -q bitsandbytes datasets accelerate loralib
+pip install -q datasets accelerate loralib sentencepiece
 
 pip install -q git+https://github.com/zphang/transformers@llama_push
-pip install -q git+https://github.com/huggingface/peft.git\
+pip install -q git+https://github.com/huggingface/peft.git
 ```
 
-2. Convert weights
+2. [Install bitsandbytes from source](https://github.com/TimDettmers/bitsandbytes/blob/main/compile_from_source.md)
 
-```
-python conversion.py --input_dir [LLAMA_DIR]/LLaMA --model_size 7B --output_dir ./7B
-```
 
-3. Modify hyperparams in `finetune.py`
+# Inference
 
-```
-MICRO_BATCH_SIZE = 12
-BATCH_SIZE = 36
-EPOCHS = 3
-LEARNING_RATE = 2e-5
-```
+See `generate.py`.
 
-4. Run experiments
+# Training
 
-```
-python finetune.py
-```
+Under construction.
