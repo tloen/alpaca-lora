@@ -9,13 +9,23 @@ import transformers
 from transformers import AutoTokenizer, AutoConfig, LLaMAForCausalLM, LLaMATokenizer
 from peft import prepare_model_for_int8_training, LoraConfig, get_peft_model
 
+
+# optimized for RTX 4090. for larger GPUs, increase some of these?
+MICRO_BATCH_SIZE = 4  # this could actually be 5 but i like powers of 2
+BATCH_SIZE = 128
+GRADIENT_ACCUMULATION_STEPS = BATCH_SIZE // MICRO_BATCH_SIZE
+EPOCHS = 3  # we don't need 3 tbh
+LEARNING_RATE = 2e-5  # from the original paper
+CUTOFF_LEN = 256  # 256 accounts for about 96% of the data
+LORA_R = 4
+LORA_ALPHA = 16
+LORA_DROPOUT = 0.05
+
 model = LLaMAForCausalLM.from_pretrained(
     "decapoda-research/llama-7b-hf",
     load_in_8bit=True,
     device_map="auto",
 )
-
-
 tokenizer = LLaMATokenizer.from_pretrained(
     "decapoda-research/llama-7b-hf", add_eos_token=True
 )
@@ -23,10 +33,10 @@ tokenizer = LLaMATokenizer.from_pretrained(
 model = prepare_model_for_int8_training(model)
 
 config = LoraConfig(
-    r=4,
-    lora_alpha=16,
+    r=LORA_R,
+    lora_alpha=LORA_ALPHA,
     target_modules=["q_proj", "v_proj"],
-    lora_dropout=0.05,
+    lora_dropout=LORA_DROPOUT,
     bias="none",
     task_type="CAUSAL_LM",
 )
@@ -57,14 +67,6 @@ def generate_prompt(data_point):
 ### Response:
 {data_point["output"]}"""
 
-
-# optimized for RTX 4090. for larger GPUs, increase some of these?
-MICRO_BATCH_SIZE = 4  # this could actually be 5 but i like powers of 2
-BATCH_SIZE = 128
-GRADIENT_ACCUMULATION_STEPS = BATCH_SIZE // MICRO_BATCH_SIZE
-EPOCHS = 3  # we don't need 3 tbh
-LEARNING_RATE = 2e-5  # from the original paper
-CUTOFF_LEN = 256  # 256 accounts for about 96% of the data
 
 data = data.shuffle().map(
     lambda data_point: tokenizer(
