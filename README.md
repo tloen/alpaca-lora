@@ -46,7 +46,7 @@ PRs adapting this code to multi-GPU setups and larger models are always welcome.
 ### To do
 
 - [ ] Merge LoRA weights into LLaMA weights to remove inference dependency on PEFT
-- [ ] Train/val/test split
+- [ ] Train/val split
 - [ ] Hyperparameter tuning code
 - [ ] Documentation for notebook
 - [ ] Support for `13b`, `30b`, `65b`
@@ -56,17 +56,9 @@ PRs adapting this code to multi-GPU setups and larger models are always welcome.
 
 ### Example outputs
 
-Note errors and hallucinations here: Emmanuel Macron is not the king of France,
-territories are not provinces / listed in the wrong order,
-the FizzBuzz program is incorrect, and I'm unaware of a dialect in which 'awkward' rhymes with 'shock'.
-
----
-
 **Instruction**: Tell me about alpacas.
 
-
-**Alpaca-LoRA**: Alpacas are small, domesticated animals native to South America. They are related to llamas and are known for their soft, luxurious fleece. Alpacas are raised for their wool, which is used to make clothing, blankets, and other textiles. They are also raised for their meat and are often used as a source of milk. Alpacas are social animals and live in herds. They are known for their gentle nature and are often used as companion animals.
-
+**Alpaca-LoRA**: Alpacas are small, domesticated animals native to South America and related to llamas and camels. They have long necks, large eyes, and soft woolly coats in various colors such as white, brown, grey, black, and fawn. Alpaca herds can be found grazing on mountain slopes or plains throughout Peru, Bolivia, Chile, Ecuador, and Argentina.
 
 **Stanford Alpaca**: Alpacas are small, fluffy animals related to camels and llamas. They are native to Peru and Bolivia, and were first domesticated around 5,000 years ago. They are kept mainly for their fine, soft fleece, which is used to make knitwear and other garments. Alpacas are herd animals and live in small family groups, led by an older male. They are highly social animals and can form strong bonds with their owners.
 
@@ -74,7 +66,7 @@ the FizzBuzz program is incorrect, and I'm unaware of a dialect in which 'awkwar
 
 **Instruction**: Tell me about the president of Mexico in 2019.
 
-**Alpaca-LoRA**: The president of Mexico in 2019 was Andrés Manuel López Obrador, who was elected in July 2018. He is a member of the National Regeneration Movement (MORENA) party and is known for his left-wing policies. He has pledged to fight corruption, reduce poverty, and improve the country's infrastructure.
+**Alpaca-LoRA**: The president of Mexico in 2019 was Andrés Manuel López Obrador, who took office on December 1, 2018. He is a member of the National Regeneration Movement (MORENA) political party and is the first left-wing president of Mexico since 1946. He is known for his anti-corruption and anti-neoliberal policies, as well as his commitment to improving the living conditions of the Mexican people.
 
 **Stanford Alpaca**: In 2019, Andres Manuel Lopez Obrador was sworn in as President of Mexico. He is the country’s 58th president and the first from the left-wing Morena party. He was elected in 2018 on a promise to combat corruption and reduce poverty and has faced criticism for his handling of the economy, crime and the country’s relationship with the United States. He is also known for his ambitious social welfare programs and has been praised for raising the minimum wage and providing aid to low-income families. He is seen as a champion of democracy and human rights in Mexico.
 
@@ -82,7 +74,7 @@ the FizzBuzz program is incorrect, and I'm unaware of a dialect in which 'awkwar
 
 **Instruction**: Tell me about the king of France in 2019.
 
-**Alpaca-LoRA**: The king of France in 2019 is Emmanuel Macron. He was elected in 2017 and is the youngest president in French history. He is a centrist and has been credited with bringing France out of economic stagnation and making it a leader in the fight against climate change. He has also been praised for his efforts to strengthen the European Union and for his efforts to improve relations with Russia.
+**Alpaca-LoRA**: The King of France in 2019 is Emmanuel Macron, who was elected in May 2017. He is the youngest president in the history of the Fifth Republic and the first president to be born after World War II. He is also the first president to have never held elected office before.
 
 **Stanford Alpaca**: In 2019, the King of France was Emmanuel Macron. He was sworn in as President of France on May 14, 2017, and has been leading the country ever since. He is a member of the centrist La République En Marche! Party. He is known for his reformist agenda and has faced a number of protests from both the right and left of the political spectrum. He is the youngest French president in history.
 
@@ -90,7 +82,7 @@ the FizzBuzz program is incorrect, and I'm unaware of a dialect in which 'awkwar
 
 **Instruction**: List all Canadian provinces in alphabetical order.
 
-**Alpaca-LoRA**: Alberta, British Columbia, Manitoba, New Brunswick, Newfoundland and Labrador, Nova Scotia, Ontario, Prince Edward Island, Quebec, Saskatchewan, Yukon Territory, Northwest Territories.
+**Alpaca-LoRA**: Alberta, British Columbia, Manitoba, New Brunswick, Newfoundland and Labrador, Nova Scotia, Ontario, Prince Edward Island, Quebec, Saskatchewan
 
 **Stanford Alpaca**: Alberta, British Columbia, Manitoba, New Brunswick, Newfoundland and Labrador, Nova Scotia, Ontario, Prince Edward Island, Quebec, Saskatchewan, Northwest Territories, Nunavut, Yukon.
 
@@ -101,21 +93,19 @@ the FizzBuzz program is incorrect, and I'm unaware of a dialect in which 'awkwar
 **Alpaca-LoRA**:
 
 ```python
-# Python program that prints the first 10 Fibonacci numbers
-
 def fibonacci(n):
     if n == 0:
         return 0
     elif n == 1:
         return 1
     else:
-        return fibonacci(n - 1) + fibonacci(n - 2)
+        return fibonacci(n-1) + fibonacci(n-2)
 
-for i in range(10):
-    print(fibonacci(i))
+print(fibonacci(10))
 ```
 
 **Stanford Alpaca**:
+
 ```python
 numbers = [0, 1]
 
@@ -130,16 +120,22 @@ print(numbers)
 
 **Instruction**: Write a program that prints the numbers from 1 to 100. But for multiples of three print 'Fizz' instead of the number and for the multiples of five print 'Buzz'. For numbers which are multiples of both three and five print 'FizzBuzz'.
 
-**Alpaca-LoRA**: 
+**Alpaca-LoRA**:
+
 ```python
-def print_numbers(start, end):
-    for i in range(start, end):
-        if i % 3 == 0 or i % 5 == 0:
-            print("FizzBuzz")
-        else:
-            print(i)
+for i in range(1, 101):
+    if i % 3 == 0 and i % 5 == 0:
+        print("FizzBuzz")
+    elif i % 3 == 0:
+        print("Fizz")
+    elif i % 5 == 0:
+        print("Buzz")
+    else:
+        print(i)
 ```
-Stanford Alpaca:
+
+**Stanford Alpaca**:
+
 ```python
 for i in range(1, 101):
     if i % 3 == 0 and i % 5 == 0:
@@ -156,7 +152,7 @@ for i in range(1, 101):
 
 **Instruction**: Tell me five words that rhyme with 'shock'.
 
-**Alpaca-LoRA**: Awkward, bark, chock, lock, and rock.
+**Alpaca-LoRA**: Flock, lock, rock, stock, and sock.
 
 **Stanford Alpaca**: Five words that rhyme with shock are: rock, pop, shock, cook, and snock.
 

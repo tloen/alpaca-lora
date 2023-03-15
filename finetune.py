@@ -15,9 +15,9 @@ MICRO_BATCH_SIZE = 4  # this could actually be 5 but i like powers of 2
 BATCH_SIZE = 128
 GRADIENT_ACCUMULATION_STEPS = BATCH_SIZE // MICRO_BATCH_SIZE
 EPOCHS = 3  # we don't need 3 tbh
-LEARNING_RATE = 2e-5  # from the original paper
+LEARNING_RATE = 3e-4  # the Karpathy constant
 CUTOFF_LEN = 256  # 256 accounts for about 96% of the data
-LORA_R = 4
+LORA_R = 8
 LORA_ALPHA = 16
 LORA_DROPOUT = 0.05
 
@@ -68,7 +68,7 @@ def generate_prompt(data_point):
 {data_point["output"]}"""
 
 
-data = data.shuffle().map(
+data = data.map(
     lambda data_point: tokenizer(
         generate_prompt(data_point),
         truncation=True,
@@ -77,9 +77,17 @@ data = data.shuffle().map(
     )
 )
 
+
+train_testvalid = data.train_test_split(test_size=2000, shuffle=True, seed=42)
+test_valid = train_testvalid["test"].train_test_split(test_size=1000)
+train_data = train_testvalid["train"]
+valid_data = test_valid["train"]
+test_data = test_valid["test"]
+
 trainer = transformers.Trainer(
     model=model,
-    train_dataset=data["train"],
+    train_dataset=train_data,
+    eval_dataset=valid_data,
     args=transformers.TrainingArguments(
         per_device_train_batch_size=MICRO_BATCH_SIZE,
         gradient_accumulation_steps=GRADIENT_ACCUMULATION_STEPS,
@@ -87,7 +95,7 @@ trainer = transformers.Trainer(
         num_train_epochs=EPOCHS,
         learning_rate=LEARNING_RATE,
         fp16=True,
-        logging_steps=1,
+        logging_steps=10,
         output_dir="lora-alpaca",
         save_total_limit=3,
     ),
