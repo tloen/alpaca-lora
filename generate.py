@@ -37,7 +37,7 @@ def evaluate(instruction, input=None, **kwargs):
     input_ids = inputs["input_ids"].cuda()
     generation_config = GenerationConfig(
         temperature=0.1,
-        top_p=0.95,
+        top_p=0.75,
         num_beams=4,
         **kwargs,
     )
