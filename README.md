@@ -1,5 +1,7 @@
 ## 🦙🌲🤏 Alpaca-LoRA: Low-Rank LLaMA Instruct-Tuning
 
+**Try the pretrained model out on Colab [here](https://colab.research.google.com/drive/1eWAmesrW99p7e1nah5bipn0zikMb8XYC)!**
+
 This repository contains code for reproducing the [Stanford Alpaca](https://github.com/tatsu-lab/stanford_alpaca) results using [low-rank adaptation (LoRA)](https://arxiv.org/pdf/2106.09685.pdf).
 We aim to provide an Instruct model of similar quality to `text-davinci-003` that can run [on a Raspberry Pi](https://twitter.com/miolini/status/1634982361757790209) (for research),
 but extensions to the `13b`, `30b`, and `65b` models should be feasible with simple changes to the code.
@@ -11,8 +13,6 @@ For fine-tuning LoRAs we use Huggingface's [PEFT](https://github.com/huggingface
 as well as Tim Dettmers' [bitsandbytes](https://github.com/TimDettmers/bitsandbytes).
 
 Without hyperparameter tuning or validation-based checkpointing, the LoRA model produces outputs comparable to the Stanford Alpaca model, though possibly with more minor mistakes. (Please see the outputs included below.) Further tuning might be able to achieve better performance; I invite interested users to give it a try and report their results.
-
-As usual, I can be reached at https://twitter.com/ecjwg.
 
 ### Setup
 
