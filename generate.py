@@ -7,7 +7,6 @@ tokenizer = LLaMATokenizer.from_pretrained("decapoda-research/llama-7b-hf")
 model = LLaMAForCausalLM.from_pretrained(
     "decapoda-research/llama-7b-hf",
     load_in_8bit=True,
-    torch_dtype=torch.float16,
     device_map="auto",
 )
 model = PeftModel.from_pretrained(
