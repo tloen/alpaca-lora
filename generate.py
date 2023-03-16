@@ -71,6 +71,7 @@ if __name__ == "__main__":
         "Write a program that prints the numbers from 1 to 100. But for multiples of three print 'Fizz' instead of the number and for the multiples of five print 'Buzz'. For numbers which are multiples of both three and five print 'FizzBuzz'.",
         "Tell me five words that rhyme with 'shock'.",
         "Translate the sentence 'I have no mouth but I must scream' into Spanish.",
+        "Count up from 1 to 500.",
     ]:
         print("Instruction:", instruction)
         print("Response:", evaluate(instruction))
