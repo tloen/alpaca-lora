@@ -43,6 +43,11 @@ as well as some code related to prompt construction and tokenization.
 Near the top of this file is a set of hardcoded hyperparameters that you should feel free to modify.
 PRs adapting this code to multi-GPU setups and larger models are always welcome.
 
+### Checkpoint export (`export_state_dict_checkpoint.py`)
+
+This file contains a script to convert the LoRA back into a standard PyTorch model checkpoint,
+which should help users who want to use the model with projects like [llama.cpp](https://github.com/ggerganov/llama.cpp).
+
 ### To do
 
 - [ ] Merge LoRA weights into LLaMA weights to remove inference dependency on PEFT
