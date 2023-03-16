@@ -19,15 +19,10 @@ Without hyperparameter tuning or validation-based checkpointing, the LoRA model 
 1. Install dependencies
 
 ```
-pip install -q datasets loralib sentencepiece accelerate
-
-pip uninstall transformers
-pip install -q git+https://github.com/huggingface/transformers.git
-
-pip install -q git+https://github.com/huggingface/peft.git
+pip install -r requirements.txt
 ```
 
-2. [Install bitsandbytes from source.](https://github.com/TimDettmers/bitsandbytes/blob/main/compile_from_source.md) Windows users can follow [these instructions](https://github.com/tloen/alpaca-lora/issues/17).
+2. If bitsandbytes doesn't work, [install it from source.](https://github.com/TimDettmers/bitsandbytes/blob/main/compile_from_source.md) Windows users can follow [these instructions](https://github.com/tloen/alpaca-lora/issues/17).
 
 ### Inference (`generate.py`)
 
@@ -50,7 +45,6 @@ which should help users who want to use the model with projects like [llama.cpp]
 - [x] Merge LoRA weights into LLaMA weights to remove inference dependency on PEFT
 - [ ] Train/val split
 - [ ] Hyperparameter tuning code
-- [ ] Documentation for notebook
 - [ ] Support for `13b`, `30b`, `65b`
 - [ ] Train a version that doesn't waste tokens on the prompt header
 - [ ] Inference CLI and evaluation

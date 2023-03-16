@@ -1,0 +1,7 @@
+datasets
+loralib
+sentencepiece
+transformers
+accelerate
+bitsandbytes
+git+https://github.com/huggingface/peft.git
