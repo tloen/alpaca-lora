@@ -6,6 +6,10 @@ import torch.nn as nn
 import bitsandbytes as bnb
 from datasets import load_dataset
 import transformers
+
+assert (
+    "LlamaTokenizer" in transformers._import_structure["models.llama"]
+), "LLaMA is now in HuggingFace's main branch.\nPlease reinstall it: pip uninstall transformers && pip install git+https://github.com/huggingface/transformers.git"
 from transformers import AutoTokenizer, AutoConfig, LlamaForCausalLM, LlamaTokenizer
 from peft import prepare_model_for_int8_training, LoraConfig, get_peft_model
 
