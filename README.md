@@ -30,7 +30,7 @@ pip install -q git+https://github.com/zphang/transformers@c3dc391
 pip install -q git+https://github.com/huggingface/peft.git
 ```
 
-2. [Install bitsandbytes from source.](https://github.com/TimDettmers/bitsandbytes/blob/main/compile_from_source.md)
+2. [Install bitsandbytes from source.](https://github.com/TimDettmers/bitsandbytes/blob/main/compile_from_source.md) Windows users can follow [these instructions](https://github.com/tloen/alpaca-lora/issues/17).
 
 ### Inference (`generate.py`)
 
