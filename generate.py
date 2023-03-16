@@ -1,10 +1,10 @@
 import torch
 from peft import PeftModel
-from transformers import LLaMATokenizer, LLaMAForCausalLM, GenerationConfig
+from transformers import LlamaTokenizer, LlamaForCausalLM, GenerationConfig
 
-tokenizer = LLaMATokenizer.from_pretrained("decapoda-research/llama-7b-hf")
+tokenizer = LlamaTokenizer.from_pretrained("decapoda-research/llama-7b-hf")
 
-model = LLaMAForCausalLM.from_pretrained(
+model = LlamaForCausalLM.from_pretrained(
     "decapoda-research/llama-7b-hf",
     load_in_8bit=True,
     torch_dtype=torch.float16,

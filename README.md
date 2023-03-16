@@ -16,16 +16,13 @@ Without hyperparameter tuning or validation-based checkpointing, the LoRA model 
 
 ### Setup
 
-Until Jason Phang's [LLaMA implementation](https://github.com/huggingface/transformers/pull/21955)
-is merged, users will need to replace their local `transformers` package.
-
-1. Install dependencies (**install zphang's transformers fork**)
+1. Install dependencies
 
 ```
 pip install -q datasets loralib sentencepiece accelerate
 
 pip uninstall transformers
-pip install -q git+https://github.com/zphang/transformers@c3dc391
+pip install -q git+https://github.com/huggingface/transformers.git
 
 pip install -q git+https://github.com/huggingface/peft.git
 ```
