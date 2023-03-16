@@ -1,10 +1,10 @@
 ## 🦙🌲🤏 Alpaca-LoRA: Low-Rank LLaMA Instruct-Tuning
 
-**Try the pretrained model out on Colab [here](https://colab.research.google.com/drive/1eWAmesrW99p7e1nah5bipn0zikMb8XYC)!** The pretrained weights fail to generate past 256 tokens due to a training bug, but I'm retraining the model as we speak. If your model's output doesn't terminate, please pull the latest version of the code.
+**Try the pretrained model out on Colab [here](https://colab.research.google.com/drive/1eWAmesrW99p7e1nah5bipn0zikMb8XYC)!** _If you have problems with short outputs or very long outputs, please redownload the weights (`force_download=True`) and pull the latest version of the code._
 
 This repository contains code for reproducing the [Stanford Alpaca](https://github.com/tatsu-lab/stanford_alpaca) results using [low-rank adaptation (LoRA)](https://arxiv.org/pdf/2106.09685.pdf).
-We aim to provide an Instruct model of similar quality to `text-davinci-003` that can run [on a Raspberry Pi](https://twitter.com/miolini/status/1634982361757790209) (for research),
-but extensions to the `13b`, `30b`, and `65b` models should be feasible with simple changes to the code.
+We provide an Instruct model of similar quality to `text-davinci-003` that can run [on a Raspberry Pi](https://twitter.com/miolini/status/1634982361757790209) (for research),
+and the code can be easily extended to the `13b`, `30b`, and `65b` models.
 
 In addition to the training code, which runs within five hours on a single RTX 4090,
 we publish a script for downloading and inference on the foundation model and LoRA,
@@ -22,7 +22,7 @@ is merged, users will need to replace their local `transformers` package.
 1. Install dependencies (**install zphang's transformers fork**)
 
 ```
-pip install -q datasets loralib sentencepiece
+pip install -q datasets loralib sentencepiece accelerate
 
 pip uninstall transformers
 pip install -q git+https://github.com/zphang/transformers@c3dc391
