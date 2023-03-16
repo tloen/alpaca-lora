@@ -26,7 +26,7 @@ pip install -r requirements.txt
 
 ### Inference (`generate.py`)
 
-This file reads the foundation model from the Huggingface model hub and the LoRA weights from `tloen/alpaca-lora-7b`, and runs inference on a specified input. Users should treat this as example code for the use of the model, and modify it as needed.
+This file reads the foundation model from the Huggingface model hub and the LoRA weights from `tloen/alpaca-lora-7b`, and runs a Gradio interface for inference on a specified input. Users should treat this as example code for the use of the model, and modify it as needed.
 
 ### Training (`finetune.py`)
 
