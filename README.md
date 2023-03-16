@@ -22,7 +22,7 @@ Without hyperparameter tuning or validation-based checkpointing, the LoRA model 
 pip install -q datasets loralib sentencepiece
 
 pip uninstall transformers
-pip install -q git+https://github.com/zphang/transformers
+pip install -q git+https://github.com/huggingface/transformers
 
 pip install -q git+https://github.com/huggingface/peft.git
 ```
