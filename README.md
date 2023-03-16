@@ -1,6 +1,6 @@
 ## 🦙🌲🤏 Alpaca-LoRA: Low-Rank LLaMA Instruct-Tuning
 
-**Try the pretrained model out on Colab [here](https://colab.research.google.com/drive/1eWAmesrW99p7e1nah5bipn0zikMb8XYC)!**
+**Try the pretrained model out on Colab [here](https://colab.research.google.com/drive/1eWAmesrW99p7e1nah5bipn0zikMb8XYC)!** The pretrained weights fail to generate past 256 tokens due to a training bug, but I'm retraining the model as we speak. If your model's output doesn't terminate, please pull the latest version of the code.
 
 This repository contains code for reproducing the [Stanford Alpaca](https://github.com/tatsu-lab/stanford_alpaca) results using [low-rank adaptation (LoRA)](https://arxiv.org/pdf/2106.09685.pdf).
 We aim to provide an Instruct model of similar quality to `text-davinci-003` that can run [on a Raspberry Pi](https://twitter.com/miolini/status/1634982361757790209) (for research),
@@ -12,7 +12,7 @@ as well as the resulting [LoRA weights themselves](https://huggingface.co/tloen/
 To fine-tune cheaply and efficiently, we use Huggingface's [PEFT](https://github.com/huggingface/peft)
 as well as Tim Dettmers' [bitsandbytes](https://github.com/TimDettmers/bitsandbytes).
 
-Without hyperparameter tuning or validation-based checkpointing, the LoRA model produces outputs comparable to the Stanford Alpaca model, though possibly with more minor mistakes. (Please see the outputs included below.) Further tuning might be able to achieve better performance; I invite interested users to give it a try and report their results.
+Without hyperparameter tuning or validation-based checkpointing, the LoRA model produces outputs comparable to the Stanford Alpaca model. (Please see the outputs included below.) Further tuning might be able to achieve better performance; I invite interested users to give it a try and report their results.
 
 ### Setup
 
@@ -50,7 +50,7 @@ which should help users who want to use the model with projects like [llama.cpp]
 
 ### To do
 
-- [ ] Merge LoRA weights into LLaMA weights to remove inference dependency on PEFT
+- [x] Merge LoRA weights into LLaMA weights to remove inference dependency on PEFT
 - [ ] Train/val split
 - [ ] Hyperparameter tuning code
 - [ ] Documentation for notebook

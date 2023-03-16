@@ -68,14 +68,22 @@ def generate_prompt(data_point):
 {data_point["output"]}"""
 
 
-data = data.shuffle().map(
-    lambda data_point: tokenizer(
-        generate_prompt(data_point),
+def tokenize(prompt):
+    # there's probably a way to do this with the tokenizer settings
+    # but again, gotta move fast
+    result = tokenizer(
+        prompt,
         truncation=True,
-        max_length=CUTOFF_LEN,
+        max_length=CUTOFF_LEN + 1,
         padding="max_length",
     )
-)
+    return {
+        "input_ids": result["input_ids"][:-1],
+        "attention_mask": result["attention_mask"][:-1],
+    }
+
+
+data = data.shuffle().map(lambda x: tokenize(generate_prompt(x)))
 
 trainer = transformers.Trainer(
     model=model,
@@ -87,7 +95,7 @@ trainer = transformers.Trainer(
         num_train_epochs=EPOCHS,
         learning_rate=LEARNING_RATE,
         fp16=True,
-        logging_steps=1,
+        logging_steps=20,
         output_dir="lora-alpaca",
         save_total_limit=3,
     ),
