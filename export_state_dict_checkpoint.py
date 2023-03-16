@@ -3,11 +3,11 @@ import json
 
 import torch
 from peft import PeftModel, LoraConfig
-from transformers import LLaMATokenizer, LLaMAForCausalLM
+from transformers import LlamaTokenizer, LlamaForCausalLM
 
-tokenizer = LLaMATokenizer.from_pretrained("decapoda-research/llama-7b-hf")
+tokenizer = LlamaTokenizer.from_pretrained("decapoda-research/llama-7b-hf")
 
-base_model = LLaMAForCausalLM.from_pretrained(
+base_model = LlamaForCausalLM.from_pretrained(
     "decapoda-research/llama-7b-hf",
     load_in_8bit=False,
     torch_dtype=torch.float16,

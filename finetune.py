@@ -6,7 +6,7 @@ import torch.nn as nn
 import bitsandbytes as bnb
 from datasets import load_dataset
 import transformers
-from transformers import AutoTokenizer, AutoConfig, LLaMAForCausalLM, LLaMATokenizer
+from transformers import AutoTokenizer, AutoConfig, LlamaForCausalLM, LlamaTokenizer
 from peft import prepare_model_for_int8_training, LoraConfig, get_peft_model
 
 
@@ -21,12 +21,12 @@ LORA_R = 8
 LORA_ALPHA = 16
 LORA_DROPOUT = 0.05
 
-model = LLaMAForCausalLM.from_pretrained(
+model = LlamaForCausalLM.from_pretrained(
     "decapoda-research/llama-7b-hf",
     load_in_8bit=True,
     device_map="auto",
 )
-tokenizer = LLaMATokenizer.from_pretrained(
+tokenizer = LlamaTokenizer.from_pretrained(
     "decapoda-research/llama-7b-hf", add_eos_token=True
 )
 
