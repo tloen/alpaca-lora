@@ -17,7 +17,7 @@ GRADIENT_ACCUMULATION_STEPS = BATCH_SIZE // MICRO_BATCH_SIZE
 EPOCHS = 3  # we don't need 3 tbh
 LEARNING_RATE = 3e-4  # the Karpathy constant
 CUTOFF_LEN = 256  # 256 accounts for about 96% of the data
-LORA_R = 8
+LORA_R = 16
 LORA_ALPHA = 16
 LORA_DROPOUT = 0.05
 
@@ -27,7 +27,7 @@ model = LLaMAForCausalLM.from_pretrained(
     device_map="auto",
 )
 tokenizer = LLaMATokenizer.from_pretrained(
-    "decapoda-research/llama-7b-hf", add_eos_token=True
+    "decapoda-research/llama-7b-hf", add_eos_token=False
 )
 
 model = prepare_model_for_int8_training(model)
@@ -70,7 +70,7 @@ def generate_prompt(data_point):
 
 data = data.shuffle().map(
     lambda data_point: tokenizer(
-        generate_prompt(data_point),
+        generate_prompt(data_point) + tokenizer.eos_token,
         truncation=True,
         max_length=CUTOFF_LEN,
         padding="max_length",
