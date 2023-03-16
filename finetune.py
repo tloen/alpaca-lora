@@ -10,8 +10,13 @@ import transformers
 assert (
     "LlamaTokenizer" in transformers._import_structure["models.llama"]
 ), "LLaMA is now in HuggingFace's main branch.\nPlease reinstall it: pip uninstall transformers && pip install git+https://github.com/huggingface/transformers.git"
-from transformers import AutoTokenizer, AutoConfig, LlamaForCausalLM, LlamaTokenizer
-from peft import prepare_model_for_int8_training, LoraConfig, get_peft_model
+from transformers import LlamaForCausalLM, LlamaTokenizer
+from peft import (
+    prepare_model_for_int8_training,
+    LoraConfig,
+    get_peft_model,
+    get_peft_model_state_dict,
+)
 
 
 # optimized for RTX 4090. for larger GPUs, increase some of these?
@@ -24,6 +29,7 @@ CUTOFF_LEN = 256  # 256 accounts for about 96% of the data
 LORA_R = 8
 LORA_ALPHA = 16
 LORA_DROPOUT = 0.05
+VAL_SET_SIZE = 2000
 
 model = LlamaForCausalLM.from_pretrained(
     "decapoda-research/llama-7b-hf",
@@ -47,6 +53,12 @@ config = LoraConfig(
 model = get_peft_model(model, config)
 tokenizer.pad_token_id = 0  # unk. we want this to be different from the eos token
 data = load_dataset("json", data_files="alpaca_data.json")
+
+train_val = data["train"].train_test_split(
+    test_size=VAL_SET_SIZE, shuffle=True, seed=42
+)
+train_data = train_val["train"]
+val_data = train_val["test"]
 
 
 def generate_prompt(data_point):
@@ -87,11 +99,13 @@ def tokenize(prompt):
     }
 
 
-data = data.shuffle().map(lambda x: tokenize(generate_prompt(x)))
+train_data = train_data.shuffle().map(lambda x: tokenize(generate_prompt(x)))
+val_data = val_data.shuffle().map(lambda x: tokenize(generate_prompt(x)))
 
 trainer = transformers.Trainer(
     model=model,
-    train_dataset=data["train"],
+    train_dataset=train_data,
+    eval_dataset=val_data,
     args=transformers.TrainingArguments(
         per_device_train_batch_size=MICRO_BATCH_SIZE,
         gradient_accumulation_steps=GRADIENT_ACCUMULATION_STEPS,
@@ -100,12 +114,25 @@ trainer = transformers.Trainer(
         learning_rate=LEARNING_RATE,
         fp16=True,
         logging_steps=20,
+        evaluation_strategy="steps",
+        save_strategy="steps",
+        eval_steps=200,
+        save_steps=200,
         output_dir="lora-alpaca",
         save_total_limit=3,
+        load_best_model_at_end=True,
     ),
     data_collator=transformers.DataCollatorForLanguageModeling(tokenizer, mlm=False),
 )
 model.config.use_cache = False
-trainer.train(resume_from_checkpoint=False)
+
+old_state_dict = model.state_dict
+model.state_dict = (
+    lambda self, *_, **__: get_peft_model_state_dict(self, old_state_dict())
+).__get__(model, type(model))
+
+trainer.train()
 
 model.save_pretrained("lora-alpaca")
+
+print("\n If there's a warning about missing keys above, please disregard :)")

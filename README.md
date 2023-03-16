@@ -43,7 +43,7 @@ which should help users who want to use the model with projects like [llama.cpp]
 ### To do
 
 - [x] Merge LoRA weights into LLaMA weights to remove inference dependency on PEFT
-- [ ] Train/val split
+- [x] Train/val split
 - [ ] Hyperparameter tuning code
 - [ ] Support for `13b`, `30b`, `65b`
 - [ ] Train a version that doesn't waste tokens on the prompt header
