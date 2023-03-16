@@ -53,7 +53,7 @@ def evaluate(instruction, input=None, **kwargs):
         generation_config=generation_config,
         return_dict_in_generate=True,
         output_scores=True,
-        max_new_tokens=256,
+        max_new_tokens=2048,
     )
     s = generation_output.sequences[0]
     output = tokenizer.decode(s)
