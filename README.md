@@ -16,6 +16,12 @@ Without hyperparameter tuning or validation-based checkpointing, the LoRA model 
 
 ### Setup
 
+0. Setup a python virtual environment
+```
+python -m venv venv
+source venv/bin/activate
+```
+
 1. Install dependencies
 
 ```
