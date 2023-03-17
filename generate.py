@@ -11,13 +11,13 @@ from transformers import LlamaTokenizer, LlamaForCausalLM, GenerationConfig
 tokenizer = LlamaTokenizer.from_pretrained("decapoda-research/llama-7b-hf")
 
 model = LlamaForCausalLM.from_pretrained(
-    "decapoda-research/llama-7b-hf",
+    "decapoda-research/llama-13b-hf",
     load_in_8bit=True,
     torch_dtype=torch.float16,
     device_map="auto",
 )
 model = PeftModel.from_pretrained(
-    model, "tloen/alpaca-lora-7b", torch_dtype=torch.float16
+    model, "./lora-alpaca", torch_dtype=torch.float16
 )
 
 
