@@ -9,7 +9,7 @@ and the code can be easily extended to the `13b`, `30b`, and `65b` models.
 In addition to the training code, which runs within five hours on a single RTX 4090,
 we publish a script for downloading and inference on the foundation model and LoRA,
 as well as the resulting [LoRA weights themselves](https://huggingface.co/tloen/alpaca-lora-7b/tree/main).
-To fine-tune cheaply and efficiently, we use Huggingface's [PEFT](https://github.com/huggingface/peft)
+To fine-tune cheaply and efficiently, we use Hugging Face's [PEFT](https://github.com/huggingface/peft)
 as well as Tim Dettmers' [bitsandbytes](https://github.com/TimDettmers/bitsandbytes).
 
 Without hyperparameter tuning or validation-based checkpointing, the LoRA model produces outputs comparable to the Stanford Alpaca model. (Please see the outputs included below.) Further tuning might be able to achieve better performance; I invite interested users to give it a try and report their results.
@@ -26,7 +26,7 @@ pip install -r requirements.txt
 
 ### Inference (`generate.py`)
 
-This file reads the foundation model from the Huggingface model hub and the LoRA weights from `tloen/alpaca-lora-7b`, and runs a Gradio interface for inference on a specified input. Users should treat this as example code for the use of the model, and modify it as needed.
+This file reads the foundation model from the Hugging Face model hub and the LoRA weights from `tloen/alpaca-lora-7b`, and runs a Gradio interface for inference on a specified input. Users should treat this as example code for the use of the model, and modify it as needed.
 
 ### Training (`finetune.py`)
 
@@ -43,7 +43,7 @@ which should help users who want to use the model with projects like [llama.cpp]
 ### Notes
 
 - Before we try to tune the weights on 13B+ models, we should note (sorry Tatsu) that [the quality of the Stanford Alpaca dataset is not very good](https://github.com/tloen/alpaca-lora/pull/32). We can likely improve our model performance significantly if we combed through the data and fixed bad examples; in fact, dataset quality might be our bottleneck. _The most impactful contribution anyone can make to this project is to provide a way to systematically iterate on the training data._
-- We're continually fixing bugs and conducting training runs, and the weights on the Huggingface Hub are being updated accordingly. In particular, those facing issues with response lengths should make sure that they have the latest version of the weights and code.
+- We're continually fixing bugs and conducting training runs, and the weights on the Hugging Face Hub are being updated accordingly. In particular, those facing issues with response lengths should make sure that they have the latest version of the weights and code.
 
 
 ### Example outputs
