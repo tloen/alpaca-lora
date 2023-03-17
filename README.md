@@ -16,6 +16,12 @@ Without hyperparameter tuning or validation-based checkpointing, the LoRA model 
 
 ### Setup
 
+0. Setup a python virtual environment
+```
+python -m venv venv
+source venv/bin/activate
+```
+
 1. Install dependencies
 
 ```
@@ -45,7 +51,7 @@ which should help users who want to use the model with projects like [llama.cpp]
 - [x] Merge LoRA weights into LLaMA weights to remove inference dependency on PEFT
 - [x] Train/val split
 - [ ] Hyperparameter tuning code
-- [ ] Support for `13b`, `30b`, `65b`
+- [ ] Support for `13b`, `30b`, `65b`  (Note: this branch supports 13b)
 - [ ] Train a version that doesn't waste tokens on the prompt header
 - [ ] Inference CLI and evaluation
 - [ ] Better disclaimers about why using LLaMA without permission is very bad!
