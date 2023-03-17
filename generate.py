@@ -6,20 +6,23 @@ import gradio as gr
 assert (
     "LlamaTokenizer" in transformers._import_structure["models.llama"]
 ), "LLaMA is now in HuggingFace's main branch.\nPlease reinstall it: pip uninstall transformers && pip install git+https://github.com/huggingface/transformers.git"
+
+
 from transformers import LlamaTokenizer, LlamaForCausalLM, GenerationConfig
 
-tokenizer = LlamaTokenizer.from_pretrained("decapoda-research/llama-7b-hf")
+tokenizer = LlamaTokenizer.from_pretrained("decapoda-research/llama-7b-hf",device_map={'':0})
 
 model = LlamaForCausalLM.from_pretrained(
     "decapoda-research/llama-7b-hf",
     load_in_8bit=True,
     torch_dtype=torch.float16,
-    device_map="auto",
-)
-model = PeftModel.from_pretrained(
-    model, "tloen/alpaca-lora-7b", torch_dtype=torch.float16
+    device_map={'':0}
 )
 
+# add device_map={'':0} in PeftModel.from_pretrained to confirm 2 2080Ti can work
+model = PeftModel.from_pretrained(
+    model, "tloen/alpaca-lora-7b", torch_dtype=torch.float16, device_map={'':0}
+)
 
 def generate_prompt(instruction, input=None):
     if input:
@@ -45,13 +48,13 @@ model.eval()
 
 
 def evaluate(
-        instruction,
-        input=None,
-        temperature=0.1,
-        top_p=0.75,
-        top_k=40,
-        num_beams=4,
-        **kwargs,
+    instruction,
+    temperature=0.1,
+    top_p=0.75,
+    top_k=40,
+    num_beams=4,
+    input=None,
+    **kwargs,
 ):
     prompt = generate_prompt(instruction, input)
     inputs = tokenizer(prompt, return_tensors="pt")
@@ -82,13 +85,10 @@ gr.Interface(
         gr.components.Textbox(
             lines=2, label="Instruction", placeholder="Tell me about alpacas."
         ),
-        gr.components.Textbox(
-            lines=2, label="Input", placeholder="none"
-        ),
         gr.components.Slider(minimum=0, maximum=1, value=0.1, label="Temperature"),
         gr.components.Slider(minimum=0, maximum=1, value=0.75, label="Top p"),
         gr.components.Slider(minimum=0, maximum=100, step=1, value=40, label="Top k"),
-        gr.components.Slider(minimum=0, maximum=4, step=1, value=4, label="Beams"),
+        gr.components.Slider(minimum=1, maximum=4, step=1, value=4, label="Beams"),
     ],
     outputs=[
         gr.inputs.Textbox(
@@ -101,22 +101,19 @@ gr.Interface(
 ).launch(share=True)
 
 # Old testing code follows.
+# if __name__ == "__main__":
+#     # testing code for readme
+#     for instruction in [
+#         "Tell me about alpacas.",
+#         "Tell me about the president of Mexico in 2019.",
+#         "Tell me about the king of France in 2019.",
+#         "List all Canadian provinces in alphabetical order.",
+#         "Write a Python program that prints the first 10 Fibonacci numbers.",
+#         "Write a program that prints the numbers from 1 to 100. But for multiples of three print 'Fizz' instead of the number and for the multiples of five print 'Buzz'. For numbers which are multiples of both three and five print 'FizzBuzz'.",
+#         "Tell me five words that rhyme with 'shock'.",
+#         "Translate the sentence 'I have no mouth but I must scream' into Spanish.",
+#         "Count up from 1 to 500.",
+#     ]:
+#         print("Instruction:", instruction)
+#         print("Response:", evaluate(instruction))
 
-"""
-if __name__ == "__main__":
-    # testing code for readme
-    for instruction in [
-        "Tell me about alpacas.",
-        "Tell me about the president of Mexico in 2019.",
-        "Tell me about the king of France in 2019.",
-        "List all Canadian provinces in alphabetical order.",
-        "Write a Python program that prints the first 10 Fibonacci numbers.",
-        "Write a program that prints the numbers from 1 to 100. But for multiples of three print 'Fizz' instead of the number and for the multiples of five print 'Buzz'. For numbers which are multiples of both three and five print 'FizzBuzz'.",
-        "Tell me five words that rhyme with 'shock'.",
-        "Translate the sentence 'I have no mouth but I must scream' into Spanish.",
-        "Count up from 1 to 500.",
-    ]:
-        print("Instruction:", instruction)
-        print("Response:", evaluate(instruction))
-        print()
-"""
