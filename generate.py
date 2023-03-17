@@ -11,13 +11,13 @@ from transformers import LlamaTokenizer, LlamaForCausalLM, GenerationConfig
 tokenizer = LlamaTokenizer.from_pretrained("decapoda-research/llama-7b-hf")
 
 model = LlamaForCausalLM.from_pretrained(
-    "decapoda-research/llama-13b-hf",
+    "decapoda-research/llama-7b-hf",
     load_in_8bit=True,
     torch_dtype=torch.float16,
     device_map="auto",
 )
 model = PeftModel.from_pretrained(
-    model, "./lora-alpaca", torch_dtype=torch.float16
+    model, "tloen/alpaca-lora-7b", torch_dtype=torch.float16
 )
 
 
@@ -97,7 +97,7 @@ gr.Interface(
         )
     ],
     title="🦙🌲 Alpaca-LoRA",
-    description="Alpaca-LoRA is a 13B-parameter LLaMA model finetuned to follow instructions. It is trained on the [Stanford Alpaca](https://github.com/tatsu-lab/stanford_alpaca) dataset and makes use of the Huggingface LLaMA implementation. For more information, please visit [the project's website](https://github.com/tloen/alpaca-lora).",
+    description="Alpaca-LoRA is a 7B-parameter LLaMA model finetuned to follow instructions. It is trained on the [Stanford Alpaca](https://github.com/tatsu-lab/stanford_alpaca) dataset and makes use of the Huggingface LLaMA implementation. For more information, please visit [the project's website](https://github.com/tloen/alpaca-lora).",
 ).launch(share=True)
 
 # Old testing code follows.
