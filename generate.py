@@ -123,7 +123,7 @@ gr.Interface(
         gr.components.Slider(minimum=0, maximum=1, value=0.1, label="Temperature"),
         gr.components.Slider(minimum=0, maximum=1, value=0.75, label="Top p"),
         gr.components.Slider(minimum=0, maximum=100, step=1, value=40, label="Top k"),
-        gr.components.Slider(minimum=0, maximum=4, step=1, value=4, label="Beams"),
+        gr.components.Slider(minimum=1, maximum=4, step=1, value=4, label="Beams"),
     ],
     outputs=[
         gr.inputs.Textbox(
