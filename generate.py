@@ -45,13 +45,13 @@ model.eval()
 
 
 def evaluate(
-    instruction,
-    temperature=0.1,
-    top_p=0.75,
-    top_k=40,
-    num_beams=4,
-    input=None,
-    **kwargs,
+        instruction,
+        input=None,
+        temperature=0.1,
+        top_p=0.75,
+        top_k=40,
+        num_beams=4,
+        **kwargs,
 ):
     prompt = generate_prompt(instruction, input)
     inputs = tokenizer(prompt, return_tensors="pt")
@@ -81,6 +81,9 @@ gr.Interface(
     inputs=[
         gr.components.Textbox(
             lines=2, label="Instruction", placeholder="Tell me about alpacas."
+        ),
+        gr.components.Textbox(
+            lines=2, label="Input", placeholder="none"
         ),
         gr.components.Slider(minimum=0, maximum=1, value=0.1, label="Temperature"),
         gr.components.Slider(minimum=0, maximum=1, value=0.75, label="Top p"),
