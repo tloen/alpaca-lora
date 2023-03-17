@@ -227,3 +227,12 @@ for (let i = 1; i <= 100; i++) {
 **Stanford Alpaca**: No tengo boca, pero debo gritar.
 
 **text-davinci-003**: No tengo boca pero debo gritar.
+
+---
+**Dataset Explorer for Initial Alpaca Data**
+
+[Training Data Instructions Latent Space](https://atlas.nomic.ai/map/alpaca_instructions)
+
+[Alpaca Data Output Generations Explorer](https://atlas.nomic.ai/map/alpaca_outputs)
+
+[Example bad outputs](https://atlas.nomic.ai/map/d2139cc3-bc1c-441c-8d6f-3e6ffbbc2eda/838019ff-8fe2-42ba-809a-d86d2b98cd50/-18.11668742841587/-11.348087116836096/-20.88850316347706/-17.680468640801223/774455612)
