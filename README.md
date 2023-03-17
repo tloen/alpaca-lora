@@ -40,15 +40,11 @@ PRs adapting this code to multi-GPU setups and larger models are always welcome.
 This file contains a script to convert the LoRA back into a standard PyTorch model checkpoint,
 which should help users who want to use the model with projects like [llama.cpp](https://github.com/ggerganov/llama.cpp).
 
-### To do
+### Notes
 
-- [x] Merge LoRA weights into LLaMA weights to remove inference dependency on PEFT
-- [x] Train/val split
-- [ ] Hyperparameter tuning code
-- [ ] Support for `13b`, `30b`, `65b`
-- [ ] Train a version that doesn't waste tokens on the prompt header
-- [ ] Inference CLI and evaluation
-- [ ] Better disclaimers about why using LLaMA without permission is very bad!
+- Before we try to tune the weights on 13B+ models, we should note (sorry Tatsu) that [the quality of the Stanford Alpaca dataset is not very good](https://github.com/tloen/alpaca-lora/pull/32). We can likely improve our model performance significantly if we combed through the data and fixed bad examples; in fact, dataset quality might be our bottleneck. _The most impactful contribution anyone can make to this project is to provide a way to systematically iterate on the training data._
+- We're continually fixing bugs and conducting training runs, and the weights on the Huggingface Hub are being updated accordingly. In particular, those facing issues with response lengths should make sure that they have the latest version of the weights and code.
+
 
 ### Example outputs
 
