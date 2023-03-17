@@ -40,9 +40,20 @@ PRs adapting this code to multi-GPU setups and larger models are always welcome.
 This file contains a script to convert the LoRA back into a standard PyTorch model checkpoint,
 which should help users who want to use the model with projects like [llama.cpp](https://github.com/ggerganov/llama.cpp).
 
+### Dataset
+
+In addition to `alpaca_data.json`, which contains the original Stanford Alpaca dataset,
+we also include `alpaca_data_cleaned.json`, which has been [stripped of various tokenization artifacts](https://github.com/tloen/alpaca-lora/pull/32)
+with the help of @gururise.
+This file is now used by default in the training script.
+
+@AndriyMulyar has also provided interactive, embedding-based visualizations of the original dataset's [instructions](https://atlas.nomic.ai/map/alpaca_instructions)
+and [outputs](https://atlas.nomic.ai/map/alpaca_outputs),
+as well as [clusters of bad examples](https://atlas.nomic.ai/map/d2139cc3-bc1c-441c-8d6f-3e6ffbbc2eda/838019ff-8fe2-42ba-809a-d86d2b98cd50/-18.11668742841587/-11.348087116836096/-20.88850316347706/-17.680468640801223/774455612).
+
 ### Notes
 
-- Before we try to tune the weights on 13B+ models, we should note (sorry Tatsu) that [the quality of the Stanford Alpaca dataset is not very good](https://github.com/tloen/alpaca-lora/pull/32). We can likely improve our model performance significantly if we combed through the data and fixed bad examples; in fact, dataset quality might be our bottleneck. _The most impactful contribution anyone can make to this project is to provide a way to systematically iterate on the training data._
+- We can likely improve our model performance significantly if we combed through the data and fixed bad examples; in fact, dataset quality might be our bottleneck.
 - We're continually fixing bugs and conducting training runs, and the weights on the Hugging Face Hub are being updated accordingly. In particular, those facing issues with response lengths should make sure that they have the latest version of the weights and code.
 
 
