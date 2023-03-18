@@ -37,9 +37,11 @@ TARGET_MODULES = [
 DATA_PATH = "alpaca_data_cleaned.json"
 
 device_map = "auto"
-ddp = int(os.environ.get('WORLD_SIZE', 1)) != 1
+world_size = int(os.environ.get('WORLD_SIZE', 1))
+ddp = world_size != 1
 if ddp:
-    device_map={'':int(os.environ.get('LOCAL_RANK') or 0)}
+    device_map = {'':int(os.environ.get('LOCAL_RANK') or 0)}
+    GRADIENT_ACCUMULATION_STEPS = GRADIENT_ACCUMULATION_STEPS // world_size
 
 model = LlamaForCausalLM.from_pretrained(
     "decapoda-research/llama-7b-hf",
