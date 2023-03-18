@@ -35,10 +35,12 @@ as well as some code related to prompt construction and tokenization.
 Near the top of this file is a set of hardcoded hyperparameters that you should feel free to modify.
 PRs adapting this code to multi-GPU setups and larger models are always welcome.
 
-### Checkpoint export (`export_state_dict_checkpoint.py`)
+### Checkpoint export (`export_*_checkpoint.py`)
 
-This file contains a script to convert the LoRA back into a standard PyTorch model checkpoint,
-which should help users who want to use the model with projects like [llama.cpp](https://github.com/ggerganov/llama.cpp).
+These files contain scripts that merge the LoRA weights back into the base model
+for export to Hugging Face format and to PyTorch `state_dicts`,
+which should help users who want to export LlamaModel-shaped weights or
+use the model with projects like [llama.cpp](https://github.com/ggerganov/llama.cpp).
 
 ### Dataset
 
@@ -55,7 +57,6 @@ as well as [clusters of bad examples](https://atlas.nomic.ai/map/d2139cc3-bc1c-4
 
 - We can likely improve our model performance significantly if we combed through the data and fixed bad examples; in fact, dataset quality might be our bottleneck.
 - We're continually fixing bugs and conducting training runs, and the weights on the Hugging Face Hub are being updated accordingly. In particular, those facing issues with response lengths should make sure that they have the latest version of the weights and code.
-
 
 ### Example outputs
 
