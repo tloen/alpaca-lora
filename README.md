@@ -33,7 +33,7 @@ This file reads the foundation model from the Hugging Face model hub and the LoR
 This file contains a straightforward application of PEFT to the LLaMA model,
 as well as some code related to prompt construction and tokenization.
 Near the top of this file is a set of hardcoded hyperparameters that you should feel free to modify.
-PRs adapting this code to multi-GPU setups and larger models are always welcome.
+PRs adapting this code to support larger models are always welcome.
 
 ### Checkpoint export (`export_*_checkpoint.py`)
 
