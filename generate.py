@@ -87,6 +87,7 @@ def evaluate(
     top_p=0.75,
     top_k=40,
     num_beams=4,
+    max_new_tokens=128,
     **kwargs,
 ):
     prompt = generate_prompt(instruction, input)
@@ -105,7 +106,7 @@ def evaluate(
             generation_config=generation_config,
             return_dict_in_generate=True,
             output_scores=True,
-            max_new_tokens=2048,
+            max_new_tokens=max_new_tokens,
         )
     s = generation_output.sequences[0]
     output = tokenizer.decode(s)
@@ -123,6 +124,9 @@ gr.Interface(
         gr.components.Slider(minimum=0, maximum=1, value=0.75, label="Top p"),
         gr.components.Slider(minimum=0, maximum=100, step=1, value=40, label="Top k"),
         gr.components.Slider(minimum=1, maximum=4, step=1, value=4, label="Beams"),
+        gr.components.Slider(
+            minimum=1, maximum=2000, step=1, value=128, label="Max tokens"
+        ),
     ],
     outputs=[
         gr.inputs.Textbox(
