@@ -5,3 +5,6 @@ __pycache__/
 checkpoint**
 minimal-llama**
 upload.py
+lora-**
+*ckpt
+wandb
