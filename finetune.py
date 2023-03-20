@@ -33,6 +33,13 @@ TARGET_MODULES = [
     "q_proj",
     "v_proj",
 ]
+# Additional modules to be trained natively
+# additional training on embed and head is good for multilang task
+# FULL_FINETUNE_MODULES = [
+#     "model.embed_tokens", 
+#     "model.lm_head"
+# ]
+FULL_FINETUNE_MODULES = []
 DATA_PATH = "alpaca_data_cleaned.json"
 
 device_map = "auto"
@@ -60,6 +67,7 @@ config = LoraConfig(
     lora_dropout=LORA_DROPOUT,
     bias="none",
     task_type="CAUSAL_LM",
+    modules_to_save=FULL_FINETUNE_MODULES,
 )
 model = get_peft_model(model, config)
 tokenizer.pad_token_id = 0  # unk. we want this to be different from the eos token
