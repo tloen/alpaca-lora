@@ -30,9 +30,13 @@ pip install -r requirements.txt
 
 #### Docker
 
+You can use `docker` with build in support for `torch==2.1.0` and `bytesands`
+
 ```
-docker run --gpus=all --ipc=host --shm-size 64g -v ${HOME}/.cache:/root/.cache --entrypoint /bin/bash --rm -it alpaca-lora
+docker build -t alpaca-lora .
 ```
+
+Then, run it by mapping your local `.cache` folder to the container
 
 ```
 docker run --gpus=all --ipc=host --shm-size 64g -v ${HOME}/.cache:/root/.cache --rm -it alpaca-lora
