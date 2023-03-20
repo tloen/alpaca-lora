@@ -174,7 +174,7 @@ def generate_prompt(row) -> str:
     instruction = row["instruction"]
     input_data = row["input"]
     output_data = row["output"]
-    if input_data != "":
+    if input_data != "" or input_data == "Noinput":
         prompt = f"Following the format <yes/no>||<explanation why yes or no>. Given the following instruction: {instruction} and the following input: {input_data}, is the output '{output_data}' correct?"
     else:
         prompt = f"Following the format <yes/no>||<explanation why yes or no>. Given the following instruction: {instruction}, is the output '{output_data}' correct?"
