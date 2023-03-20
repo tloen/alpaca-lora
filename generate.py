@@ -53,6 +53,10 @@ else:
         LORA_WEIGHTS,
         device_map={"": device},
     )
+    
+model.eval()
+if torch.__version__ >= "2":
+    model = torch.compile(model)
 
 
 def evaluate(
