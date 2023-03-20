@@ -7,6 +7,7 @@ import bitsandbytes as bnb
 from datasets import load_dataset
 import transformers
 
+
 assert (
     "LlamaTokenizer" in transformers._import_structure["models.llama"]
 ), "LLaMA is now in HuggingFace's main branch.\nPlease reinstall it: pip uninstall transformers && pip install git+https://github.com/huggingface/transformers.git"
@@ -17,7 +18,7 @@ from peft import (
     get_peft_model,
     get_peft_model_state_dict,
 )
-
+from utils import generate_prompt_by_data_point
 
 # optimized for RTX 4090. for larger GPUs, increase some of these?
 MICRO_BATCH_SIZE = 4  # this could actually be 5 but i like powers of 2
@@ -68,29 +69,6 @@ tokenizer.pad_token_id = 0  # unk. we want this to be different from the eos tok
 data = load_dataset("json", data_files=DATA_PATH)
 
 
-def generate_prompt(data_point):
-    # sorry about the formatting disaster gotta move fast
-    if data_point["input"]:
-        return f"""Below is an instruction that describes a task, paired with an input that provides further context. Write a response that appropriately completes the request.
-
-### Instruction:
-{data_point["instruction"]}
-
-### Input:
-{data_point["input"]}
-
-### Response:
-{data_point["output"]}"""
-    else:
-        return f"""Below is an instruction that describes a task. Write a response that appropriately completes the request.
-
-### Instruction:
-{data_point["instruction"]}
-
-### Response:
-{data_point["output"]}"""
-
-
 def tokenize(prompt):
     # there's probably a way to do this with the tokenizer settings
     # but again, gotta move fast
@@ -109,30 +87,7 @@ def tokenize(prompt):
 def generate_and_tokenize_prompt(data_point):
     # This function masks out the labels for the input,
     # so that our loss is computed only on the response.
-    user_prompt = (
-        (
-            f"""Below is an instruction that describes a task, paired with an input that provides further context. Write a response that appropriately completes the request.
-
-### Instruction:
-{data_point["instruction"]}
-
-### Input:
-{data_point["input"]}
-
-### Response:
-"""
-        )
-        if data_point["input"]
-        else (
-            f"""Below is an instruction that describes a task. Write a response that appropriately completes the request.
-
-### Instruction:
-{data_point["instruction"]}
-
-### Response:
-"""
-        )
-    )
+    user_prompt = (generate_prompt_by_data_point(data_point))
     len_user_prompt_tokens = (
         len(
             tokenizer(

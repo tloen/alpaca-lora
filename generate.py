@@ -2,7 +2,7 @@ import torch
 from peft import PeftModel
 import transformers
 import gradio as gr
-
+from utils import generate_prompt
 assert (
     "LlamaTokenizer" in transformers._import_structure["models.llama"]
 ), "LLaMA is now in HuggingFace's main branch.\nPlease reinstall it: pip uninstall transformers && pip install git+https://github.com/huggingface/transformers.git"
@@ -53,31 +53,6 @@ else:
         LORA_WEIGHTS,
         device_map={"": device},
     )
-
-
-def generate_prompt(instruction, input=None):
-    if input:
-        return f"""Below is an instruction that describes a task, paired with an input that provides further context. Write a response that appropriately completes the request.
-
-### Instruction:
-{instruction}
-
-### Input:
-{input}
-
-### Response:"""
-    else:
-        return f"""Below is an instruction that describes a task. Write a response that appropriately completes the request.
-
-### Instruction:
-{instruction}
-
-### Response:"""
-
-
-model.eval()
-if torch.__version__ >= "2":
-    model = torch.compile(model)
 
 
 def evaluate(
