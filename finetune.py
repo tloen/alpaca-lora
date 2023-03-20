@@ -1,6 +1,6 @@
 import os
+import sys
 
-# os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 import torch
 import torch.nn as nn
 import bitsandbytes as bnb
@@ -35,12 +35,13 @@ TARGET_MODULES = [
     "v_proj",
 ]
 DATA_PATH = "alpaca_data_cleaned.json"
+OUTPUT_DIR = "lora-alpaca"
 
 device_map = "auto"
-world_size = int(os.environ.get('WORLD_SIZE', 1))
+world_size = int(os.environ.get("WORLD_SIZE", 1))
 ddp = world_size != 1
 if ddp:
-    device_map = {'':int(os.environ.get('LOCAL_RANK') or 0)}
+    device_map = {"": int(os.environ.get("LOCAL_RANK") or 0)}
     GRADIENT_ACCUMULATION_STEPS = GRADIENT_ACCUMULATION_STEPS // world_size
 
 model = LlamaForCausalLM.from_pretrained(
@@ -65,12 +66,6 @@ config = LoraConfig(
 model = get_peft_model(model, config)
 tokenizer.pad_token_id = 0  # unk. we want this to be different from the eos token
 data = load_dataset("json", data_files=DATA_PATH)
-
-train_val = data["train"].train_test_split(
-    test_size=VAL_SET_SIZE, shuffle=True, seed=42
-)
-train_data = train_val["train"]
-val_data = train_val["test"]
 
 
 def generate_prompt(data_point):
@@ -111,8 +106,67 @@ def tokenize(prompt):
     }
 
 
-train_data = train_data.shuffle().map(lambda x: tokenize(generate_prompt(x)))
-val_data = val_data.shuffle().map(lambda x: tokenize(generate_prompt(x)))
+def generate_and_tokenize_prompt(data_point):
+    # This function masks out the labels for the input,
+    # so that our loss is computed only on the response.
+    user_prompt = (
+        (
+            f"""Below is an instruction that describes a task, paired with an input that provides further context. Write a response that appropriately completes the request.
+
+### Instruction:
+{data_point["instruction"]}
+
+### Input:
+{data_point["input"]}
+
+### Response:
+"""
+        )
+        if data_point["input"]
+        else (
+            f"""Below is an instruction that describes a task. Write a response that appropriately completes the request.
+
+### Instruction:
+{data_point["instruction"]}
+
+### Response:
+"""
+        )
+    )
+    len_user_prompt_tokens = (
+        len(
+            tokenizer(
+                user_prompt,
+                truncation=True,
+                max_length=CUTOFF_LEN + 1,
+                padding="max_length",
+            )["input_ids"]
+        )
+        - 1
+    )  # no eos token
+    full_tokens = tokenizer(
+        user_prompt + data_point["output"],
+        truncation=True,
+        max_length=CUTOFF_LEN + 1,
+        padding="max_length",
+    )["input_ids"][:-1]
+    return {
+        "input_ids": full_tokens,
+        "labels": [-100] * len_user_prompt_tokens
+        + full_tokens[len_user_prompt_tokens:],
+        "attention_mask": [1] * (len(full_tokens)),
+    }
+
+
+if VAL_SET_SIZE > 0:
+    train_val = data["train"].train_test_split(
+        test_size=VAL_SET_SIZE, shuffle=True, seed=42
+    )
+    train_data = train_val["train"].shuffle().map(generate_and_tokenize_prompt)
+    val_data = train_val["test"].shuffle().map(generate_and_tokenize_prompt)
+else:
+    train_data = data['train'].shuffle().map(generate_and_tokenize_prompt)
+    val_data = None
 
 trainer = transformers.Trainer(
     model=model,
@@ -126,13 +180,13 @@ trainer = transformers.Trainer(
         learning_rate=LEARNING_RATE,
         fp16=True,
         logging_steps=20,
-        evaluation_strategy="steps",
+        evaluation_strategy="steps" if VAL_SET_SIZE > 0 else "no",
         save_strategy="steps",
-        eval_steps=200,
+        eval_steps=200 if VAL_SET_SIZE > 0 else None,
         save_steps=200,
-        output_dir="lora-alpaca",
+        output_dir=OUTPUT_DIR,
         save_total_limit=3,
-        load_best_model_at_end=True,
+        load_best_model_at_end=True if VAL_SET_SIZE > 0 else False,
         ddp_find_unused_parameters=False if ddp else None,
     ),
     data_collator=transformers.DataCollatorForLanguageModeling(tokenizer, mlm=False),
@@ -144,8 +198,11 @@ model.state_dict = (
     lambda self, *_, **__: get_peft_model_state_dict(self, old_state_dict())
 ).__get__(model, type(model))
 
+if torch.__version__ >= "2" and sys.platform != 'win32':
+    model = torch.compile(model)
+
 trainer.train()
 
-model.save_pretrained("lora-alpaca")
+model.save_pretrained(OUTPUT_DIR)
 
 print("\n If there's a warning about missing keys above, please disregard :)")

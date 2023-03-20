@@ -6,3 +6,6 @@ checkpoint**
 minimal-llama**
 upload.py
 my_secrets.py
+lora-**
+*ckpt
+wandb

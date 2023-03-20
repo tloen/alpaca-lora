@@ -6,3 +6,4 @@ accelerate
 bitsandbytes
 git+https://github.com/huggingface/peft.git
 gradio
+appdirs

@@ -1,6 +1,8 @@
 ## 🦙🌲🤏 Alpaca-LoRA: Low-Rank LLaMA Instruct-Tuning
 
-**Try the pretrained model out on Colab [here](https://colab.research.google.com/drive/1eWAmesrW99p7e1nah5bipn0zikMb8XYC)!** _If you have problems with short outputs or very long outputs, please redownload the weights (`force_download=True`) and pull the latest version of the code._
+**Try the pretrained model out on Colab [here](https://colab.research.google.com/drive/1eWAmesrW99p7e1nah5bipn0zikMb8XYC)!**
+
+_**Update 2023-03-19:** weights have been updated with cleaned data and prompts masked out in the loss. This should reduce the number of template artifacts in outputs._
 
 This repository contains code for reproducing the [Stanford Alpaca](https://github.com/tatsu-lab/stanford_alpaca) results using [low-rank adaptation (LoRA)](https://arxiv.org/pdf/2106.09685.pdf).
 We provide an Instruct model of similar quality to `text-davinci-003` that can run [on a Raspberry Pi](https://twitter.com/miolini/status/1634982361757790209) (for research),
@@ -13,6 +15,8 @@ To fine-tune cheaply and efficiently, we use Hugging Face's [PEFT](https://githu
 as well as Tim Dettmers' [bitsandbytes](https://github.com/TimDettmers/bitsandbytes).
 
 Without hyperparameter tuning or validation-based checkpointing, the LoRA model produces outputs comparable to the Stanford Alpaca model. (Please see the outputs included below.) Further tuning might be able to achieve better performance; I invite interested users to give it a try and report their results.
+
+For discussion and support, users have created a dedicated Discord server [here](https://discord.gg/prbq284xX5).
 
 ### Setup
 
@@ -38,9 +42,10 @@ PRs adapting this code to support larger models are always welcome.
 ### Checkpoint export (`export_*_checkpoint.py`)
 
 These files contain scripts that merge the LoRA weights back into the base model
-for export to Hugging Face format and to PyTorch `state_dicts`,
-which should help users who want to export LlamaModel-shaped weights or
-use the model with projects like [llama.cpp](https://github.com/ggerganov/llama.cpp).
+for export to Hugging Face format and to PyTorch `state_dicts`.
+They should help users
+who want to run inference in projects like [llama.cpp](https://github.com/ggerganov/llama.cpp)
+or [alpaca.cpp](https://github.com/antimatter15/alpaca.cpp).
 
 ### Dataset
 
