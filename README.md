@@ -1,6 +1,6 @@
 ## 🦙🌲🤏 Alpaca-LoRA: Low-Rank LLaMA Instruct-Tuning
 
-- Try the pretrained model out on Colab [here](https://colab.research.google.com/drive/1eWAmesrW99p7e1nah5bipn0zikMb8XYC)
+- 🤗 **Try the pretrained model out [here](https://huggingface.co/spaces/tloen/alpaca-lora), courtesy of a GPU grant from Huggingface!**
 - Share custom LoRA adapters, including adapters for the larger models, [here](https://github.com/tloen/alpaca-lora/issues/52)
 - Users have created a Discord server for discussion and support [here](https://discord.gg/prbq284xX5)
 - `alpaca-lora-30b` can be used like ChatGPT; see [here](https://twitter.com/algo_diver/status/1637851640027041798)
