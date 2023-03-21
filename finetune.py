@@ -24,7 +24,7 @@ from peft import (
 MICRO_BATCH_SIZE = 4  # this could actually be 5 but i like powers of 2
 BATCH_SIZE = 128
 GRADIENT_ACCUMULATION_STEPS = BATCH_SIZE // MICRO_BATCH_SIZE
-EPOCHS = 5  # remember, we're loading the best checkpoint with the val set
+EPOCHS = 3  # remember, we're loading the best checkpoint with the val set
 LEARNING_RATE = 3e-4  # the Karpathy constant
 CUTOFF_LEN = 256  # 256 accounts for about 96% of the data
 LORA_R = 8
