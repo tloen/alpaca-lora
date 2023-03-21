@@ -31,7 +31,7 @@ if device == "cuda":
         torch_dtype=torch.float16,
         device_map="auto",
     )
-    model = PeftModel.from_pretrained(model, LORA_WEIGHTS, torch_dtype=torch.float16)
+    model = PeftModel.from_pretrained(model, LORA_WEIGHTS, torch_dtype=torch.float16, device_map={"": 0})
 elif device == "mps":
     model = LlamaForCausalLM.from_pretrained(
         BASE_MODEL,
@@ -41,7 +41,7 @@ elif device == "mps":
     model = PeftModel.from_pretrained(
         model,
         LORA_WEIGHTS,
-        device_map={"": device},
+        device_map={"": 0},
         torch_dtype=torch.float16,
     )
 else:
@@ -51,7 +51,7 @@ else:
     model = PeftModel.from_pretrained(
         model,
         LORA_WEIGHTS,
-        device_map={"": device},
+        device_map={"": 0},
     )
 
 
