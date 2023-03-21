@@ -8,3 +8,4 @@ upload.py
 lora-**
 *ckpt
 wandb
+test_data.json
