@@ -143,17 +143,18 @@ def generate_and_tokenize_prompt(data_point):
         )
         - 1
     )  # no eos token
-    full_tokens = tokenizer(
+    full_tokens = tokenizer.encode_plus(
         user_prompt + data_point["output"],
         truncation=True,
-        max_length=CUTOFF_LEN + 1,
+        max_length=CUTOFF_LEN,
         padding="max_length",
-    )["input_ids"][:-1]
+    )["input_ids"]
+    full_tokens = encodings["input_ids"]
+    attention_mask = encodings["attention_mask"]
     return {
         "input_ids": full_tokens,
-        "labels": [-100] * len_user_prompt_tokens
-        + full_tokens[len_user_prompt_tokens:],
-        "attention_mask": [1] * (len(full_tokens)),
+        "labels": [-100] * len_user_prompt_tokens + full_tokens[len_user_prompt_tokens:],
+        "attention_mask": attention_mask
     }
 
 
