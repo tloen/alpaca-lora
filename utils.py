@@ -14,7 +14,7 @@ def generate_prompt(instruction, input=None, response=None):
         response_part="""### Response:
 {response}"""
     else:
-        response_part = """"""
+        response_part = """### Response:"""
 
 
     s = f"""Below is an instruction that describes a task, paired with an input that provides further context. Write a response that appropriately completes the request.
