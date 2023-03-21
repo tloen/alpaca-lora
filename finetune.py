@@ -139,7 +139,6 @@ def generate_and_tokenize_prompt(data_point):
                 user_prompt,
                 truncation=True,
                 max_length=CUTOFF_LEN + 1,
-                padding="max_length",
             )["input_ids"]
         )
         - 1
@@ -165,7 +164,7 @@ if VAL_SET_SIZE > 0:
     train_data = train_val["train"].shuffle().map(generate_and_tokenize_prompt)
     val_data = train_val["test"].shuffle().map(generate_and_tokenize_prompt)
 else:
-    train_data = data['train'].shuffle().map(generate_and_tokenize_prompt)
+    train_data = data["train"].shuffle().map(generate_and_tokenize_prompt)
     val_data = None
 
 trainer = transformers.Trainer(
@@ -198,7 +197,7 @@ model.state_dict = (
     lambda self, *_, **__: get_peft_model_state_dict(self, old_state_dict())
 ).__get__(model, type(model))
 
-if torch.__version__ >= "2" and sys.platform != 'win32':
+if torch.__version__ >= "2" and sys.platform != "win32":
     model = torch.compile(model)
 
 trainer.train()
