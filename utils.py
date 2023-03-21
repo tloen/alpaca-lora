@@ -28,8 +28,10 @@ def generate_prompt(instruction, input=None, response=None):
 
 
 
-def generate_prompt_by_data_point(data_point):
-    # sorry about the formatting disaster gotta move fast
-    return generate_prompt(data_point["instruction"], input=data_point.get("input", None), response=data_point.get("response", None))
+def generate_prompt_by_data_point(data_point, omit_response=False):
+    if omit_response:
+        return generate_prompt(data_point["instruction"], input=data_point.get("input", None), response=None)
+    else:
+        return generate_prompt(data_point["instruction"], input=data_point.get("input", None), response=data_point.get("response", None))
 
 
