@@ -87,7 +87,7 @@ def tokenize(prompt):
 def generate_and_tokenize_prompt(data_point):
     # This function masks out the labels for the input,
     # so that our loss is computed only on the response.
-    user_prompt = (generate_prompt_by_data_point(data_point))
+    user_prompt = (generate_prompt_by_data_point(data_point, omit_response=True))
     len_user_prompt_tokens = (
         len(
             tokenizer(
