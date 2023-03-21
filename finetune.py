@@ -1,6 +1,5 @@
 import os
 import sys
-
 import torch
 import torch.nn as nn
 import bitsandbytes as bnb
@@ -17,7 +16,6 @@ from peft import (
     get_peft_model,
     get_peft_model_state_dict,
 )
-
 
 # optimized for RTX 4090. for larger GPUs, increase some of these?
 MICRO_BATCH_SIZE = 4  # this could actually be 5 but i like powers of 2
@@ -36,7 +34,6 @@ TARGET_MODULES = [
 ]
 DATA_PATH = "alpaca_data_cleaned.json"
 OUTPUT_DIR = "lora-alpaca"
-
 device_map = "auto"
 world_size = int(os.environ.get("WORLD_SIZE", 1))
 ddp = world_size != 1
@@ -67,7 +64,6 @@ model = get_peft_model(model, config)
 tokenizer.pad_token_id = 0  # unk. we want this to be different from the eos token
 data = load_dataset("json", data_files=DATA_PATH)
 
-
 def generate_prompt(data_point):
     # sorry about the formatting disaster gotta move fast
     if data_point["input"]:
@@ -90,7 +86,6 @@ def generate_prompt(data_point):
 ### Response:
 {data_point["output"]}"""
 
-
 def tokenize(prompt):
     # there's probably a way to do this with the tokenizer settings
     # but again, gotta move fast
@@ -104,7 +99,6 @@ def tokenize(prompt):
         "input_ids": result["input_ids"][:-1],
         "attention_mask": result["attention_mask"][:-1],
     }
-
 
 def generate_and_tokenize_prompt(data_point):
     # This function masks out the labels for the input,
