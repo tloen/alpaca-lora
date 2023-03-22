@@ -72,6 +72,7 @@ as well as [clusters of bad examples](https://atlas.nomic.ai/map/d2139cc3-bc1c-4
     - 🇧🇷 https://huggingface.co/22h/cabrita-lora-v0-1
     - 🇨🇳 https://huggingface.co/qychen/luotuo-lora-7b-0.1
     - 🇯🇵 https://huggingface.co/kunishou/Japanese-Alapaca-LoRA-7b-v0
+    - 🇫🇷 https://huggingface.co/bofenghuang/vigogne-lora-7b
   - 13B (decapoda-research/llama-13b-hf):
     - https://huggingface.co/chansung/alpaca-lora-13b
     - https://huggingface.co/mattreid/alpaca-lora-13b
