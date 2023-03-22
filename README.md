@@ -1,12 +1,13 @@
 ## 🦙🌲🤏 Alpaca-LoRA: Low-Rank LLaMA Instruct-Tuning
 
-**Try the pretrained model out on Colab [here](https://colab.research.google.com/drive/1eWAmesrW99p7e1nah5bipn0zikMb8XYC)!**
-
-_**Update 2023-03-19:** weights have been updated with cleaned data and prompts masked out in the loss. This should reduce the number of template artifacts in outputs._
+- 🤗 **Try the pretrained model out [here](https://huggingface.co/spaces/tloen/alpaca-lora), courtesy of a GPU grant from Huggingface!**
+- Share custom LoRA adapters, including adapters for the larger models, [here](https://github.com/tloen/alpaca-lora/issues/52)
+- Users have created a Discord server for discussion and support [here](https://discord.gg/prbq284xX5)
+- `alpaca-lora-30b` can be used like ChatGPT; see [here](https://twitter.com/algo_diver/status/1637851640027041798)
 
 This repository contains code for reproducing the [Stanford Alpaca](https://github.com/tatsu-lab/stanford_alpaca) results using [low-rank adaptation (LoRA)](https://arxiv.org/pdf/2106.09685.pdf).
 We provide an Instruct model of similar quality to `text-davinci-003` that can run [on a Raspberry Pi](https://twitter.com/miolini/status/1634982361757790209) (for research),
-and the code can be easily extended to the `13b`, `30b`, and `65b` models.
+and the code is easily extended to the `13b`, `30b`, and `65b` models.
 
 In addition to the training code, which runs within five hours on a single RTX 4090,
 we publish a script for downloading and inference on the foundation model and LoRA,
@@ -14,9 +15,7 @@ as well as the resulting [LoRA weights themselves](https://huggingface.co/tloen/
 To fine-tune cheaply and efficiently, we use Hugging Face's [PEFT](https://github.com/huggingface/peft)
 as well as Tim Dettmers' [bitsandbytes](https://github.com/TimDettmers/bitsandbytes).
 
-Without hyperparameter tuning or validation-based checkpointing, the LoRA model produces outputs comparable to the Stanford Alpaca model. (Please see the outputs included below.) Further tuning might be able to achieve better performance; I invite interested users to give it a try and report their results.
-
-For discussion and support, users have created a dedicated Discord server [here](https://discord.gg/prbq284xX5).
+Without hyperparameter tuning, the LoRA model produces outputs comparable to the Stanford Alpaca model. (Please see the outputs included below.) Further tuning might be able to achieve better performance; I invite interested users to give it a try and report their results.
 
 ### Setup
 
@@ -60,7 +59,7 @@ as well as [clusters of bad examples](https://atlas.nomic.ai/map/d2139cc3-bc1c-4
 
 ### Notes
 
-- We can likely improve our model performance significantly if we combed through the data and fixed bad examples; in fact, dataset quality might be our bottleneck.
+- We can likely improve our model performance significantly if we had a better dataset. Consider supporting the [LAION Open Assistant](https://open-assistant.io/) effort to produce a high-quality dataset for supervised fine-tuning (or bugging them to release their data).
 - We're continually fixing bugs and conducting training runs, and the weights on the Hugging Face Hub are being updated accordingly. In particular, those facing issues with response lengths should make sure that they have the latest version of the weights and code.
 
 ### Example outputs
