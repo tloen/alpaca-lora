@@ -18,19 +18,21 @@ Without hyperparameter tuning, the LoRA model produces outputs comparable to the
 
 ### Docker commands for easy local inference
 
-1. Build the container image
+1. Add reference to your desired model weights to `ENV BASE_MODEL="None"` in the `Dockerfile`.
+
+2. Build the container image
 
 ```
 docker build -t alpaca-lora-demo .
 ```
 
-2. Run the container image
+3. Run the container image
 
 ```
-docker run --gpus=all --shm-size 64g -p 7860:7860 -v ${HOME}/.cache:/root/.cache --rm alpaca-lora-demo
+docker run --gpus=all --shm-size 64g -p 7860:7860 -v ${HOME}/.cache:/root/.cache --rm alpaca-lora-demo generate.py
 ```
 
-3. Head on down to `localhost:7860` and enjoy!
+4. Head on down to `localhost:7860` and enjoy!
 
 ### Setup
 
