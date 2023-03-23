@@ -30,16 +30,46 @@ pip install -r requirements.txt
 
 #### Docker
 
-You can use `docker` with build in support for `torch==2.1.0` and `bytesands`
+You can use [`docker`](docker) with built-in support for `torch==2.1.0` and `bytesands`
 
-```
+```bash
 docker build -t alpaca-lora .
 ```
 
+> **Note**
+> Building the image will take several minutes
+
 Then, run it by mapping your local `.cache` folder to the container
 
+```bash
+docker run --gpus=all --ipc=host --shm-size 64g \
+  -v ${HOME}/.cache:/root/.cache \
+  -v ${PWD}/lora-alpaca:/workspace/lora-alpaca \
+  --rm -it alpaca-lora
 ```
-docker run --gpus=all --ipc=host --shm-size 64g -v ${HOME}/.cache:/root/.cache --rm -it alpaca-lora
+
+You mapped the host `.cache` folder to the container to persist the original model checkpoint in future runs.
+
+You can also pass custom env variables to change training behaviour, see [Training](#training-finetunepy) for more information.
+
+```bash
+docker run --gpus=0 --ipc=host --shm-size 64g \
+  -e MICRO_BATCH_SIZE=5 \
+  -e BATCH_SIZE=256 \
+  -e GRADIENT_ACCUMULATION_STEPS=64 \
+  -e EPOCHS=5 \
+  -e LEARNING_RATE=0.001 \
+  -e CUTOFF_LEN=512 \
+  -e LORA_R=16 \
+  -e LORA_ALPHA=32 \
+  -e LORA_DROPOUT=0.1 \
+  -e VAL_SET_SIZE=5000 \
+  -e TARGET_MODULES="q_proj,v_proj,a_proj" \
+  -e DATA_PATH="/path/to/data.json" \
+  -e OUTPUT_DIR="/path/to/output" \
+  -v ${HOME}/.cache:/root/.cache \
+  -v ${PWD}/lora-alpaca:/workspace/lora-alpaca \
+  --rm -it my-image
 ```
 
 ### Inference (`generate.py`)
@@ -52,6 +82,24 @@ This file contains a straightforward application of PEFT to the LLaMA model,
 as well as some code related to prompt construction and tokenization.
 Near the top of this file is a set of hardcoded hyperparameters that you should feel free to modify.
 PRs adapting this code to support larger models are always welcome.
+
+You can quickly change different training variables by using the following env variables
+
+| Variable                      | Description                                               | Default Value                | CLI Example                                             | Docker Example                                                                                            |
+| ----------------------------- | --------------------------------------------------------- | ---------------------------- | ------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `MICRO_BATCH_SIZE`            | The size of mini-batches used for gradient accumulation   | `4`                          | `python train.py --micro_batch_size=5`                  | `docker run my-image python train.py --micro_batch_size=5`                                                |
+| `BATCH_SIZE`                  | The size of mini-batches used for training                | `128`                        | `python train.py --batch_size=256`                      | `docker run my-image python train.py --batch_size=256`                                                    |
+| `GRADIENT_ACCUMULATION_STEPS` | The number of gradient accumulation steps per batch       | `32`                         | `python train.py --gradient_accumulation_steps=16`      | `docker run my-image python train.py --gradient_accumulation_steps=16`                                    |
+| `EPOCHS`                      | The number of training epochs                             | `3`                          | `python train.py --epochs=5`                            | `docker run my-image python train.py --epochs=5`                                                          |
+| `LEARNING_RATE`               | The learning rate for the optimizer                       | `3e-4`                       | `python train.py --learning_rate=0.001`                 | `docker run my-image python train.py --learning_rate=0.001`                                               |
+| `CUTOFF_LEN`                  | The maximum sequence length to use for training           | `256`                        | `python train.py --cutoff_len=512`                      | `docker run my-image python train.py --cutoff_len=512`                                                    |
+| `LORA_R`                      | The number of attention heads in the LORA attention layer | `8`                          | `python train.py --lora_r=16`                           | `docker run my-image python train.py --lora_r=16`                                                         |
+| `LORA_ALPHA`                  | The alpha parameter for the LORA attention layer          | `16`                         | `python train.py --lora_alpha=32`                       | `docker run my-image python train.py --lora_alpha=32`                                                     |
+| `LORA_DROPOUT`                | The dropout probability for the LORA attention layer      | `0.05`                       | `python train.py --lora_dropout=0.1`                    | `docker run my-image python train.py --lora_dropout=0.1`                                                  |
+| `VAL_SET_SIZE`                | The size of the validation set                            | `2000`                       | `python train.py --val_set_size=5000`                   | `docker run my-image python train.py --val_set_size=5000`                                                 |
+| `TARGET_MODULES`              | The list of target modules to extract from the model      | `["q_proj", "v_proj"]`       | `python train.py --target_modules=q_proj,v_proj,a_proj` | `docker run my-image python train.py --target_modules=q_proj,v_proj,a_proj`                               |
+| `DATA_PATH`                   | The path to the data file                                 | `"alpaca_data_cleaned.json"` | `python train.py --data_path=/path/to/data.json`        | `docker run -v /host/path:/container/path my-image python train.py --data_path=/container/path/data.json` |
+| `OUTPUT_DIR`                  | The directory to save the model checkpoints and logs      | `"lora-alpaca"`              | `python train.py --output_dir=/path/to/output`          | `docker run -v /host/path:/container/path my-image python train.py --output_dir=/container/path/output`   |
 
 ### Checkpoint export (`export_*_checkpoint.py`)
 
