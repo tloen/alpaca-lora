@@ -1,0 +1,35 @@
+# Configuration for Cog ⚙️
+# Reference: https://github.com/replicate/cog/blob/main/docs/yaml.md
+
+build:
+  # set to true if your model requires a GPU
+  gpu: true
+  cuda: "11.7"
+
+  # a list of ubuntu apt packages to install
+  # system_packages:
+    # - "libgl1-mesa-glx"
+    # - "libglib2.0-0"
+
+  # python version in the form '3.8' or '3.8.12'
+  python_version: "3.10"
+
+  # a list of packages in the format <package-name>==<version>
+  python_packages:
+    - "datasets==2.10.1"
+    - "loralib==0.1.1"
+    - "sentencepiece==0.1.97"
+    - "git+https://github.com/huggingface/transformers.git@73fdc8c5b4509580a047696a4c672a80a8f1710c"
+    - "accelerate==0.17.1"
+    - "bitsandbytes==0.37.2"
+    - "git+https://github.com/huggingface/peft.git@13e53fc7ee5d89d59b16523051006dddf0fb7a49"
+    - "gradio==3.23.0"
+    - "appdirs==1.4.4"
+  
+  # commands run after the environment is setup
+  # run:
+    # - "echo env is ready!"
+    # - "echo another command if needed"
+
+# predict.py defines how predictions are run on your model
+predict: "predict.py:Predictor"
