@@ -17,13 +17,13 @@ Without hyperparameter tuning, the LoRA model produces outputs comparable to the
 
 ### Docker commands for easy local inference
 
-1.
+1. Build the container image
 
 ```
 docker build -t alpaca-lora .
 ```
 
-2.
+2. Run the container image
 
 ```
 docker run --gpus=all --shm-size 64g -p 7860:7860 -v ${HOME}/.cache:/root/.cache --rm alpaca-lora-demo
