@@ -50,8 +50,15 @@ model = LlamaForCausalLM.from_pretrained(
     device_map=device_map,
 )
 tokenizer = LlamaTokenizer.from_pretrained(
-    "decapoda-research/llama-7b-hf", add_eos_token=True
+    "decapoda-research/llama-7b-hf"
 )
+
+tokenizer.add_special_tokens(
+    {"pad_token": "[PAD]"}
+)  # Add pad token to the tokenizer
+model.resize_token_embeddings(len(tokenizer))  # Resize the model's embeddings
+tokenizer.padding_side = "left"  # Allow batched inference
+
 
 model = prepare_model_for_int8_training(model)
 
@@ -64,7 +71,7 @@ config = LoraConfig(
     task_type="CAUSAL_LM",
 )
 model = get_peft_model(model, config)
-tokenizer.pad_token_id = 0  # unk. we want this to be different from the eos token
+
 data = load_dataset("json", data_files=DATA_PATH)
 
 
@@ -97,13 +104,21 @@ def tokenize(prompt):
     result = tokenizer(
         prompt,
         truncation=True,
-        max_length=CUTOFF_LEN + 1,
-        padding="max_length",
+        max_length=CUTOFF_LEN,
+        padding=False,
+        return_tensors=None,
     )
-    return {
-        "input_ids": result["input_ids"][:-1],
-        "attention_mask": result["attention_mask"][:-1],
-    }
+    
+    if (
+        result["input_ids"][-1] != tokenizer.eos_token_id
+        and len(result["input_ids"]) < CUTOFF_LEN
+    ):
+        result["input_ids"].append(tokenizer.eos_token_id)
+        result["attention_mask"].append(1)
+    
+    result["labels"] = result["input_ids"].copy()
+    
+    return result
 
 
 def generate_and_tokenize_prompt(data_point):
@@ -142,7 +157,7 @@ trainer = transformers.Trainer(
         load_best_model_at_end=True if VAL_SET_SIZE > 0 else False,
         ddp_find_unused_parameters=False if ddp else None,
     ),
-    data_collator=transformers.DataCollatorForLanguageModeling(tokenizer, mlm=False),
+    data_collator=transformers.DataCollatorForSeq2Seq(tokenizer, pad_to_multiple_of=8, return_tensors="pt",padding=True),
 )
 model.config.use_cache = False
 
