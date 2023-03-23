@@ -20,22 +20,19 @@ from peft import (
 
 
 # optimized for RTX 4090. for larger GPUs, increase some of these?
-MICRO_BATCH_SIZE = 4  # this could actually be 5 but i like powers of 2
-BATCH_SIZE = 128
+MICRO_BATCH_SIZE = int(os.environ.get('MICRO_BATCH_SIZE', '4'))  # this could actually be 5 but i like powers of 2
+BATCH_SIZE = int(os.environ.get('BATCH_SIZE', '128'))
 GRADIENT_ACCUMULATION_STEPS = BATCH_SIZE // MICRO_BATCH_SIZE
-EPOCHS = 3  # we don't always need 3 tbh
-LEARNING_RATE = 3e-4  # the Karpathy constant
-CUTOFF_LEN = 256  # 256 accounts for about 96% of the data
-LORA_R = 8
-LORA_ALPHA = 16
-LORA_DROPOUT = 0.05
-VAL_SET_SIZE = 2000
-TARGET_MODULES = [
-    "q_proj",
-    "v_proj",
-]
-DATA_PATH = "alpaca_data_cleaned.json"
-OUTPUT_DIR = "lora-alpaca"
+EPOCHS = int(os.environ.get('EPOCHS', '3'))  # we don't always need 3 tbh
+LEARNING_RATE = float(os.environ.get('LEARNING_RATE', '3e-4'))  # the Karpathy constant
+CUTOFF_LEN = int(os.environ.get('CUTOFF_LEN', '256'))  # 256 accounts for about 96% of the data
+LORA_R = int(os.environ.get('LORA_R', '8'))
+LORA_ALPHA = int(os.environ.get('LORA_ALPHA', '16'))
+LORA_DROPOUT = float(os.environ.get('LORA_DROPOUT', '0.05'))
+VAL_SET_SIZE = int(os.environ.get('VAL_SET_SIZE', '2000'))
+TARGET_MODULES = os.environ.get('TARGET_MODULES', 'q_proj,v_proj').split(',')
+DATA_PATH = os.environ.get('DATA_PATH', 'alpaca_data_cleaned.json')
+OUTPUT_DIR = os.environ.get('OUTPUT_DIR', 'lora-alpaca')
 
 device_map = "auto"
 world_size = int(os.environ.get("WORLD_SIZE", 1))
@@ -107,55 +104,8 @@ def tokenize(prompt):
 
 
 def generate_and_tokenize_prompt(data_point):
-    # This function masks out the labels for the input,
-    # so that our loss is computed only on the response.
-    user_prompt = (
-        (
-            f"""Below is an instruction that describes a task, paired with an input that provides further context. Write a response that appropriately completes the request.
-
-### Instruction:
-{data_point["instruction"]}
-
-### Input:
-{data_point["input"]}
-
-### Response:
-"""
-        )
-        if data_point["input"]
-        else (
-            f"""Below is an instruction that describes a task. Write a response that appropriately completes the request.
-
-### Instruction:
-{data_point["instruction"]}
-
-### Response:
-"""
-        )
-    )
-    len_user_prompt_tokens = (
-        len(
-            tokenizer(
-                user_prompt,
-                truncation=True,
-                max_length=CUTOFF_LEN + 1,
-                padding="max_length",
-            )["input_ids"]
-        )
-        - 1
-    )  # no eos token
-    full_tokens = tokenizer(
-        user_prompt + data_point["output"],
-        truncation=True,
-        max_length=CUTOFF_LEN + 1,
-        padding="max_length",
-    )["input_ids"][:-1]
-    return {
-        "input_ids": full_tokens,
-        "labels": [-100] * len_user_prompt_tokens
-        + full_tokens[len_user_prompt_tokens:],
-        "attention_mask": [1] * (len(full_tokens)),
-    }
+    prompt = generate_prompt(data_point)
+    return tokenize(prompt)
 
 
 if VAL_SET_SIZE > 0:
@@ -165,7 +115,7 @@ if VAL_SET_SIZE > 0:
     train_data = train_val["train"].shuffle().map(generate_and_tokenize_prompt)
     val_data = train_val["test"].shuffle().map(generate_and_tokenize_prompt)
 else:
-    train_data = data['train'].shuffle().map(generate_and_tokenize_prompt)
+    train_data = data["train"].shuffle().map(generate_and_tokenize_prompt)
     val_data = None
 
 trainer = transformers.Trainer(
@@ -198,7 +148,7 @@ model.state_dict = (
     lambda self, *_, **__: get_peft_model_state_dict(self, old_state_dict())
 ).__get__(model, type(model))
 
-if torch.__version__ >= "2" and sys.platform != 'win32':
+if torch.__version__ >= "2" and sys.platform != "win32":
     model = torch.compile(model)
 
 trainer.train()
