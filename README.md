@@ -21,7 +21,7 @@ Without hyperparameter tuning, the LoRA model produces outputs comparable to the
 1. Build the container image
 
 ```
-docker build -t alpaca-lora .
+docker build -t alpaca-lora-demo .
 ```
 
 2. Run the container image
