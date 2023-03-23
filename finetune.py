@@ -98,7 +98,7 @@ def tokenize(prompt):
         prompt,
         truncation=True,
         max_length=CUTOFF_LEN + 1,
-        padding="max_length",
+        padding=True,
     )
     return {
         "input_ids": result["input_ids"][:-1],
@@ -141,6 +141,7 @@ trainer = transformers.Trainer(
         save_total_limit=3,
         load_best_model_at_end=True if VAL_SET_SIZE > 0 else False,
         ddp_find_unused_parameters=False if ddp else None,
+        group_by_length=True,
     ),
     data_collator=transformers.DataCollatorForLanguageModeling(tokenizer, mlm=False),
 )
