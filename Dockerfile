@@ -14,4 +14,4 @@ RUN apt-get update && apt-get install -y \
     && python3.10 -m pip install -r requirements.txt \
     && python3.10 -m pip install numpy --pre torch --force-reinstall --index-url https://download.pytorch.org/whl/nightly/cu118
 COPY . .
-ENTRYPOINT [ "python3.10", "finetune.py" ]
+ENTRYPOINT [ "python3.10" ]

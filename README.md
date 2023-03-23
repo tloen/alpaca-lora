@@ -39,42 +39,30 @@ docker build -t alpaca-lora .
 > **Note**
 > Building the image will take several minutes
 
-Then, run it by mapping your local `.cache` folder to the container
+Then, run it by mapping your local `.cache` folder to the container (and your output folder if you are training.)
 
 ```bash
 docker run --gpus=all --ipc=host --shm-size 64g \
   -v ${HOME}/.cache:/root/.cache \
   -v ${PWD}/lora-alpaca:/workspace/lora-alpaca \
-  --rm -it alpaca-lora
+  --rm -it alpaca-lora training.py
 ```
 
 You mapped the host `.cache` folder to the container to persist the original model checkpoint in future runs.
 
-You can also pass custom env variables to change training behaviour, see [Training](#training-finetunepy) for more information.
-
-```bash
-docker run --gpus=all --ipc=host --shm-size 64g \
-  -e MICRO_BATCH_SIZE=5 \
-  -e BATCH_SIZE=256 \
-  -e GRADIENT_ACCUMULATION_STEPS=64 \
-  -e EPOCHS=5 \
-  -e LEARNING_RATE=0.001 \
-  -e CUTOFF_LEN=512 \
-  -e LORA_R=16 \
-  -e LORA_ALPHA=32 \
-  -e LORA_DROPOUT=0.1 \
-  -e VAL_SET_SIZE=5000 \
-  -e TARGET_MODULES="q_proj,v_proj,a_proj" \
-  -e DATA_PATH="/path/to/data.json" \
-  -e OUTPUT_DIR="/path/to/output" \
-  -v ${HOME}/.cache:/root/.cache \
-  -v ${PWD}/lora-alpaca:/workspace/lora-alpaca \
-  --rm -it alpaca-lora
-```
-
 ### Inference (`generate.py`)
 
 This file reads the foundation model from the Hugging Face model hub and the LoRA weights from `tloen/alpaca-lora-7b`, and runs a Gradio interface for inference on a specified input. Users should treat this as example code for the use of the model, and modify it as needed.
+
+#### Docker
+
+```bash
+docker run --gpus=all --ipc=host --shm-size 64g \
+  -v ${HOME}/.cache:/root/.cache \
+  -v ${PWD}/lora-alpaca:/workspace/lora-alpaca \
+  -p 7860:7860 \
+  --rm -it alpaca-lora generate.py
+```
 
 ### Training (`finetune.py`)
 
@@ -100,6 +88,28 @@ You can quickly change different training variables by using the following env v
 | `TARGET_MODULES`              | The list of target modules to extract from the model      | `["q_proj", "v_proj"]`       | `python train.py --target_modules=q_proj,v_proj,a_proj` | `docker run my-image python train.py --target_modules=q_proj,v_proj,a_proj`                               |
 | `DATA_PATH`                   | The path to the data file                                 | `"alpaca_data_cleaned.json"` | `python train.py --data_path=/path/to/data.json`        | `docker run -v /host/path:/container/path my-image python train.py --data_path=/container/path/data.json` |
 | `OUTPUT_DIR`                  | The directory to save the model checkpoints and logs      | `"lora-alpaca"`              | `python train.py --output_dir=/path/to/output`          | `docker run -v /host/path:/container/path my-image python train.py --output_dir=/container/path/output`   |
+
+#### Docker
+
+```bash
+docker run --gpus=all --ipc=host --shm-size 64g \
+  -e MICRO_BATCH_SIZE=5 \
+  -e BATCH_SIZE=256 \
+  -e GRADIENT_ACCUMULATION_STEPS=64 \
+  -e EPOCHS=5 \
+  -e LEARNING_RATE=0.001 \
+  -e CUTOFF_LEN=512 \
+  -e LORA_R=16 \
+  -e LORA_ALPHA=32 \
+  -e LORA_DROPOUT=0.1 \
+  -e VAL_SET_SIZE=5000 \
+  -e TARGET_MODULES="q_proj,v_proj,a_proj" \
+  -e DATA_PATH="/path/to/data.json" \
+  -e OUTPUT_DIR="/path/to/output" \
+  -v ${HOME}/.cache:/root/.cache \
+  -v ${PWD}/lora-alpaca:/workspace/lora-alpaca \
+  --rm -it alpaca-lora training.py
+```
 
 ### Checkpoint export (`export_*_checkpoint.py`)
 
