@@ -60,6 +60,11 @@ else:
         device_map={"": device},
     )
 
+# unwind broken decapoda-research config
+model.config.pad_token_id = tokenizer.pad_token_id = 0  # unk
+model.config.bos_token_id = 1
+model.config.eos_token_id = 2
+
 
 def generate_prompt(instruction, input=None):
     if input:
@@ -79,6 +84,7 @@ def generate_prompt(instruction, input=None):
 {instruction}
 
 ### Response:"""
+
 
 if not LOAD_8BIT:
     model.half()  # seems to fix bugs for some users.
