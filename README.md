@@ -53,7 +53,7 @@ You mapped the host `.cache` folder to the container to persist the original mod
 You can also pass custom env variables to change training behaviour, see [Training](#training-finetunepy) for more information.
 
 ```bash
-docker run --gpus=0 --ipc=host --shm-size 64g \
+docker run --gpus=all --ipc=host --shm-size 64g \
   -e MICRO_BATCH_SIZE=5 \
   -e BATCH_SIZE=256 \
   -e GRADIENT_ACCUMULATION_STEPS=64 \
@@ -69,7 +69,7 @@ docker run --gpus=0 --ipc=host --shm-size 64g \
   -e OUTPUT_DIR="/path/to/output" \
   -v ${HOME}/.cache:/root/.cache \
   -v ${PWD}/lora-alpaca:/workspace/lora-alpaca \
-  --rm -it my-image
+  --rm -it alpaca-lora
 ```
 
 ### Inference (`generate.py`)
