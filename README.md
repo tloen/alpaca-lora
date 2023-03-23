@@ -15,7 +15,23 @@ as well as Tim Dettmers' [bitsandbytes](https://github.com/TimDettmers/bitsandby
 
 Without hyperparameter tuning, the LoRA model produces outputs comparable to the Stanford Alpaca model. (Please see the outputs included below.) Further tuning might be able to achieve better performance; I invite interested users to give it a try and report their results.
 
-## Setup
+### Docker commands for easy local inference
+
+1.
+
+```
+docker build -t alpaca-lora .
+```
+
+2.
+
+```
+docker run --gpus=all --shm-size 64g -p 7860:7860 -v ${HOME}/.cache:/root/.cache --rm alpaca-lora-demo
+```
+
+3. Head on down to `localhost:7860` and enjoy!
+
+### Setup
 
 1. Install dependencies
 
