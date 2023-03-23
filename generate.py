@@ -147,7 +147,35 @@ def main(
     ).launch()
     # Old testing code follows.
 
-    """
+gr.Interface(
+    fn=evaluate,
+    inputs=[
+        gr.components.Textbox(
+            lines=2, label="Instruction", placeholder="Tell me about alpacas."
+        ),
+        gr.components.Textbox(lines=2, label="Input", placeholder="none"),
+        gr.components.Slider(minimum=0, maximum=1, value=0.1, label="Temperature"),
+        gr.components.Slider(minimum=0, maximum=1, value=0.75, label="Top p"),
+        gr.components.Slider(minimum=0, maximum=100, step=1, value=40, label="Top k"),
+        gr.components.Slider(minimum=1, maximum=4, step=1, value=4, label="Beams"),
+        gr.components.Slider(
+            minimum=1, maximum=2000, step=1, value=128, label="Max tokens"
+        ),
+    ],
+    outputs=[
+        gr.inputs.Textbox(
+            lines=5,
+            label="Output",
+        )
+    ],
+    title="🦙🌲 Alpaca-LoRA",
+    description="Alpaca-LoRA is a 7B-parameter LLaMA model finetuned to follow instructions. It is trained on the [Stanford Alpaca](https://github.com/tatsu-lab/stanford_alpaca) dataset and makes use of the Huggingface LLaMA implementation. For more information, please visit [the project's website](https://github.com/tloen/alpaca-lora).",
+).launch(server_name="0.0.0.0")
+
+# Old testing code follows.
+
+"""
+if __name__ == "__main__":
     # testing code for readme
     for instruction in [
         "Tell me about alpacas.",
