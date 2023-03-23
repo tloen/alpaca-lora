@@ -23,9 +23,9 @@ from peft import (
 MICRO_BATCH_SIZE = 4  # this could actually be 5 but i like powers of 2
 BATCH_SIZE = 128
 GRADIENT_ACCUMULATION_STEPS = BATCH_SIZE // MICRO_BATCH_SIZE
-EPOCHS = 3  # we don't always need 3 tbh
+EPOCHS = 5 # increased for testing run
 LEARNING_RATE = 3e-4  # the Karpathy constant
-CUTOFF_LEN = 256  # 256 accounts for about 96% of the data
+CUTOFF_LEN = 512
 LORA_R = 8
 LORA_ALPHA = 16
 LORA_DROPOUT = 0.05
@@ -36,7 +36,7 @@ TARGET_MODULES = [
 ]
 DATA_PATH = "alpaca_data_cleaned.json"
 OUTPUT_DIR = "lora-alpaca"
-BASE_MODEL = None
+BASE_MODEL = "decapoda-research/llama-7b-hf"
 assert (
     BASE_MODEL
 ), "Please specify a BASE_MODEL in the script, e.g. 'decapoda-research/llama-7b-hf'"
@@ -97,7 +97,7 @@ def generate_prompt(data_point):
 {data_point["output"]}"""
 
 
-def tokenize(prompt):
+def tokenize(prompt, add_eos_token=True):
     # there's probably a way to do this with the tokenizer settings
     # but again, gotta move fast
     result = tokenizer(
@@ -110,6 +110,7 @@ def tokenize(prompt):
     if (
         result["input_ids"][-1] != tokenizer.eos_token_id
         and len(result["input_ids"]) < CUTOFF_LEN
+        and add_eos_token
     ):
         result["input_ids"].append(tokenizer.eos_token_id)
         result["attention_mask"].append(1)
@@ -120,8 +121,17 @@ def tokenize(prompt):
 
 
 def generate_and_tokenize_prompt(data_point):
-    prompt = generate_prompt(data_point)
-    return tokenize(prompt)
+    user_prompt = generate_prompt({**data_point, "output": ""})
+    full_prompt = generate_prompt(data_point)
+    tokenized_user_prompt = tokenize(user_prompt, add_eos_token=False)
+    tokenized_full_prompt = tokenize(full_prompt)
+    user_prompt_len = len(tokenized_user_prompt["input_ids"])
+    tokenized_full_prompt["labels"] = [-100] * user_prompt_len + tokenized_full_prompt[
+        "labels"
+    ][
+        user_prompt_len:
+    ]  # could be sped up, probably
+    return tokenized_full_prompt
 
 
 if VAL_SET_SIZE > 0:
@@ -145,7 +155,7 @@ trainer = transformers.Trainer(
         num_train_epochs=EPOCHS,
         learning_rate=LEARNING_RATE,
         fp16=True,
-        logging_steps=20,
+        logging_steps=1,
         evaluation_strategy="steps" if VAL_SET_SIZE > 0 else "no",
         save_strategy="steps",
         eval_steps=200 if VAL_SET_SIZE > 0 else None,
