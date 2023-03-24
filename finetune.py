@@ -22,25 +22,32 @@ from peft import (
 
 
 def train(
-    micro_batch_size: int = 4,
+    # model/data params
+    base_model: str = "",  # the only required argument
+    data_path: str = "alpaca_data_cleaned.json",
+    output_dir: str = "lora-alpaca",
+    # training hyperparams
     batch_size: int = 128,
+    micro_batch_size: int = 4,
     num_epochs: int = 3,
     learning_rate: float = 3e-4,
     cutoff_len: int = 512,
+    val_set_size: int = 2000,
+    # lora hyperparams
     lora_r: int = 8,
     lora_alpha: int = 16,
     lora_dropout: float = 0.05,
-    val_set_size: int = 2000,
     target_modules: List[str] = [
         "q_proj",
         "v_proj",
     ],
-    data_path: str = "alpaca_data_cleaned.json",
-    output_dir: str = "lora-alpaca",
-    base_model: str = "",
+    # llm hyperparams
     train_on_inputs: bool = True,  # if False, masks out inputs in loss
     group_by_length: bool = True,  # faster, but produces an odd training loss curve
 ):
+    assert (
+        base_model
+    ), "Please specify a --base_model, e.g. --base_model='decapoda-research/llama-7b-hf'"
     gradient_accumulation_steps = batch_size // micro_batch_size
 
     device_map = "auto"
@@ -49,10 +56,6 @@ def train(
     if ddp:
         device_map = {"": int(os.environ.get("LOCAL_RANK") or 0)}
         gradient_accumulation_steps = gradient_accumulation_steps // world_size
-
-    assert (
-        base_model
-    ), "Please specify a --base_model, e.g. 'decapoda-research/llama-7b-hf'"
 
     model = LlamaForCausalLM.from_pretrained(
         base_model,

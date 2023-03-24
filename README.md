@@ -25,10 +25,6 @@ pip install -r requirements.txt
 
 2. If bitsandbytes doesn't work, [install it from source.](https://github.com/TimDettmers/bitsandbytes/blob/main/compile_from_source.md) Windows users can follow [these instructions](https://github.com/tloen/alpaca-lora/issues/17).
 
-### Inference (`generate.py`)
-
-This file reads the foundation model from the Hugging Face model hub and the LoRA weights from `tloen/alpaca-lora-7b`, and runs a Gradio interface for inference on a specified input. Users should treat this as example code for the use of the model, and modify it as needed.
-
 ### Training (`finetune.py`)
 
 This file contains a straightforward application of PEFT to the LLaMA model,
@@ -36,8 +32,19 @@ as well as some code related to prompt construction and tokenization.
 PRs adapting this code to support larger models are always welcome.
 
 Example usage:
+
 ```bash
 python finetune.py \
+    --base_model 'decapoda-research/llama-7b-hf' \
+    --data_path 'alpaca_data_cleaned.json' \
+    --output_dir './lora-alpaca'
+```
+
+We can also tweak our hyperparameters:
+```bash
+python finetune.py \
+    --base_model 'decapoda-research/llama-7b-hf' \
+    --data_path alpaca_data_cleaned.json \
     --micro_batch_size 4 \
     --batch_size 128 \
     --num_epochs 3 \
@@ -48,11 +55,22 @@ python finetune.py \
     --lora_dropout 0.05 \
     --val_set_size 2000 \
     --target_modules '[q_proj,v_proj]' \
-    --data_path alpaca_data_cleaned.json \
     --output_dir lora-alpaca \
-    --base_model 'decapoda-research/llama-7b-hf' \
     --train_on_inputs \
     --group_by_length
+```
+
+### Inference (`generate.py`)
+
+This file reads the foundation model from the Hugging Face model hub and the LoRA weights from `tloen/alpaca-lora-7b`, and runs a Gradio interface for inference on a specified input. Users should treat this as example code for the use of the model, and modify it as needed.
+
+Example usage:
+
+```bash
+python generate.py \
+    --load_8bit \
+    --base_model 'decapoda-research/llama-7b-hf' \
+    --lora_weights 'tloen/alpaca-lora-7b'
 ```
 
 ### Checkpoint export (`export_*_checkpoint.py`)
