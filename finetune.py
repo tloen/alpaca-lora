@@ -16,14 +16,17 @@ from peft import (
     LoraConfig,
     get_peft_model,
     get_peft_model_state_dict,
+    set_peft_model_state_dict,
 )
 
 
-# optimized for RTX 4090. for larger GPUs, increase some of these?
-MICRO_BATCH_SIZE = 4  # this could actually be 5 but i like powers of 2
+CONTINUE_FROM_CHECKPOINT = None  # None, a full checkpoint dir like "./lora-alpaca/checkpoint-260" or the last adapter dir only, like "./lora-alpaca/"
+
+# optimized for RTX 3090 and should be good for 4090 as well
+MICRO_BATCH_SIZE = 64  # Fits in vram for me.
 BATCH_SIZE = 128
 GRADIENT_ACCUMULATION_STEPS = BATCH_SIZE // MICRO_BATCH_SIZE
-EPOCHS = 3  # we don't always need 3 tbh
+EPOCHS = 3  # If you resume from a previous full checkpoint, you need to increment this since it'll remember how many epochs it already did.
 LEARNING_RATE = 3e-4  # the Karpathy constant
 CUTOFF_LEN = 256  # 256 accounts for about 96% of the data
 LORA_R = 8
@@ -66,6 +69,20 @@ config = LoraConfig(
     task_type="CAUSAL_LM",
 )
 model = get_peft_model(model, config)
+
+if CONTINUE_FROM_CHECKPOINT:
+    # Check the available weights and load them
+    checkpoint_name = os.path.join(CONTINUE_FROM_CHECKPOINT, "pytorch_model.bin")  # Full checkpoint
+    if not os.path.exists(checkpoint_name):
+        checkpoint_name = os.path.join(CONTINUE_FROM_CHECKPOINT, "adapter_model.bin")  # only LoRA model - LoRA config above has to fit
+    # The two files above have a different name depending on how they were saved, but are actually the same.
+    if os.path.exists(checkpoint_name):
+        print(f"Restarting from {checkpoint_name}")
+        adapters_weights = torch.load(checkpoint_name)
+        model = set_peft_model_state_dict(model, adapters_weights)
+                
+model.print_trainable_parameters()  # Be more transparent about the % of trainable params.
+
 tokenizer.pad_token_id = 0  # unk. we want this to be different from the eos token
 data = load_dataset("json", data_files=DATA_PATH)
 
@@ -156,7 +173,8 @@ model.state_dict = (
 if torch.__version__ >= "2" and sys.platform != "win32":
     model = torch.compile(model)
 
-trainer.train()
+# If resuming from a previous checkpoint, you'll get the missing keys warning you can ignore.
+trainer.train(resume_from_checkpoint=CONTINUE_FROM_CHECKPOINT)
 
 model.save_pretrained(OUTPUT_DIR)
 
