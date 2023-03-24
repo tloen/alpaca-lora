@@ -1,4 +1,5 @@
 import sys
+import os
 import torch
 from peft import PeftModel
 import transformers
@@ -10,7 +11,7 @@ assert (
 from transformers import LlamaTokenizer, LlamaForCausalLM, GenerationConfig
 
 LOAD_8BIT = False
-BASE_MODEL = None
+BASE_MODEL = os.environ.get("BASE_MODEL")
 LORA_WEIGHTS = "tloen/alpaca-lora-7b"
 
 tokenizer = LlamaTokenizer.from_pretrained(BASE_MODEL)
