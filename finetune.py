@@ -23,9 +23,9 @@ from peft import (
 MICRO_BATCH_SIZE = 4  # this could actually be 5 but i like powers of 2
 BATCH_SIZE = 128
 GRADIENT_ACCUMULATION_STEPS = BATCH_SIZE // MICRO_BATCH_SIZE
-EPOCHS = 3  # we don't always need 3 tbh
-LEARNING_RATE = 3e-4  # the Karpathy constant
-CUTOFF_LEN = 256  # 256 accounts for about 96% of the data
+EPOCHS = 3
+LEARNING_RATE = 3e-4
+CUTOFF_LEN = 512
 LORA_R = 8
 LORA_ALPHA = 16
 LORA_DROPOUT = 0.05
@@ -40,6 +40,8 @@ BASE_MODEL = None
 assert (
     BASE_MODEL
 ), "Please specify a BASE_MODEL in the script, e.g. 'decapoda-research/llama-7b-hf'"
+TRAIN_ON_INPUTS = True
+GROUP_BY_LENGTH = True  # faster, but produces an odd training loss curve
 
 device_map = "auto"
 world_size = int(os.environ.get("WORLD_SIZE", 1))
@@ -53,7 +55,11 @@ model = LlamaForCausalLM.from_pretrained(
     load_in_8bit=True,
     device_map=device_map,
 )
-tokenizer = LlamaTokenizer.from_pretrained(BASE_MODEL, add_eos_token=True)
+
+tokenizer = LlamaTokenizer.from_pretrained(BASE_MODEL)
+
+tokenizer.pad_token_id = 0  # unk. we want this to be different from the eos token
+tokenizer.padding_side = "left"  # Allow batched inference
 
 model = prepare_model_for_int8_training(model)
 
@@ -66,7 +72,7 @@ config = LoraConfig(
     task_type="CAUSAL_LM",
 )
 model = get_peft_model(model, config)
-tokenizer.pad_token_id = 0  # unk. we want this to be different from the eos token
+
 data = load_dataset("json", data_files=DATA_PATH)
 
 
@@ -93,24 +99,43 @@ def generate_prompt(data_point):
 {data_point["output"]}"""
 
 
-def tokenize(prompt):
+def tokenize(prompt, add_eos_token=True):
     # there's probably a way to do this with the tokenizer settings
     # but again, gotta move fast
     result = tokenizer(
         prompt,
         truncation=True,
-        max_length=CUTOFF_LEN + 1,
-        padding="max_length",
+        max_length=CUTOFF_LEN,
+        padding=False,
+        return_tensors=None,
     )
-    return {
-        "input_ids": result["input_ids"][:-1],
-        "attention_mask": result["attention_mask"][:-1],
-    }
+    if (
+        result["input_ids"][-1] != tokenizer.eos_token_id
+        and len(result["input_ids"]) < CUTOFF_LEN
+        and add_eos_token
+    ):
+        result["input_ids"].append(tokenizer.eos_token_id)
+        result["attention_mask"].append(1)
+
+    result["labels"] = result["input_ids"].copy()
+
+    return result
 
 
 def generate_and_tokenize_prompt(data_point):
-    prompt = generate_prompt(data_point)
-    return tokenize(prompt)
+    full_prompt = generate_prompt(data_point)
+    tokenized_full_prompt = tokenize(full_prompt)
+    if not TRAIN_ON_INPUTS:
+        user_prompt = generate_prompt({**data_point, "output": ""})
+        tokenized_user_prompt = tokenize(user_prompt, add_eos_token=False)
+        user_prompt_len = len(tokenized_user_prompt["input_ids"])
+
+        tokenized_full_prompt["labels"] = [
+            -100
+        ] * user_prompt_len + tokenized_full_prompt["labels"][
+            user_prompt_len:
+        ]  # could be sped up, probably
+    return tokenized_full_prompt
 
 
 if VAL_SET_SIZE > 0:
@@ -134,7 +159,7 @@ trainer = transformers.Trainer(
         num_train_epochs=EPOCHS,
         learning_rate=LEARNING_RATE,
         fp16=True,
-        logging_steps=20,
+        logging_steps=10,
         evaluation_strategy="steps" if VAL_SET_SIZE > 0 else "no",
         save_strategy="steps",
         eval_steps=200 if VAL_SET_SIZE > 0 else None,
@@ -143,8 +168,11 @@ trainer = transformers.Trainer(
         save_total_limit=3,
         load_best_model_at_end=True if VAL_SET_SIZE > 0 else False,
         ddp_find_unused_parameters=False if ddp else None,
+        group_by_length=GROUP_BY_LENGTH,
     ),
-    data_collator=transformers.DataCollatorForLanguageModeling(tokenizer, mlm=False),
+    data_collator=transformers.DataCollatorForSeq2Seq(
+        tokenizer, pad_to_multiple_of=8, return_tensors="pt", padding=True
+    ),
 )
 model.config.use_cache = False
 
