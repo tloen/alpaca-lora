@@ -1,15 +1,23 @@
 import sys
-
-import fire
-import gradio as gr
+import os
 import torch
 import transformers
 from peft import PeftModel
 
 assert (
     "LlamaTokenizer" in transformers._import_structure["models.llama"]
-), "LLaMA is now in HuggingFace's main branch.\nPlease reinstall it: pip uninstall transformers && pip install git+https://github.com/huggingface/transformers.git"  # noqa: E501
-from transformers import GenerationConfig, LlamaForCausalLM, LlamaTokenizer
+), "LLaMA is now in HuggingFace's main branch.\nPlease reinstall it: pip uninstall transformers && pip install git+https://github.com/huggingface/transformers.git"
+from transformers import LlamaTokenizer, LlamaForCausalLM, GenerationConfig
+
+LOAD_8BIT = False
+BASE_MODEL = os.environ.get("BASE_MODEL")
+LORA_WEIGHTS = "tloen/alpaca-lora-7b"
+
+tokenizer = LlamaTokenizer.from_pretrained(BASE_MODEL)
+
+assert (
+    BASE_MODEL
+), "Please specify a BASE_MODEL in the script, e.g. 'decapoda-research/llama-7b-hf'"
 
 if torch.cuda.is_available():
     device = "cuda"
