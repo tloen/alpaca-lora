@@ -2,7 +2,6 @@
 
 - 🤗 **Try the pretrained model out [here](https://huggingface.co/spaces/tloen/alpaca-lora), courtesy of a GPU grant from Huggingface!**
 - Users have created a Discord server for discussion and support [here](https://discord.gg/prbq284xX5)
-- **This repository does not contain code for hosting and/or facilitating the downloading and/or streaming of the LLaMA weights. You will have to specify your own HuggingFace Hub base model to run the code, such as `decapoda-research/llama-7b-hf`.**
 
 This repository contains code for reproducing the [Stanford Alpaca](https://github.com/tatsu-lab/stanford_alpaca) results using [low-rank adaptation (LoRA)](https://arxiv.org/pdf/2106.09685.pdf).
 We provide an Instruct model of similar quality to `text-davinci-003` that can run [on a Raspberry Pi](https://twitter.com/miolini/status/1634982361757790209) (for research),
@@ -26,16 +25,53 @@ pip install -r requirements.txt
 
 2. If bitsandbytes doesn't work, [install it from source.](https://github.com/TimDettmers/bitsandbytes/blob/main/compile_from_source.md) Windows users can follow [these instructions](https://github.com/tloen/alpaca-lora/issues/17).
 
-### Inference (`generate.py`)
-
-This file reads the foundation model from the Hugging Face model hub and the LoRA weights from `tloen/alpaca-lora-7b`, and runs a Gradio interface for inference on a specified input. Users should treat this as example code for the use of the model, and modify it as needed.
-
 ### Training (`finetune.py`)
 
 This file contains a straightforward application of PEFT to the LLaMA model,
 as well as some code related to prompt construction and tokenization.
-Near the top of this file is a set of hardcoded hyperparameters that you should feel free to modify.
 PRs adapting this code to support larger models are always welcome.
+
+Example usage:
+
+```bash
+python finetune.py \
+    --base_model 'decapoda-research/llama-7b-hf' \
+    --data_path './alpaca_data_cleaned.json' \
+    --output_dir './lora-alpaca'
+```
+
+We can also tweak our hyperparameters:
+```bash
+python finetune.py \
+    --base_model 'decapoda-research/llama-7b-hf' \
+    --data_path 'alpaca_data_cleaned.json' \
+    --output_dir './lora-alpaca' \
+    --batch_size 128 \
+    --micro_batch_size 4 \
+    --num_epochs 3 \
+    --learning_rate 1e-4 \
+    --cutoff_len 512 \
+    --val_set_size 2000 \
+    --lora_r 8 \
+    --lora_alpha 16 \
+    --lora_dropout 0.05 \
+    --lora_target_modules '[q_proj,v_proj]' \
+    --train_on_inputs \
+    --group_by_length
+```
+
+### Inference (`generate.py`)
+
+This file reads the foundation model from the Hugging Face model hub and the LoRA weights from `tloen/alpaca-lora-7b`, and runs a Gradio interface for inference on a specified input. Users should treat this as example code for the use of the model, and modify it as needed.
+
+Example usage:
+
+```bash
+python generate.py \
+    --load_8bit \
+    --base_model 'decapoda-research/llama-7b-hf' \
+    --lora_weights 'tloen/alpaca-lora-7b'
+```
 
 ### Checkpoint export (`export_*_checkpoint.py`)
 
