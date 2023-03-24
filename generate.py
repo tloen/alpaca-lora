@@ -9,11 +9,15 @@ assert (
 ), "LLaMA is now in HuggingFace's main branch.\nPlease reinstall it: pip uninstall transformers && pip install git+https://github.com/huggingface/transformers.git"
 from transformers import LlamaTokenizer, LlamaForCausalLM, GenerationConfig
 
-tokenizer = LlamaTokenizer.from_pretrained("decapoda-research/llama-7b-hf")
-
 LOAD_8BIT = False
-BASE_MODEL = "decapoda-research/llama-7b-hf"
+BASE_MODEL = None
 LORA_WEIGHTS = "tloen/alpaca-lora-7b"
+
+tokenizer = LlamaTokenizer.from_pretrained(BASE_MODEL)
+
+assert (
+    BASE_MODEL
+), "Please specify a BASE_MODEL in the script, e.g. 'decapoda-research/llama-7b-hf'"
 
 if torch.cuda.is_available():
     device = "cuda"
@@ -59,6 +63,32 @@ else:
         LORA_WEIGHTS,
         device_map={"": device},
     )
+
+# unwind broken decapoda-research config
+model.config.pad_token_id = tokenizer.pad_token_id = 0  # unk
+model.config.bos_token_id = 1
+model.config.eos_token_id = 2
+
+
+
+def generate_prompt(instruction, input=None):
+    if input:
+        return f"""Below is an instruction that describes a task, paired with an input that provides further context. Write a response that appropriately completes the request.
+
+### Instruction:
+{instruction}
+
+### Input:
+{input}
+
+### Response:"""
+    else:
+        return f"""Below is an instruction that describes a task. Write a response that appropriately completes the request.
+
+### Instruction:
+{instruction}
+
+### Response:"""
 
 
 if not LOAD_8BIT:
