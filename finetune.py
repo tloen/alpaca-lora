@@ -75,6 +75,7 @@ if CONTINUE_FROM_CHECKPOINT:
     checkpoint_name = os.path.join(CONTINUE_FROM_CHECKPOINT, "pytorch_model.bin")  # Full checkpoint
     if not os.path.exists(checkpoint_name):
         checkpoint_name = os.path.join(CONTINUE_FROM_CHECKPOINT, "adapter_model.bin")  # only LoRA model - LoRA config above has to fit
+        CONTINUE_FROM_CHECKPOINT = False  # So the trainer won't try loading its state
     # The two files above have a different name depending on how they were saved, but are actually the same.
     if os.path.exists(checkpoint_name):
         print(f"Restarting from {checkpoint_name}")
