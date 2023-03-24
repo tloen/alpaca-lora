@@ -23,7 +23,7 @@ from peft import (
 MICRO_BATCH_SIZE = 4  # this could actually be 5 but i like powers of 2
 BATCH_SIZE = 128
 GRADIENT_ACCUMULATION_STEPS = BATCH_SIZE // MICRO_BATCH_SIZE
-EPOCHS = 3  # increased for testing run
+EPOCHS = 3
 LEARNING_RATE = 3e-4
 CUTOFF_LEN = 512
 LORA_R = 8
@@ -36,7 +36,7 @@ TARGET_MODULES = [
 ]
 DATA_PATH = "alpaca_data_cleaned.json"
 OUTPUT_DIR = "lora-alpaca"
-BASE_MODEL = "decapoda-research/llama-7b-hf"
+BASE_MODEL = None
 assert (
     BASE_MODEL
 ), "Please specify a BASE_MODEL in the script, e.g. 'decapoda-research/llama-7b-hf'"
