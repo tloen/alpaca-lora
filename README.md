@@ -44,7 +44,7 @@ We can also tweak our hyperparameters:
 ```bash
 python finetune.py \
     --base_model 'decapoda-research/llama-7b-hf' \
-    --data_path 'alpaca_data_cleaned.json' \
+    --data_path './alpaca_data_cleaned.json' \
     --output_dir './lora-alpaca' \
     --batch_size 128 \
     --micro_batch_size 4 \
