@@ -36,7 +36,7 @@ Example usage:
 ```bash
 python finetune.py \
     --base_model 'decapoda-research/llama-7b-hf' \
-    --data_path 'alpaca_data_cleaned.json' \
+    --data_path './alpaca_data_cleaned.json' \
     --output_dir './lora-alpaca'
 ```
 

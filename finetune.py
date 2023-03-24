@@ -24,8 +24,8 @@ from peft import (
 def train(
     # model/data params
     base_model: str = "",  # the only required argument
-    data_path: str = "alpaca_data_cleaned.json",
-    output_dir: str = "lora-alpaca",
+    data_path: str = "./alpaca_data_cleaned.json",
+    output_dir: str = "./lora-alpaca",
     # training hyperparams
     batch_size: int = 128,
     micro_batch_size: int = 4,
@@ -45,6 +45,24 @@ def train(
     train_on_inputs: bool = True,  # if False, masks out inputs in loss
     group_by_length: bool = True,  # faster, but produces an odd training loss curve
 ):
+    print(
+        f"Training Alpaca-LoRA model with params:\n"
+        f"base_model: {base_model}\n"
+        f"data_path: {data_path}\n"
+        f"output_dir: {output_dir}\n"
+        f"batch_size: {batch_size}\n"
+        f"micro_batch_size: {micro_batch_size}\n"
+        f"num_epochs: {num_epochs}\n"
+        f"learning_rate: {learning_rate}\n"
+        f"cutoff_len: {cutoff_len}\n"
+        f"val_set_size: {val_set_size}\n"
+        f"lora_r: {lora_r}\n"
+        f"lora_alpha: {lora_alpha}\n"
+        f"lora_dropout: {lora_dropout}\n"
+        f"lora_target_modules: {lora_target_modules}\n"
+        f"train_on_inputs: {train_on_inputs}\n"
+        f"group_by_length: {group_by_length}\n"
+    )
     assert (
         base_model
     ), "Please specify a --base_model, e.g. --base_model='decapoda-research/llama-7b-hf'"
