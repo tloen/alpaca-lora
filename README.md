@@ -2,7 +2,6 @@
 
 - 🤗 **Try the pretrained model out [here](https://huggingface.co/spaces/tloen/alpaca-lora), courtesy of a GPU grant from Huggingface!**
 - Users have created a Discord server for discussion and support [here](https://discord.gg/prbq284xX5)
-- **This repository does not contain code for hosting and/or facilitating the downloading and/or streaming of the LLaMA weights. You will have to specify your own HuggingFace Hub base model to run the code, such as `decapoda-research/llama-7b-hf`.**
 
 This repository contains code for reproducing the [Stanford Alpaca](https://github.com/tatsu-lab/stanford_alpaca) results using [low-rank adaptation (LoRA)](https://arxiv.org/pdf/2106.09685.pdf).
 We provide an Instruct model of similar quality to `text-davinci-003` that can run [on a Raspberry Pi](https://twitter.com/miolini/status/1634982361757790209) (for research),
