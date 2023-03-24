@@ -41,7 +41,7 @@ assert (
     BASE_MODEL
 ), "Please specify a BASE_MODEL in the script, e.g. 'decapoda-research/llama-7b-hf'"
 TRAIN_ON_INPUTS = True
-GROUP_BY_LENGTH = True
+GROUP_BY_LENGTH = True  # faster, but produces an odd training loss curve
 
 device_map = "auto"
 world_size = int(os.environ.get("WORLD_SIZE", 1))
@@ -159,7 +159,7 @@ trainer = transformers.Trainer(
         num_train_epochs=EPOCHS,
         learning_rate=LEARNING_RATE,
         fp16=True,
-        logging_steps=1,
+        logging_steps=10,
         evaluation_strategy="steps" if VAL_SET_SIZE > 0 else "no",
         save_strategy="steps",
         eval_steps=200 if VAL_SET_SIZE > 0 else None,
