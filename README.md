@@ -55,7 +55,7 @@ python finetune.py \
     --lora_r 8 \
     --lora_alpha 16 \
     --lora_dropout 0.05 \
-    --target_modules '[q_proj,v_proj]' \
+    --lora_target_modules '[q_proj,v_proj]' \
     --train_on_inputs \
     --group_by_length
 ```
