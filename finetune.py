@@ -123,11 +123,11 @@ def tokenize(prompt, add_eos_token=True):
 
 
 def generate_and_tokenize_prompt(data_point):
-    user_prompt = generate_prompt({**data_point, "output": ""})
     full_prompt = generate_prompt(data_point)
-    tokenized_user_prompt = tokenize(user_prompt, add_eos_token=False)
     tokenized_full_prompt = tokenize(full_prompt)
     if not TRAIN_ON_INPUTS:
+        user_prompt = generate_prompt({**data_point, "output": ""})
+        tokenized_user_prompt = tokenize(user_prompt, add_eos_token=False)
         user_prompt_len = len(tokenized_user_prompt["input_ids"])
 
         tokenized_full_prompt["labels"] = [
