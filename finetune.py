@@ -23,8 +23,8 @@ from peft import (
 MICRO_BATCH_SIZE = 4  # this could actually be 5 but i like powers of 2
 BATCH_SIZE = 128
 GRADIENT_ACCUMULATION_STEPS = BATCH_SIZE // MICRO_BATCH_SIZE
-EPOCHS = 5 # increased for testing run
-LEARNING_RATE = 3e-4  # the Karpathy constant
+EPOCHS = 3  # increased for testing run
+LEARNING_RATE = 3e-4
 CUTOFF_LEN = 512
 LORA_R = 8
 LORA_ALPHA = 16
@@ -40,6 +40,8 @@ BASE_MODEL = "decapoda-research/llama-7b-hf"
 assert (
     BASE_MODEL
 ), "Please specify a BASE_MODEL in the script, e.g. 'decapoda-research/llama-7b-hf'"
+TRAIN_ON_INPUTS = True
+GROUP_BY_LENGTH = True
 
 device_map = "auto"
 world_size = int(os.environ.get("WORLD_SIZE", 1))
@@ -125,12 +127,14 @@ def generate_and_tokenize_prompt(data_point):
     full_prompt = generate_prompt(data_point)
     tokenized_user_prompt = tokenize(user_prompt, add_eos_token=False)
     tokenized_full_prompt = tokenize(full_prompt)
-    user_prompt_len = len(tokenized_user_prompt["input_ids"])
-    tokenized_full_prompt["labels"] = [-100] * user_prompt_len + tokenized_full_prompt[
-        "labels"
-    ][
-        user_prompt_len:
-    ]  # could be sped up, probably
+    if not TRAIN_ON_INPUTS:
+        user_prompt_len = len(tokenized_user_prompt["input_ids"])
+
+        tokenized_full_prompt["labels"] = [
+            -100
+        ] * user_prompt_len + tokenized_full_prompt["labels"][
+            user_prompt_len:
+        ]  # could be sped up, probably
     return tokenized_full_prompt
 
 
@@ -164,7 +168,7 @@ trainer = transformers.Trainer(
         save_total_limit=3,
         load_best_model_at_end=True if VAL_SET_SIZE > 0 else False,
         ddp_find_unused_parameters=False if ddp else None,
-        group_by_length=True,
+        group_by_length=GROUP_BY_LENGTH,
     ),
     data_collator=transformers.DataCollatorForSeq2Seq(
         tokenizer, pad_to_multiple_of=8, return_tensors="pt", padding=True
