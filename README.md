@@ -34,8 +34,27 @@ This file reads the foundation model from the Hugging Face model hub and the LoR
 
 This file contains a straightforward application of PEFT to the LLaMA model,
 as well as some code related to prompt construction and tokenization.
-Near the top of this file is a set of hardcoded hyperparameters that you should feel free to modify.
 PRs adapting this code to support larger models are always welcome.
+
+Example usage:
+```bash
+python finetune.py \
+    --micro_batch_size 4 \
+    --batch_size 128 \
+    --num_epochs 3 \
+    --learning_rate 1e-4 \
+    --cutoff_len 512 \
+    --lora_r 8 \
+    --lora_alpha 16 \
+    --lora_dropout 0.05 \
+    --val_set_size 2000 \
+    --target_modules '[q_proj,v_proj]' \
+    --data_path alpaca_data_cleaned.json \
+    --output_dir lora-alpaca \
+    --base_model 'decapoda-research/llama-7b-hf' \
+    --train_on_inputs \
+    --group_by_length
+```
 
 ### Checkpoint export (`export_*_checkpoint.py`)
 
