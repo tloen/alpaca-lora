@@ -44,6 +44,9 @@ def train(
     # llm hyperparams
     train_on_inputs: bool = True,  # if False, masks out inputs in loss
     group_by_length: bool = True,  # faster, but produces an odd training loss curve
+    # wandb params
+    wandb_project: str = "",
+    run_name: str = ""
 ):
     print(
         f"Training Alpaca-LoRA model with params:\n"
@@ -62,6 +65,8 @@ def train(
         f"lora_target_modules: {lora_target_modules}\n"
         f"train_on_inputs: {train_on_inputs}\n"
         f"group_by_length: {group_by_length}\n"
+        f"wandb_project: {wandb_project}\n"
+        f"run_name: {run_name}\n"
     )
     assert (
         base_model
@@ -74,6 +79,11 @@ def train(
     if ddp:
         device_map = {"": int(os.environ.get("LOCAL_RANK") or 0)}
         gradient_accumulation_steps = gradient_accumulation_steps // world_size
+
+    # wandb
+    use_wandb = len(wandb_project) > 0 or len(os.environ["WANDB_PROJECT"]) > 0
+    if len(wandb_project) > 0: # only overwrite if param passed
+        os.environ['WANDB_PROJECT'] = wandb_project
 
     model = LlamaForCausalLM.from_pretrained(
         base_model,
@@ -168,6 +178,8 @@ def train(
             load_best_model_at_end=True if val_set_size > 0 else False,
             ddp_find_unused_parameters=False if ddp else None,
             group_by_length=group_by_length,
+            report_to="wandb" if use_wandb else None,
+            run_name=run_name if use_wandb else None
         ),
         data_collator=transformers.DataCollatorForSeq2Seq(
             tokenizer, pad_to_multiple_of=8, return_tensors="pt", padding=True
