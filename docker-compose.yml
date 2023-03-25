@@ -10,6 +10,8 @@ services:
     restart: unless-stopped
     environment:
       - BASE_MODEL=decapoda-research/llama-7b-hf  # Hugging face model to use
+      - LORA_WEIGHTS=tloen/alpaca-lora-7b
+      - LOAD_8BIT=0
     volumes:
       - ./appdata/cache:/root/.cache  # Location downloaded weights will be stored
     shm_size: '64gb'
