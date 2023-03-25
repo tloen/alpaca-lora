@@ -13,7 +13,7 @@ services:
       - LORA_WEIGHTS=tloen/alpaca-lora-7b
       - LOAD_8BIT=0
     volumes:
-      - ./appdata/cache:/root/.cache  # Location downloaded weights will be stored
+      - /tmp:/root/.cache  # Location downloaded weights will be stored
     shm_size: '64gb'
     ports:
       - 7860:7860
