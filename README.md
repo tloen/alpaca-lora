@@ -34,6 +34,27 @@ docker run --gpus=all --shm-size 64g -p 7860:7860 -v ${HOME}/.cache:/root/.cache
 
 4. Head on down to `localhost:7860` and enjoy!
 
+### Docker compose
+
+1. (optional) Set reference to your desired model weights to `BASE_MODEL=decapoda-research/llama-7b-hf` in the `docker-compose.yml`.
+
+2. Build the container image
+
+```
+docker compose build
+```
+
+3. Run the container image
+
+```
+docker compose up
+```
+
+4. Head on down to `localhost:7860` and enjoy!
+
+### Setup
+
+
 ### Setup
 
 1. Install dependencies

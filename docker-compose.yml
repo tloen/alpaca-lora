@@ -1,0 +1,24 @@
+version: '3'
+
+services:
+  alpaca-lora:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    image: alpaca-lora
+    command: generate.py
+    restart: unless-stopped
+    environment:
+      - BASE_MODEL=decapoda-research/llama-7b-hf  # Hugging face model to use
+    volumes:
+      - ./appdata/cache:/root/.cache  # Location downloaded weights will be stored
+    shm_size: '64gb'
+    ports:
+      - 7860:7860
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
