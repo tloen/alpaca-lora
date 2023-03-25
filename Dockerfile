@@ -3,7 +3,9 @@ FROM nvidia/cuda:11.8.0-devel-ubuntu22.04
 ARG DEBIAN_FRONTEND=noninteractive
 
 # enter the base model weights you wish to use here, like "decapoda-research/llama-7b-hf"
-ENV BASE_MODEL="None"
+ENV BASE_MODEL="decapoda-research/llama-7b-hf"
+ENV LORA_WEIGHTS="tloen/alpaca-lora-7b"
+ENV LOAD_8BIT=0
 
 # since bytesands will use the installed cuda version, I have fixed to 11.8 and cannot use easily torch2.0 or nvidia with pytorch containers
 RUN apt-get update && apt-get install -y \
