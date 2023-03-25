@@ -46,7 +46,9 @@ def train(
     group_by_length: bool = True,  # faster, but produces an odd training loss curve
     # wandb params
     wandb_project: str = "",
-    run_name: str = ""
+    run_name: str = "",
+    wandb_watch: str = "", # options: false | gradients | all
+    wandb_log_model: str = "" # options: false | true
 ):
     print(
         f"Training Alpaca-LoRA model with params:\n"
@@ -67,6 +69,8 @@ def train(
         f"group_by_length: {group_by_length}\n"
         f"wandb_project: {wandb_project}\n"
         f"run_name: {run_name}\n"
+        f"wandb_watch: {wandb_watch}\n"
+        f"wandb_log_model: {wandb_log_model}\n"
     )
     assert (
         base_model
@@ -83,8 +87,14 @@ def train(
     # Check if parameter passed or if set within environ
     use_wandb = len(wandb_project) > 0 or \
                 ("WANDB_PROJECT" in os.environ and len(os.environ["WANDB_PROJECT"]) > 0)
-    if len(wandb_project) > 0: # only overwrite if param passed
+    # Only overwrite environ if wandb param passed
+    if len(wandb_project) > 0: 
         os.environ['WANDB_PROJECT'] = wandb_project
+    if len(wandb_watch) > 0:
+        os.environ['WANDB_WATCH'] = wandb_watch
+    if len(wandb_log_model) > 0:
+        os.environ['WANDB_LOG_MODEL'] = wandb_log_model
+
 
     model = LlamaForCausalLM.from_pretrained(
         base_model,
