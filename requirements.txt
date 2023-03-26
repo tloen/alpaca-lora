@@ -1,10 +1,11 @@
-datasets
-loralib
-sentencepiece
-git+https://github.com/huggingface/transformers.git
 accelerate
+appdirs
 bitsandbytes
+black
+black[jupyter]
+datasets
 git+https://github.com/huggingface/peft.git
+git+https://github.com/huggingface/transformers.git
 gradio
 appdirs
 fire

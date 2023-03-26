@@ -1,0 +1,8 @@
+[tool.black]
+line-length = 79
+
+[tool.isort]
+include_trailing_comma = true
+line_length = 79
+multi_line_output = 3
+profile = "black"
