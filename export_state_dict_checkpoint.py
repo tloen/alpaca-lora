@@ -1,20 +1,23 @@
-import os
 import json
+import os
 
 import torch
-from peft import PeftModel, LoraConfig
-
 import transformers
+
+# Unused imports
+# from peft import LoraConfig
+from peft import PeftModel
 
 assert (
     "LlamaTokenizer" in transformers._import_structure["models.llama"]
-), "LLaMA is now in HuggingFace's main branch.\nPlease reinstall it: pip uninstall transformers && pip install git+https://github.com/huggingface/transformers.git"
-from transformers import LlamaTokenizer, LlamaForCausalLM
+), "LLaMA is now in HuggingFace's main branch.\nPlease reinstall it: pip uninstall transformers && pip install git+https://github.com/huggingface/transformers.git"  # noqa: E501
 
-BASE_MODEL = None
+from transformers import LlamaForCausalLM, LlamaTokenizer  # noqa: E402
+
+BASE_MODEL = os.environ.get("BASE_MODEL", None)
 assert (
     BASE_MODEL
-), "Please specify a BASE_MODEL in the script, e.g. 'decapoda-research/llama-7b-hf'"
+), "Please specify a value for BASE_MODEL environment variable, e.g. `export BASE_MODEL=decapoda-research/llama-7b-hf`"  # noqa: E501
 
 tokenizer = LlamaTokenizer.from_pretrained(BASE_MODEL)
 
@@ -54,22 +57,28 @@ n_heads = params["n_heads"]
 dim = params["dim"]
 dims_per_head = dim // n_heads
 base = 10000.0
-inv_freq = 1.0 / (base ** (torch.arange(0, dims_per_head, 2).float() / dims_per_head))
+inv_freq = 1.0 / (
+    base ** (torch.arange(0, dims_per_head, 2).float() / dims_per_head)
+)
 
 
 def permute(w):
     return (
-        w.view(n_heads, dim // n_heads // 2, 2, dim).transpose(1, 2).reshape(dim, dim)
+        w.view(n_heads, dim // n_heads // 2, 2, dim)
+        .transpose(1, 2)
+        .reshape(dim, dim)
     )
 
 
 def unpermute(w):
     return (
-        w.view(n_heads, 2, dim // n_heads // 2, dim).transpose(1, 2).reshape(dim, dim)
+        w.view(n_heads, 2, dim // n_heads // 2, dim)
+        .transpose(1, 2)
+        .reshape(dim, dim)
     )
 
 
-def translate_state_dict_key(k):
+def translate_state_dict_key(k):  # noqa: C901
     k = k.replace("base_model.model.", "")
     if k == "model.embed_tokens.weight":
         return "tok_embeddings.weight"
