@@ -56,9 +56,9 @@ async def get_response(prompt):
         async with session.post("http://localhost:7860/run/predict", json={
             "data": [
                 prompt,
-                1,
-                0.8,
-                90,
+                0.1,
+                0.75,
+                40,
                 4,
                 128,
                 f"{user_name}:,{ai_name}:",

@@ -27,23 +27,23 @@ def train(
     data_path: str = "./alpaca_data_cleaned.json",
     output_dir: str = "./lora",
     # training hyperparams
-    batch_size: int = 128,
+    batch_size: int = 8,
     micro_batch_size: int = 4,
-    num_epochs: int = 3,
-    learning_rate: float = 3e-4,
-    cutoff_len: int = 512,
+    num_epochs: int = 10,
+    learning_rate: float = 1e-4,
+    cutoff_len: int = 256,
     val_set_size: int = 10,
     # lora hyperparams
-    lora_r: int = 8,
-    lora_alpha: int = 16,
-    lora_dropout: float = 0.05,
+    lora_r: int = 4,
+    lora_alpha: int = 8,
+    lora_dropout: float = 0.01,
     lora_target_modules: List[str] = [
         "q_proj",
         "v_proj",
     ],
     # llm hyperparams
-    train_on_inputs: bool = True,  # if False, masks out inputs in loss
-    group_by_length: bool = True,  # faster, but produces an odd training loss curve
+    train_on_inputs: bool = False,  # if False, masks out inputs in loss
+    group_by_length: bool = False,  # faster, but produces an odd training loss curve
 ):
     print(
         f"Training Alpaca-LoRA model with params:\n"
