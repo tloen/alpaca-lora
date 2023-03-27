@@ -25,14 +25,14 @@ def train(
     # model/data params
     base_model: str = "",  # the only required argument
     data_path: str = "./alpaca_data_cleaned.json",
-    output_dir: str = "./lora-alpaca",
+    output_dir: str = "./lora",
     # training hyperparams
     batch_size: int = 128,
     micro_batch_size: int = 4,
     num_epochs: int = 3,
     learning_rate: float = 3e-4,
     cutoff_len: int = 512,
-    val_set_size: int = 2000,
+    val_set_size: int = 10,
     # lora hyperparams
     lora_r: int = 8,
     lora_alpha: int = 16,
@@ -189,29 +189,9 @@ def train(
 
     print("\n If there's a warning about missing keys above, please disregard :)")
 
-
 def generate_prompt(data_point):
     # sorry about the formatting disaster gotta move fast
-    if data_point["input"]:
-        return f"""Below is an instruction that describes a task, paired with an input that provides further context. Write a response that appropriately completes the request.
-
-### Instruction:
-{data_point["instruction"]}
-
-### Input:
-{data_point["input"]}
-
-### Response:
-{data_point["output"]}"""
-    else:
-        return f"""Below is an instruction that describes a task. Write a response that appropriately completes the request.
-
-### Instruction:
-{data_point["instruction"]}
-
-### Response:
-{data_point["output"]}"""
-
+    return f"""{data_point["input"]} {data_point["output"]}"""
 
 if __name__ == "__main__":
     fire.Fire(train)

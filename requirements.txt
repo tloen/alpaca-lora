@@ -8,3 +8,5 @@ git+https://github.com/huggingface/peft.git
 gradio
 appdirs
 fire
+py-cord
+tensorboard

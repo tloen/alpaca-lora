@@ -1,0 +1,1 @@
+python finetune.py --base_model 'decapoda-research/llama-7b-hf' --data_path './bot/data/training/training_data.json' --output_dir './lora'

@@ -1,7 +1,10 @@
 out/
 7B/
 13B/
+lora/
 __pycache__/
+LLaMA/
+data/
 checkpoint**
 minimal-llama**
 upload.py
@@ -11,3 +14,4 @@ wandb
 evaluate.py
 test_data.json
 todo.txt
+.env
