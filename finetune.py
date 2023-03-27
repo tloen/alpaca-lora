@@ -32,7 +32,7 @@ from transformers import LlamaForCausalLM, LlamaTokenizer  # noqa: F402
 def train(
     # model/data params
     base_model: str = "",  # the only required argument
-    data_path: str = "yahma/alpaca-cleaned",
+    data_path: str = "./alpaca_data_cleaned.json",
     output_dir: str = "./lora-alpaca",
     # training hyperparams
     batch_size: int = 128,
@@ -51,7 +51,7 @@ def train(
     ],
     # llm hyperparams
     train_on_inputs: bool = True,  # if False, masks out inputs in loss
-    group_by_length: bool = False,  # faster, but produces an odd training loss curve,
+    group_by_length: bool = False,  # faster, but produces an odd training loss curve
     resume_from_checkpoint: str = None,  # either training checkpoint or final adapter
 ):
     print(
@@ -147,7 +147,10 @@ def train(
     )
     model = get_peft_model(model, config)
 
-    data = load_dataset(data_path)
+    if data_path.endswith(".json"):  # todo: support jsonl
+        data = load_dataset("json", data_files=data_path)
+    else:
+        data = load_dataset(data_path)
 
     if resume_from_checkpoint:
         # Check the available weights and load them
