@@ -1,16 +1,17 @@
 import sys
 
 import fire
+import gradio as gr
 import torch
-from peft import PeftModel
 import transformers
 import gradio as gr
 from utils.prompter import Prompter
+from peft import PeftModel
 
 assert (
     "LlamaTokenizer" in transformers._import_structure["models.llama"]
-), "LLaMA is now in HuggingFace's main branch.\nPlease reinstall it: pip uninstall transformers && pip install git+https://github.com/huggingface/transformers.git"
-from transformers import LlamaTokenizer, LlamaForCausalLM, GenerationConfig
+), "LLaMA is now in HuggingFace's main branch.\nPlease reinstall it: pip uninstall transformers && pip install git+https://github.com/huggingface/transformers.git"  # noqa: E501
+from transformers import GenerationConfig, LlamaForCausalLM, LlamaTokenizer
 
 if torch.cuda.is_available():
     device = "cuda"
@@ -20,7 +21,7 @@ else:
 try:
     if torch.backends.mps.is_available():
         device = "mps"
-except:
+except:  # noqa: E722
     pass
 
 
@@ -31,10 +32,9 @@ def main(
     prompt_template: str = "",  # The prompt template to use, will default to alpaca.
     server_name: str = "127.0.0.1",  # Allows to listen on all interfaces by providing '0.0.0.0'
 ):
-    assert base_model, (
-        "Please specify a --base_model, e.g. --base_model='decapoda-research/llama-7b-hf'"
-    )
-    prompter = Prompter(prompt_template)
+    assert (
+        base_model
+    ), "Please specify a --base_model, e.g. --base_model='decapoda-research/llama-7b-hf'"
 
     tokenizer = LlamaTokenizer.from_pretrained(base_model)
     if device == "cuda":
@@ -119,15 +119,23 @@ def main(
         fn=evaluate,
         inputs=[
             gr.components.Textbox(
-                lines=2, label="Instruction", placeholder="Tell me about alpacas."
+                lines=2,
+                label="Instruction",
+                placeholder="Tell me about alpacas.",
             ),
             gr.components.Textbox(lines=2, label="Input", placeholder="none"),
-            gr.components.Slider(minimum=0, maximum=1, value=0.1, label="Temperature"),
-            gr.components.Slider(minimum=0, maximum=1, value=0.75, label="Top p"),
+            gr.components.Slider(
+                minimum=0, maximum=1, value=0.1, label="Temperature"
+            ),
+            gr.components.Slider(
+                minimum=0, maximum=1, value=0.75, label="Top p"
+            ),
             gr.components.Slider(
                 minimum=0, maximum=100, step=1, value=40, label="Top k"
             ),
-            gr.components.Slider(minimum=1, maximum=4, step=1, value=4, label="Beams"),
+            gr.components.Slider(
+                minimum=1, maximum=4, step=1, value=4, label="Beams"
+            ),
             gr.components.Slider(
                 minimum=1, maximum=2000, step=1, value=128, label="Max tokens"
             ),
@@ -151,7 +159,7 @@ def main(
         "Tell me about the king of France in 2019.",
         "List all Canadian provinces in alphabetical order.",
         "Write a Python program that prints the first 10 Fibonacci numbers.",
-        "Write a program that prints the numbers from 1 to 100. But for multiples of three print 'Fizz' instead of the number and for the multiples of five print 'Buzz'. For numbers which are multiples of both three and five print 'FizzBuzz'.",
+        "Write a program that prints the numbers from 1 to 100. But for multiples of three print 'Fizz' instead of the number and for the multiples of five print 'Buzz'. For numbers which are multiples of both three and five print 'FizzBuzz'.",  # noqa: E501
         "Tell me five words that rhyme with 'shock'.",
         "Translate the sentence 'I have no mouth but I must scream' into Spanish.",
         "Count up from 1 to 500.",
