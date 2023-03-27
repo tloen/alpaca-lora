@@ -1,12 +1,11 @@
-## 🦙🌲🤏 Alpaca-LoRA: Low-Rank LLaMA Instruct-Tuning
+# 🦙🌲🤏 Alpaca-LoRA: Low-Rank LLaMA Instruct-Tuning
 
-**Try the pretrained model out on Colab [here](https://colab.research.google.com/drive/1eWAmesrW99p7e1nah5bipn0zikMb8XYC)!**
-
-_**Update 2023-03-19:** weights have been updated with cleaned data and prompts masked out in the loss. This should reduce the number of template artifacts in outputs._
+- 🤗 **Try the pretrained model out [here](https://huggingface.co/spaces/tloen/alpaca-lora), courtesy of a GPU grant from Huggingface!**
+- Users have created a Discord server for discussion and support [here](https://discord.gg/prbq284xX5)
 
 This repository contains code for reproducing the [Stanford Alpaca](https://github.com/tatsu-lab/stanford_alpaca) results using [low-rank adaptation (LoRA)](https://arxiv.org/pdf/2106.09685.pdf).
 We provide an Instruct model of similar quality to `text-davinci-003` that can run [on a Raspberry Pi](https://twitter.com/miolini/status/1634982361757790209) (for research),
-and the code can be easily extended to the `13b`, `30b`, and `65b` models.
+and the code is easily extended to the `13b`, `30b`, and `65b` models.
 
 In addition to the training code, which runs within five hours on a single RTX 4090,
 we publish a script for downloading and inference on the foundation model and LoRA,
@@ -14,19 +13,17 @@ as well as the resulting [LoRA weights themselves](https://huggingface.co/tloen/
 To fine-tune cheaply and efficiently, we use Hugging Face's [PEFT](https://github.com/huggingface/peft)
 as well as Tim Dettmers' [bitsandbytes](https://github.com/TimDettmers/bitsandbytes).
 
-Without hyperparameter tuning or validation-based checkpointing, the LoRA model produces outputs comparable to the Stanford Alpaca model. (Please see the outputs included below.) Further tuning might be able to achieve better performance; I invite interested users to give it a try and report their results.
+Without hyperparameter tuning, the LoRA model produces outputs comparable to the Stanford Alpaca model. (Please see the outputs included below.) Further tuning might be able to achieve better performance; I invite interested users to give it a try and report their results.
 
-For discussion and support, users have created a dedicated Discord server [here](https://discord.gg/prbq284xX5).
-
-### Setup
+## Setup
 
 1. Install dependencies
 
-```
-pip install -r requirements.txt
-```
+    ```bash
+    pip install -r requirements.txt
+    ```
 
-2. If bitsandbytes doesn't work, [install it from source.](https://github.com/TimDettmers/bitsandbytes/blob/main/compile_from_source.md) Windows users can follow [these instructions](https://github.com/tloen/alpaca-lora/issues/17).
+1. Set environment variables, or modify the files referencing `BASE_MODEL`:
 
 #### Docker
 
@@ -52,7 +49,16 @@ You mapped the host `.cache` folder to the container to persist the original mod
 
 ### Inference (`generate.py`)
 
-This file reads the foundation model from the Hugging Face model hub and the LoRA weights from `tloen/alpaca-lora-7b`, and runs a Gradio interface for inference on a specified input. Users should treat this as example code for the use of the model, and modify it as needed.
+    ```bash
+    # Files referencing `BASE_MODEL`
+    # export_hf_checkpoint.py
+    # export_state_dict_checkpoint.py
+    export BASE_MODEL=decapoda-research/llama-7b-hf
+    ```
+
+    Both `finetune.py` and `generate.py` use `--base_model` flag as shown further below.
+
+1. If bitsandbytes doesn't work, [install it from source.](https://github.com/TimDettmers/bitsandbytes/blob/main/compile_from_source.md) Windows users can follow [these instructions](https://github.com/tloen/alpaca-lora/issues/17).
 
 #### Docker
 
@@ -68,47 +74,72 @@ docker run --gpus=all --ipc=host --shm-size 64g \
 
 This file contains a straightforward application of PEFT to the LLaMA model,
 as well as some code related to prompt construction and tokenization.
-Near the top of this file is a set of hardcoded hyperparameters that you should feel free to modify.
 PRs adapting this code to support larger models are always welcome.
 
-You can quickly change different training variables by using the following env variables
+Example usage:
 
-| Variable                      | Description                                               | Default Value                | CLI Example                                             | Docker Example                                                                                            |
-| ----------------------------- | --------------------------------------------------------- | ---------------------------- | ------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
-| `MICRO_BATCH_SIZE`            | The size of mini-batches used for gradient accumulation   | `4`                          | `python train.py --micro_batch_size=5`                  | `docker run my-image python train.py --micro_batch_size=5`                                                |
-| `BATCH_SIZE`                  | The size of mini-batches used for training                | `128`                        | `python train.py --batch_size=256`                      | `docker run my-image python train.py --batch_size=256`                                                    |
-| `GRADIENT_ACCUMULATION_STEPS` | The number of gradient accumulation steps per batch       | `32`                         | `python train.py --gradient_accumulation_steps=16`      | `docker run my-image python train.py --gradient_accumulation_steps=16`                                    |
-| `EPOCHS`                      | The number of training epochs                             | `3`                          | `python train.py --epochs=5`                            | `docker run my-image python train.py --epochs=5`                                                          |
-| `LEARNING_RATE`               | The learning rate for the optimizer                       | `3e-4`                       | `python train.py --learning_rate=0.001`                 | `docker run my-image python train.py --learning_rate=0.001`                                               |
-| `CUTOFF_LEN`                  | The maximum sequence length to use for training           | `256`                        | `python train.py --cutoff_len=512`                      | `docker run my-image python train.py --cutoff_len=512`                                                    |
-| `LORA_R`                      | The number of attention heads in the LORA attention layer | `8`                          | `python train.py --lora_r=16`                           | `docker run my-image python train.py --lora_r=16`                                                         |
-| `LORA_ALPHA`                  | The alpha parameter for the LORA attention layer          | `16`                         | `python train.py --lora_alpha=32`                       | `docker run my-image python train.py --lora_alpha=32`                                                     |
-| `LORA_DROPOUT`                | The dropout probability for the LORA attention layer      | `0.05`                       | `python train.py --lora_dropout=0.1`                    | `docker run my-image python train.py --lora_dropout=0.1`                                                  |
-| `VAL_SET_SIZE`                | The size of the validation set                            | `2000`                       | `python train.py --val_set_size=5000`                   | `docker run my-image python train.py --val_set_size=5000`                                                 |
-| `TARGET_MODULES`              | The list of target modules to extract from the model      | `["q_proj", "v_proj"]`       | `python train.py --target_modules=q_proj,v_proj,a_proj` | `docker run my-image python train.py --target_modules=q_proj,v_proj,a_proj`                               |
-| `DATA_PATH`                   | The path to the data file                                 | `"alpaca_data_cleaned.json"` | `python train.py --data_path=/path/to/data.json`        | `docker run -v /host/path:/container/path my-image python train.py --data_path=/container/path/data.json` |
-| `OUTPUT_DIR`                  | The directory to save the model checkpoints and logs      | `"lora-alpaca"`              | `python train.py --output_dir=/path/to/output`          | `docker run -v /host/path:/container/path my-image python train.py --output_dir=/container/path/output`   |
+```bash
+python finetune.py \
+    --base_model 'decapoda-research/llama-7b-hf' \
+    --data_path 'yahma/alpaca-cleaned' \
+    --output_dir './lora-alpaca'
+```
+
+We can also tweak our hyperparameters:
+
+```bash
+python finetune.py \
+    --base_model 'decapoda-research/llama-7b-hf' \
+    --data_path 'yahma/alpaca-cleaned' \
+    --output_dir './lora-alpaca' \
+    --batch_size 128 \
+    --micro_batch_size 4 \
+    --num_epochs 3 \
+    --learning_rate 1e-4 \
+    --cutoff_len 512 \
+    --val_set_size 2000 \
+    --lora_r 8 \
+    --lora_alpha 16 \
+    --lora_dropout 0.05 \
+    --lora_target_modules '[q_proj,v_proj]' \
+    --train_on_inputs \
+    --group_by_length
+```
 
 #### Docker
 
 ```bash
 docker run --gpus=all --ipc=host --shm-size 64g \
-  -e MICRO_BATCH_SIZE=5 \
-  -e BATCH_SIZE=256 \
-  -e GRADIENT_ACCUMULATION_STEPS=64 \
-  -e EPOCHS=5 \
-  -e LEARNING_RATE=0.001 \
-  -e CUTOFF_LEN=512 \
-  -e LORA_R=16 \
-  -e LORA_ALPHA=32 \
-  -e LORA_DROPOUT=0.1 \
-  -e VAL_SET_SIZE=5000 \
-  -e TARGET_MODULES="q_proj,v_proj,a_proj" \
-  -e DATA_PATH="/path/to/data.json" \
-  -e OUTPUT_DIR="/path/to/output" \
   -v ${HOME}/.cache:/root/.cache \
   -v ${PWD}/lora-alpaca:/workspace/lora-alpaca \
-  --rm -it alpaca-lora training.py
+  --rm -it alpaca-lora finetune.py \
+  --base_model 'decapoda-research/llama-7b-hf' \
+  --data_path 'yahma/alpaca-cleaned' \
+  --output_dir './lora-alpaca' \
+  --batch_size 128 \
+  --micro_batch_size 4 \
+  --num_epochs 3 \
+  --learning_rate 1e-4 \
+  --cutoff_len 512 \
+  --val_set_size 2000 \
+  --lora_r 8 \
+  --lora_alpha 16 \
+  --lora_dropout 0.05 \
+  --lora_target_modules '[q_proj,v_proj]' \
+  --train_on_inputs \
+  --group_by_length
+
+### Inference (`generate.py`)
+
+This file reads the foundation model from the Hugging Face model hub and the LoRA weights from `tloen/alpaca-lora-7b`, and runs a Gradio interface for inference on a specified input. Users should treat this as example code for the use of the model, and modify it as needed.
+
+Example usage:
+
+```bash
+python generate.py \
+    --load_8bit \
+    --base_model 'decapoda-research/llama-7b-hf' \
+    --lora_weights 'tloen/alpaca-lora-7b'
 ```
 
 ### Checkpoint export (`export_*_checkpoint.py`)
@@ -119,21 +150,40 @@ They should help users
 who want to run inference in projects like [llama.cpp](https://github.com/ggerganov/llama.cpp)
 or [alpaca.cpp](https://github.com/antimatter15/alpaca.cpp).
 
-### Dataset
-
-In addition to `alpaca_data.json`, which contains the original Stanford Alpaca dataset,
-we also include `alpaca_data_cleaned.json`, which has been [stripped of various tokenization artifacts](https://github.com/tloen/alpaca-lora/pull/32)
-with the help of @gururise.
-This file is now used by default in the training script.
-
-@AndriyMulyar has also provided interactive, embedding-based visualizations of the original dataset's [instructions](https://atlas.nomic.ai/map/alpaca_instructions)
-and [outputs](https://atlas.nomic.ai/map/alpaca_outputs),
-as well as [clusters of bad examples](https://atlas.nomic.ai/map/d2139cc3-bc1c-441c-8d6f-3e6ffbbc2eda/838019ff-8fe2-42ba-809a-d86d2b98cd50/-18.11668742841587/-11.348087116836096/-20.88850316347706/-17.680468640801223/774455612).
-
 ### Notes
 
-- We can likely improve our model performance significantly if we combed through the data and fixed bad examples; in fact, dataset quality might be our bottleneck.
+- We can likely improve our model performance significantly if we had a better dataset. Consider supporting the [LAION Open Assistant](https://open-assistant.io/) effort to produce a high-quality dataset for supervised fine-tuning (or bugging them to release their data).
 - We're continually fixing bugs and conducting training runs, and the weights on the Hugging Face Hub are being updated accordingly. In particular, those facing issues with response lengths should make sure that they have the latest version of the weights and code.
+- Users with multiple GPUs should take a look [here](https://github.com/tloen/alpaca-lora/issues/8#issuecomment-1477490259).
+
+### Resources
+
+- [alpaca.cpp](https://github.com/antimatter15/alpaca.cpp), a native client for running Alpaca models on the CPU
+- [Alpaca-LoRA-Serve](https://github.com/deep-diver/Alpaca-LoRA-Serve), a ChatGPT-style interface for Alpaca models
+- [AlpacaDataCleaned](https://github.com/gururise/AlpacaDataCleaned), a project to improve the quality of the Alpaca dataset
+- Various adapter weights (download at own risk):
+  - 7B:
+    - <https://huggingface.co/tloen/alpaca-lora-7b>
+    - <https://huggingface.co/samwit/alpaca7B-lora>
+    - 🇧🇷 <https://huggingface.co/22h/cabrita-lora-v0-1>
+    - 🇨🇳 <https://huggingface.co/qychen/luotuo-lora-7b-0.1>
+    - 🇯🇵 <https://huggingface.co/kunishou/Japanese-Alapaca-LoRA-7b-v0>
+    - 🇫🇷 <https://huggingface.co/bofenghuang/vigogne-lora-7b>
+    - 🇹🇭 <https://huggingface.co/Thaweewat/thai-buffala-lora-7b-v0-1>
+    - 🇩🇪 <https://huggingface.co/thisserand/alpaca_lora_german>
+    - 🇮🇹 <https://huggingface.co/teelinsan/camoscio-7b-llama>
+  - 13B:
+    - <https://huggingface.co/chansung/alpaca-lora-13b>
+    - <https://huggingface.co/mattreid/alpaca-lora-13b>
+    - <https://huggingface.co/samwit/alpaca13B-lora>
+    - 🇯🇵 <https://huggingface.co/kunishou/Japanese-Alapaca-LoRA-13b-v0>
+    - 🇰🇷 <https://huggingface.co/chansung/koalpaca-lora-13b>
+    - 🇨🇳 <https://huggingface.co/facat/alpaca-lora-cn-13b>
+  - 30B:
+    - <https://huggingface.co/baseten/alpaca-30b>
+    - <https://huggingface.co/chansung/alpaca-lora-30b>
+    - 🇯🇵 <https://huggingface.co/kunishou/Japanese-Alapaca-LoRA-30b-v0>
+- [alpaca-native](https://huggingface.co/chavinlo/alpaca-native), a replication using the original Alpaca code
 
 ### Example outputs
 
