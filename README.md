@@ -33,7 +33,7 @@ Without hyperparameter tuning, the LoRA model produces outputs comparable to the
     export BASE_MODEL=decapoda-research/llama-7b-hf
     ```
 
-    Both `finetune.py` and `generate.py` use `--base_model` flag as shown futher below.
+    Both `finetune.py` and `generate.py` use `--base_model` flag as shown further below.
 
 1. If bitsandbytes doesn't work, [install it from source.](https://github.com/TimDettmers/bitsandbytes/blob/main/compile_from_source.md) Windows users can follow [these instructions](https://github.com/tloen/alpaca-lora/issues/17).
 
