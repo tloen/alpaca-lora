@@ -1,4 +1,4 @@
-## 🦙🌲🤏 Alpaca-LoRA: Low-Rank LLaMA Instruct-Tuning
+# 🦙🌲🤏 Alpaca-LoRA: Low-Rank LLaMA Instruct-Tuning
 
 - 🤗 **Try the pretrained model out [here](https://huggingface.co/spaces/tloen/alpaca-lora), courtesy of a GPU grant from Huggingface!**
 - Users have created a Discord server for discussion and support [here](https://discord.gg/prbq284xX5)
@@ -15,15 +15,27 @@ as well as Tim Dettmers' [bitsandbytes](https://github.com/TimDettmers/bitsandby
 
 Without hyperparameter tuning, the LoRA model produces outputs comparable to the Stanford Alpaca model. (Please see the outputs included below.) Further tuning might be able to achieve better performance; I invite interested users to give it a try and report their results.
 
-### Setup
+## Setup
 
 1. Install dependencies
 
-```
-pip install -r requirements.txt
-```
+    ```bash
+    pip install -r requirements.txt
+    ```
 
-2. If bitsandbytes doesn't work, [install it from source.](https://github.com/TimDettmers/bitsandbytes/blob/main/compile_from_source.md) Windows users can follow [these instructions](https://github.com/tloen/alpaca-lora/issues/17).
+1. Set environment variables, or modify the files referencing `BASE_MODEL`:
+
+    ```bash
+    # Files referencing `BASE_MODEL`
+    # export_hf_checkpoint.py
+    # export_state_dict_checkpoint.py
+
+    export BASE_MODEL=decapoda-research/llama-7b-hf
+    ```
+
+    Both `finetune.py` and `generate.py` use `--base_model` flag as shown further below.
+
+1. If bitsandbytes doesn't work, [install it from source.](https://github.com/TimDettmers/bitsandbytes/blob/main/compile_from_source.md) Windows users can follow [these instructions](https://github.com/tloen/alpaca-lora/issues/17).
 
 ### Training (`finetune.py`)
 
@@ -36,15 +48,16 @@ Example usage:
 ```bash
 python finetune.py \
     --base_model 'decapoda-research/llama-7b-hf' \
-    --data_path './alpaca_data_cleaned.json' \
+    --data_path 'yahma/alpaca-cleaned' \
     --output_dir './lora-alpaca'
 ```
 
 We can also tweak our hyperparameters:
+
 ```bash
 python finetune.py \
     --base_model 'decapoda-research/llama-7b-hf' \
-    --data_path './alpaca_data_cleaned.json' \
+    --data_path 'yahma/alpaca-cleaned' \
     --output_dir './lora-alpaca' \
     --batch_size 128 \
     --micro_batch_size 4 \
@@ -81,17 +94,6 @@ They should help users
 who want to run inference in projects like [llama.cpp](https://github.com/ggerganov/llama.cpp)
 or [alpaca.cpp](https://github.com/antimatter15/alpaca.cpp).
 
-### Dataset
-
-In addition to `alpaca_data.json`, which contains the original Stanford Alpaca dataset,
-we also include `alpaca_data_cleaned.json`, which has been [stripped of various tokenization artifacts](https://github.com/tloen/alpaca-lora/pull/32)
-with the help of @gururise.
-This file is now used by default in the training script.
-
-@AndriyMulyar has also provided interactive, embedding-based visualizations of the original dataset's [instructions](https://atlas.nomic.ai/map/alpaca_instructions)
-and [outputs](https://atlas.nomic.ai/map/alpaca_outputs),
-as well as [clusters of bad examples](https://atlas.nomic.ai/map/d2139cc3-bc1c-441c-8d6f-3e6ffbbc2eda/838019ff-8fe2-42ba-809a-d86d2b98cd50/-18.11668742841587/-11.348087116836096/-20.88850316347706/-17.680468640801223/774455612).
-
 ### Notes
 
 - We can likely improve our model performance significantly if we had a better dataset. Consider supporting the [LAION Open Assistant](https://open-assistant.io/) effort to produce a high-quality dataset for supervised fine-tuning (or bugging them to release their data).
@@ -105,25 +107,26 @@ as well as [clusters of bad examples](https://atlas.nomic.ai/map/d2139cc3-bc1c-4
 - [AlpacaDataCleaned](https://github.com/gururise/AlpacaDataCleaned), a project to improve the quality of the Alpaca dataset
 - Various adapter weights (download at own risk):
   - 7B:
-    - https://huggingface.co/tloen/alpaca-lora-7b
-    - https://huggingface.co/samwit/alpaca7B-lora
-    - 🇧🇷 https://huggingface.co/22h/cabrita-lora-v0-1
-    - 🇨🇳 https://huggingface.co/qychen/luotuo-lora-7b-0.1
-    - 🇯🇵 https://huggingface.co/kunishou/Japanese-Alapaca-LoRA-7b-v0
-    - 🇫🇷 https://huggingface.co/bofenghuang/vigogne-lora-7b
-    - 🇹🇭 https://huggingface.co/Thaweewat/thai-buffala-lora-7b-v0-1
-    - 🇩🇪 https://huggingface.co/thisserand/alpaca_lora_german
-    - 🇮🇹 https://huggingface.co/teelinsan/camoscio-7b-llama
+    - <https://huggingface.co/tloen/alpaca-lora-7b>
+    - <https://huggingface.co/samwit/alpaca7B-lora>
+    - 🇧🇷 <https://huggingface.co/22h/cabrita-lora-v0-1>
+    - 🇨🇳 <https://huggingface.co/qychen/luotuo-lora-7b-0.1>
+    - 🇯🇵 <https://huggingface.co/kunishou/Japanese-Alapaca-LoRA-7b-v0>
+    - 🇫🇷 <https://huggingface.co/bofenghuang/vigogne-lora-7b>
+    - 🇹🇭 <https://huggingface.co/Thaweewat/thai-buffala-lora-7b-v0-1>
+    - 🇩🇪 <https://huggingface.co/thisserand/alpaca_lora_german>
+    - 🇮🇹 <https://huggingface.co/teelinsan/camoscio-7b-llama>
   - 13B:
-    - https://huggingface.co/chansung/alpaca-lora-13b
-    - https://huggingface.co/mattreid/alpaca-lora-13b
-    - https://huggingface.co/samwit/alpaca13B-lora
-    - 🇯🇵 https://huggingface.co/kunishou/Japanese-Alapaca-LoRA-13b-v0
-    - 🇰🇷 https://huggingface.co/chansung/koalpaca-lora-13b
+    - <https://huggingface.co/chansung/alpaca-lora-13b>
+    - <https://huggingface.co/mattreid/alpaca-lora-13b>
+    - <https://huggingface.co/samwit/alpaca13B-lora>
+    - 🇯🇵 <https://huggingface.co/kunishou/Japanese-Alapaca-LoRA-13b-v0>
+    - 🇰🇷 <https://huggingface.co/chansung/koalpaca-lora-13b>
+    - 🇨🇳 <https://huggingface.co/facat/alpaca-lora-cn-13b>
   - 30B:
-    - https://huggingface.co/baseten/alpaca-30b
-    - https://huggingface.co/chansung/alpaca-lora-30b
-    - 🇯🇵 https://huggingface.co/kunishou/Japanese-Alapaca-LoRA-30b-v0
+    - <https://huggingface.co/baseten/alpaca-30b>
+    - <https://huggingface.co/chansung/alpaca-lora-30b>
+    - 🇯🇵 <https://huggingface.co/kunishou/Japanese-Alapaca-LoRA-30b-v0>
 - [alpaca-native](https://huggingface.co/chavinlo/alpaca-native), a replication using the original Alpaca code
 
 ### Example outputs
