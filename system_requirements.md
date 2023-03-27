@@ -5,7 +5,7 @@ The following system requirements are recommended for running inference and fine
 The LLaMA models come in the following sizes:
 
 
-| Model Name | Quantization | Min VRAM for Inference | Min VRAM for Tuning | Min RAM/Swap to Load | Fine-tuning Optimizer Available |
+| Model Name | Quantization | Min (V)RAM for Inference | Min (V)RAM for Tuning | Min RAM/Swap to Load | Fine-tuning Optimizer Available |
 |------------|-------------|-----------------------|---------------------|----------------------|--------------------------------|
 | LLaMA 7B   | None        | 14 GB                 | 35 GB               | 14 GB               | Alpaca LoRa                 |
 | LLaMA 7B   | INT8        | 7 GB                  | 18 GB               | 14 GB               | No*              |
