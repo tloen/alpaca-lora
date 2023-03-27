@@ -20,6 +20,8 @@ The LLaMA models come in the following sizes:
 | LLaMA 65B  | INT8        | 65 GB                 | 320 GB              | 130 GB              | No*              |
 | LLaMA 65B  | INT4        | 32 GB                 | 160 GB              | 130 GB              | No*              |
 
+Addition of Alpaca or Alpaca LoRa weights does not significantly impact the requirements.
+
 Note: Alpaca Lora 4bit is currently only available for 7B INT4. It can be adapted to work with other model sizes and quantization but does not include it out of the box as of the end of March 2023.
 
 
