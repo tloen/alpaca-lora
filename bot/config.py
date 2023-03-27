@@ -4,7 +4,7 @@ import os
 from datetime import datetime
 from dotenv import load_dotenv
 
-instruction = """Transcript of a dialog, where the User interacts with another User.
+instruction = """Transcript of a dialog, where the User interacts with another User. They often send long messages (up to 4 lines!).
 
 """
 ai_name = "User2"

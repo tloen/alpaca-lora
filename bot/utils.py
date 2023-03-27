@@ -51,17 +51,17 @@ async def is_thread(thread):
         else:
             return False
 
-async def get_response(prompt):
+async def get_response(prompt, stopwords:str = f"{user_name}:,{ai_name}:"):
     async with aiohttp.ClientSession() as session:
         async with session.post("http://localhost:7860/run/predict", json={
             "data": [
                 prompt,
-                0.1,
-                0.75,
-                40,
+                0.9,
+                0.8,
+                50,
                 4,
                 128,
-                f"{user_name}:,{ai_name}:",
+                stopwords,
             ]
         }) as response:
             data = (await response.json())["data"][0]

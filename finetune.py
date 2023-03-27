@@ -29,7 +29,7 @@ def train(
     # training hyperparams
     batch_size: int = 8,
     micro_batch_size: int = 4,
-    num_epochs: int = 10,
+    num_epochs: int = 50, # 50 is a lot, but we want to be sure we're overfitting (this is a small dataset)
     learning_rate: float = 1e-4,
     cutoff_len: int = 256,
     val_set_size: int = 10,

@@ -39,15 +39,16 @@ async def on_message(message):
     prompt = instruction
     for message in history:
         if message.author == bot.user and message.content != "":
-            prompt += f"{ai_name}: {message.content}\n"
+            prompt += f"{ai_name}: {message.content}\n\n"
         elif message.author != bot.user and message.content != "":
-            prompt += f"{user_name}: {message.content}\n"
+            prompt += f"{user_name}: {message.content}\n\n"
     prompt = prompt+f"{ai_name}:"
     response = await get_response(prompt)
     await message.channel.send(response)
 
 @bot.command(name='end', description='End the conversation with the AI clone')
 async def end(ctx):
+    await ctx.defer()
     history = await ctx.channel.history().flatten()
     history.reverse()
     input = ""
@@ -60,16 +61,28 @@ async def end(ctx):
             history_before = history[:history.index(msg)]
             #we now add the messages after the msg
             for msg_before in history_before:
-                if msg_before.author == bot.user:
+                if msg_before.author == bot.user and msg_before.content != "" and msg_before.content != None:
                     input += f"{user_name}: {msg_before.content}\n"
-                else:
+                elif msg_before.author != bot.user and msg_before.content != "" and msg_before.content != None:
                     input += f"{ai_name}: {msg_before.content}\n"
             input += f"{ai_name}:"
             output = msg.content
             add_training_data(output, input)
     #remove the thread from the json file
     await remove_thread(ctx.channel.id)
-    await ctx.respond("Thread ended.", ephemeral=True)
+    prompt = f"""### BEGINNING OF TRANSCRIPT ###
+"""
+    for msg in history:
+        if msg.author == bot.user:
+            prompt += f"{user_name}: {msg.content}\n\n"
+        else:
+            prompt += f"{ai_name}: {msg.content}\n\n"
+    prompt = prompt + '### END OF TRANSCRIPT ###\n\n### BEGINNING OF SUBJECT ###\n\nSubject is: "'
+    name = await get_response(prompt, stopwords='", ### END OF SUBJECT ###')
+    try: await ctx.channel.edit(name=name)
+    except: pass
     await ctx.channel.edit(archived=True)
+    await ctx.respond("Thread ended. Title: "+name, ephemeral=True)
+
     #respond to the ctx
 bot.run(token)
