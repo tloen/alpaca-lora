@@ -55,7 +55,7 @@ def train(
     wandb_project: str = "",
     wandb_run_name: str = "",
     wandb_watch: str = "", # options: false | gradients | all
-    wandb_log_model: str = "" # options: false | true
+    wandb_log_model: str = "", # options: false | true
     resume_from_checkpoint: str = None,  # either training checkpoint or final adapter
 ):
     print(
