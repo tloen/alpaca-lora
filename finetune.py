@@ -20,6 +20,7 @@ from peft import (
     get_peft_model_state_dict,
     set_peft_model_state_dict,
 )
+from utils.prompter import Prompter
 
 
 def train(
@@ -46,6 +47,7 @@ def train(
     train_on_inputs: bool = True,  # if False, masks out inputs in loss
     group_by_length: bool = False,  # faster, but produces an odd training loss curve,
     resume_from_checkpoint: str = None,  # either training checkpoint or final adapter
+    prompt_template: str = "",  # The prompt template to use, will default to alpaca.
 ):
     print(
         f"Training Alpaca-LoRA model with params:\n"
@@ -65,11 +67,14 @@ def train(
         f"train_on_inputs: {train_on_inputs}\n"
         f"group_by_length: {group_by_length}\n"
         f"resume_from_checkpoint: {resume_from_checkpoint}\n"
+        f"prompt template: {prompt_template}\n"
     )
     assert (
         base_model
     ), "Please specify a --base_model, e.g. --base_model='decapoda-research/llama-7b-hf'"
     gradient_accumulation_steps = batch_size // micro_batch_size
+
+    prompter = Prompter(prompt_template)
 
     device_map = "auto"
     world_size = int(os.environ.get("WORLD_SIZE", 1))
@@ -111,11 +116,12 @@ def train(
 
         return result
 
+
     def generate_and_tokenize_prompt(data_point):
-        full_prompt = generate_prompt(data_point)
+        full_prompt = prompter.generate_prompt(data_point["instruction"], data_point["input"], data_point["output"])
         tokenized_full_prompt = tokenize(full_prompt)
         if not train_on_inputs:
-            user_prompt = generate_prompt({**data_point, "output": ""})
+            user_prompt = prompter.generate_prompt(data_point["instruction"], data_point["input"])
             tokenized_user_prompt = tokenize(user_prompt, add_eos_token=False)
             user_prompt_len = len(tokenized_user_prompt["input_ids"])
 
@@ -211,29 +217,6 @@ def train(
     model.save_pretrained(output_dir)
 
     print("\n If there's a warning about missing keys above, please disregard :)")
-
-
-def generate_prompt(data_point):
-    # sorry about the formatting disaster gotta move fast
-    if data_point["input"]:
-        return f"""Below is an instruction that describes a task, paired with an input that provides further context. Write a response that appropriately completes the request.
-
-### Instruction:
-{data_point["instruction"]}
-
-### Input:
-{data_point["input"]}
-
-### Response:
-{data_point["output"]}"""
-    else:
-        return f"""Below is an instruction that describes a task. Write a response that appropriately completes the request.
-
-### Instruction:
-{data_point["instruction"]}
-
-### Response:
-{data_point["output"]}"""
 
 
 if __name__ == "__main__":
