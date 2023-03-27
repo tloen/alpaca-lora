@@ -1,8 +1,8 @@
-# LLaMA LLM System Requirements
-The following system requirements are recommended for running inference and fine-tuning of LLaMA LLM models.
+# LLaMA System Requirements
+The following system requirements are recommended for running inference and fine-tuning of LLaMA models.
 
 ## Model Sizes
-The LLaMA LLM models come in the following sizes:
+The LLaMA models come in the following sizes:
 
 
 | Model Name | Quantization | Min VRAM for Inference | Min VRAM for Tuning | Min RAM/Swap to Load | Fine-tuning Optimizer Available |
@@ -25,7 +25,7 @@ Note: Alpaca Lora 4bit is currently only available for 7B INT4. It can be adapte
 
 
 ## Potential Target Systems
-LLaMA LLM models can be run on the following target systems:
+LLaMA models can be run on the following target systems:
 
 | CPU Architecture | GPU          | GPU Count | V(RAM) Available | Inf. Tokens/sec (30b_fp16)|
 |------------------|--------------|-----------|------------------|----------------------|
