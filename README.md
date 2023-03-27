@@ -122,6 +122,7 @@ or [alpaca.cpp](https://github.com/antimatter15/alpaca.cpp).
     - <https://huggingface.co/samwit/alpaca13B-lora>
     - 🇯🇵 <https://huggingface.co/kunishou/Japanese-Alapaca-LoRA-13b-v0>
     - 🇰🇷 <https://huggingface.co/chansung/koalpaca-lora-13b>
+    - 🇨🇳 <https://huggingface.co/facat/alpaca-lora-cn-13b>
   - 30B:
     - <https://huggingface.co/baseten/alpaca-30b>
     - <https://huggingface.co/chansung/alpaca-lora-30b>
