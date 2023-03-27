@@ -8,17 +8,21 @@ The LLaMA LLM models come in the following sizes:
 | Model Name | Quantization | Min VRAM for Inference | Min VRAM for Tuning | Min RAM/Swap to Load | Fine-tuning Optimizer Available |
 |------------|-------------|-----------------------|---------------------|----------------------|--------------------------------|
 | LLaMA 7B   | None        | 14 GB                 | 35 GB               | 14 GB               | Alpaca LoRa                 |
-| LLaMA 7B   | INT8        | 7 GB                  | 18 GB               | 14 GB               | Can be adapted              |
+| LLaMA 7B   | INT8        | 7 GB                  | 18 GB               | 14 GB               | No*              |
 | LLaMA 7B   | INT4        | 3.5 GB                | 9 GB                | 14 GB               | Alpaca LoRa 4bit            |
 | LLaMA 13B  | None        | 26 GB                 | 65 GB               | 26 GB               | Alpaca LoRa                 |
-| LLaMA 13B  | INT8        | 13 GB                 | 32 GB               | 26 GB               | Can be adapted              |
-| LLaMA 13B  | INT4        | 6.5 GB                | 16 GB               | 26 GB               | Can be adapted              |
+| LLaMA 13B  | INT8        | 13 GB                 | 32 GB               | 26 GB               | No*              |
+| LLaMA 13B  | INT4        | 6.5 GB                | 16 GB               | 26 GB               | No*              |
 | LLaMA 30B  | None        | 60 GB                 | 150 GB              | 60 GB               | Alpaca LoRa                 |
-| LLaMA 30B  | INT8        | 30 GB                 | 75 GB               | 60 GB               | Can be adapted              |
-| LLaMA 30B  | INT4        | 15 GB                 | 38 GB               | 60 GB               | Can be adapted              |
+| LLaMA 30B  | INT8        | 30 GB                 | 75 GB               | 60 GB               | No*              |
+| LLaMA 30B  | INT4        | 15 GB                 | 38 GB               | 60 GB               | No*              |
 | LLaMA 65B  | None        | 130 GB                | 620 GB /w deepspeed | 130 GB              | Alpaca LoRa                 |
-| LLaMA 65B  | INT8        | 65 GB                 | 320 GB              | 130 GB              | Can be adapted              |
-| LLaMA 65B  | INT4        | 32 GB                 | 160 GB              | 130 GB              | Can be adapted              |
+| LLaMA 65B  | INT8        | 65 GB                 | 320 GB              | 130 GB              | No*              |
+| LLaMA 65B  | INT4        | 32 GB                 | 160 GB              | 130 GB              | No*              |
+
+Note: Alpaca Lora 4bit is currently only available for 7B INT4. It can be adapted to work with other model sizes and quantization but does not include it out of the box as of the end of March 2023.
+
+
 
 ## Potential Target Systems
 LLaMA LLM models can be run on the following target systems:
