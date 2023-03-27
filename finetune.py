@@ -53,7 +53,7 @@ def train(
     group_by_length: bool = False,  # faster, but produces an odd training loss curve
     # wandb params
     wandb_project: str = "",
-    run_name: str = "",
+    wandb_run_name: str = "",
     wandb_watch: str = "", # options: false | gradients | all
     wandb_log_model: str = "" # options: false | true
     resume_from_checkpoint: str = None,  # either training checkpoint or final adapter
@@ -76,7 +76,7 @@ def train(
         f"train_on_inputs: {train_on_inputs}\n"
         f"group_by_length: {group_by_length}\n"
         f"wandb_project: {wandb_project}\n"
-        f"run_name: {run_name}\n"
+        f"wandb_run_name: {wandb_run_name}\n"
         f"wandb_watch: {wandb_watch}\n"
         f"wandb_log_model: {wandb_log_model}\n"
         f"resume_from_checkpoint: {resume_from_checkpoint}\n"
@@ -231,7 +231,7 @@ def train(
             ddp_find_unused_parameters=False if ddp else None,
             group_by_length=group_by_length,
             report_to="wandb" if use_wandb else None,
-            run_name=run_name if use_wandb else None
+            wandb_run_name=wandb_run_name if use_wandb else None
         ),
         data_collator=transformers.DataCollatorForSeq2Seq(
             tokenizer, pad_to_multiple_of=8, return_tensors="pt", padding=True
