@@ -12,7 +12,7 @@ class Prompter(object):
     __slots__ = ("template", "_verbose")
 
 
-    def __init__(self, template_name: str="", verbose: bool=True):
+    def __init__(self, template_name: str="", verbose: bool=False):
         self._verbose = verbose
         if not template_name :
             # Enforce the default here, so the constructor can be called with '' and will not break.
