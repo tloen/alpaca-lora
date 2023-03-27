@@ -4,8 +4,9 @@ import fire
 import gradio as gr
 import torch
 import transformers
-from utils.prompter import Prompter
 from peft import PeftModel
+
+from utils.prompter import Prompter
 
 assert (
     "LlamaTokenizer" in transformers._import_structure["models.llama"]

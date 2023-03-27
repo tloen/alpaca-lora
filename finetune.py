@@ -18,15 +18,16 @@ assert (
     "LlamaTokenizer" in transformers._import_structure["models.llama"]
 ), "LLaMA is now in HuggingFace's main branch.\nPlease reinstall it: pip uninstall transformers && pip install git+https://github.com/huggingface/transformers.git"  # noqa: E501
 
-from peft import (  # noqa: E402
+from peft import (
     LoraConfig,
     get_peft_model,
     get_peft_model_state_dict,
     prepare_model_for_int8_training,
     set_peft_model_state_dict,
 )
+from transformers import LlamaForCausalLM, LlamaTokenizer
+
 from utils.prompter import Prompter
-from transformers import LlamaForCausalLM, LlamaTokenizer  # noqa: F402
 
 
 def train(

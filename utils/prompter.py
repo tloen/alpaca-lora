@@ -2,9 +2,9 @@
 A dedicated helper to manage templates and prompt building.
 """
 
-from typing import Union
-import os.path as osp
 import json
+import os.path as osp
+from typing import Union
 
 
 class Prompter(object):
