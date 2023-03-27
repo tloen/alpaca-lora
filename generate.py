@@ -4,7 +4,6 @@ import fire
 import gradio as gr
 import torch
 import transformers
-import gradio as gr
 from utils.prompter import Prompter
 from peft import PeftModel
 
