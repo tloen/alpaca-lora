@@ -27,8 +27,8 @@ jobs:
       - name: Install Python dependencies
         run: pip install black black[jupyter] flake8 isort
 
-      - name: lint isort .
-        run: isort --check --diff
+      - name: lint isort
+        run: isort --check --diff .
 
       - name: lint black
         run: black --check --diff
