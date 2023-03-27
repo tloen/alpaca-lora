@@ -1,0 +1,5 @@
+# Uncomment if pushing model to Replicate
+# lora-alpaca/checkpoint-*
+# unconverted-weights/
+# *.json
+# *.ipynb

@@ -92,6 +92,12 @@ This file is now used by default in the training script.
 and [outputs](https://atlas.nomic.ai/map/alpaca_outputs),
 as well as [clusters of bad examples](https://atlas.nomic.ai/map/d2139cc3-bc1c-441c-8d6f-3e6ffbbc2eda/838019ff-8fe2-42ba-809a-d86d2b98cd50/-18.11668742841587/-11.348087116836096/-20.88850316347706/-17.680468640801223/774455612).
 
+### Containerization
+
+If you want to run finetuning in a container, we've packaged up the repo to run within Cog. Instead of installing dependencies, you can modify `finetune.py` as needed and then run `cog run python finetune.py` in the project root.
+
+You can also make containerized predictions locally, w/either `cog predict -i prompt="Tell me something about llamas"` or `cog run bash` and then you can run whichever commands you're interested in within the container. This also lets you stand up an inference server, see [more docs on Cog here.](https://github.com/replicate/cog)
+
 ### Notes
 
 - We can likely improve our model performance significantly if we had a better dataset. Consider supporting the [LAION Open Assistant](https://open-assistant.io/) effort to produce a high-quality dataset for supervised fine-tuning (or bugging them to release their data).
