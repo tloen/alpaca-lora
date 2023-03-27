@@ -25,7 +25,7 @@ jobs:
           python-version: 3.8
 
       - name: Install Python dependencies
-        run: pip install black black[jupyter] flake8
+        run: pip install black black[jupyter] flake8 isort
 
       - name: lint isort
         run: isort --check --diff
