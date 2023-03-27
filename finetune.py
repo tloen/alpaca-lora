@@ -58,7 +58,7 @@ def train(
     wandb_log_model: str = "",  # options: false | true
     resume_from_checkpoint: str = None,  # either training checkpoint or final adapter
 ):
-    if int(os.environ.get("LOCAL_RANK")) == 0 :
+    if int(os.environ.get("LOCAL_RANK")) == 0:
         print(
             f"Training Alpaca-LoRA model with params:\n"
             f"base_model: {base_model}\n"
