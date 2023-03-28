@@ -10,7 +10,7 @@ assert (
 ), "LLaMA is now in HuggingFace's main branch.\nPlease reinstall it: pip uninstall transformers && pip install git+https://github.com/huggingface/transformers.git"
 from transformers import LlamaTokenizer, LlamaForCausalLM, GenerationConfig
 
-LOAD_8BIT = os.environ.get("LOAD_8BIT", 0) == 1
+LOAD_8BIT = os.environ.get("LOAD_8BIT", "False").lower() == "true"
 BASE_MODEL = os.environ.get("BASE_MODEL", "decapoda-research/llama-7b-hf")
 LORA_WEIGHTS = os.environ.get("LORA_WEIGHTS", "tloen/alpaca-lora-7b")
 

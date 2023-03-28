@@ -16,46 +16,48 @@ as well as Tim Dettmers' [bitsandbytes](https://github.com/TimDettmers/bitsandby
 
 Without hyperparameter tuning, the LoRA model produces outputs comparable to the Stanford Alpaca model. (Please see the outputs included below.) Further tuning might be able to achieve better performance; I invite interested users to give it a try and report their results.
 
-### Docker commands for easy local inference
+### Docker Setup
 
-1. Add reference to your desired model weights to `ENV BASE_MODEL="None"` in the `Dockerfile`.
-
-2. Build the container image
+1. Build the container image
 
 ```
-docker build -t alpaca-lora-demo .
+docker build -t alpaca-lora .
 ```
 
-3. Run the container image
+1. Run the container
 
 ```
-docker run --gpus=all --shm-size 64g -p 7860:7860 -v ${HOME}/.cache:/root/.cache --rm alpaca-lora-demo generate.py
+docker run --gpus=all --shm-size 64g -p 7860:7860 -v ${HOME}/.cache:/root/.cache --rm alpaca-lora generate.py
 ```
 
 4. Head on down to `localhost:7860` and enjoy!
 
-### Docker compose
+### Docker Compose Setup
 
-1. (optional) Set reference to your desired model weights to `BASE_MODEL=decapoda-research/llama-7b-hf` in the `docker-compose.yml`.
+1. (optional) Change desired model and weights under `environment` in the `docker-compose.yml`
 
-2. Build the container image
-
-```
-docker compose build
-```
-
-3. Run the container image
+2. Build and run the container
 
 ```
-docker compose up
+docker-compose up -d --build
 ```
 
-4. Head on down to `localhost:7860` and enjoy!
+3. Head on down to `localhost:7860` and enjoy!
 
-### Setup
+4. See logs
+
+```
+docker-compose logs -f
+```
+
+5. Clean up everything
+
+```
+docker-compose down --volumes --rmi all
+```
 
 
-### Setup
+### Local Setup
 
 1. Install dependencies
 

@@ -11,16 +11,20 @@ services:
     environment:
       - BASE_MODEL=decapoda-research/llama-7b-hf  # Hugging face model to use
       - LORA_WEIGHTS=tloen/alpaca-lora-7b
-      - LOAD_8BIT=0
+      - LOAD_8BIT=True
     volumes:
-      - /tmp:/root/.cache  # Location downloaded weights will be stored
+      - alpaca-lora:/root/.cache  # Location downloaded weights will be stored
     shm_size: '64gb'
     ports:
       - 7860:7860
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: all
-              capabilities: [gpu]
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]
+
+volumes:
+  alpaca-lora:
+      name: alpaca-lora
