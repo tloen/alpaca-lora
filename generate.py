@@ -1,16 +1,16 @@
 import sys
-
 import fire
-import torch
-from peft import PeftModel
-import transformers
 import gradio as gr
+import torch
+import transformers
+from transformers import LlamaTokenizer, LlamaForCausalLM, GenerationConfig, StoppingCriteria
+from peft import PeftModel
 from  bot.config import instruction, ai_name, user_name
 
 assert (
     "LlamaTokenizer" in transformers._import_structure["models.llama"]
 ), "LLaMA is now in HuggingFace's main branch.\nPlease reinstall it: pip uninstall transformers && pip install git+https://github.com/huggingface/transformers.git"
-from transformers import LlamaTokenizer, LlamaForCausalLM, GenerationConfig, StoppingCriteria
+
 
 if torch.cuda.is_available():
     device = "cuda"
@@ -20,7 +20,7 @@ else:
 try:
     if torch.backends.mps.is_available():
         device = "mps"
-except:
+except:  # noqa: E722
     pass
 
 
@@ -29,9 +29,9 @@ def main(
     base_model: str = "decapoda-research/llama-7b-hf",
     lora_weights: str = "./lora/",
 ):
-    assert base_model, (
-        "Please specify a --base_model, e.g. --base_model='decapoda-research/llama-7b-hf'"
-    )
+    assert (
+        base_model
+    ), "Please specify a --base_model, e.g. --base_model='decapoda-research/llama-7b-hf'"
 
     tokenizer = LlamaTokenizer.from_pretrained(base_model)
     if device == "cuda":
@@ -144,7 +144,9 @@ def main(
             gr.components.Slider(
                 minimum=0, maximum=100, step=1, value=90, label="Top k"
             ),
-            gr.components.Slider(minimum=1, maximum=4, step=1, value=4, label="Beams"),
+            gr.components.Slider(
+                minimum=1, maximum=4, step=1, value=4, label="Beams"
+            ),
             gr.components.Slider(
                 minimum=1, maximum=2000, step=1, value=128, label="Max tokens"
             ),
@@ -157,7 +159,7 @@ def main(
             )
         ],
         title="🦙🌲 Alpaca-LoRA",
-        description="Alpaca-LoRA is a 7B-parameter LLaMA model finetuned to follow instructions. It is trained on the [Stanford Alpaca](https://github.com/tatsu-lab/stanford_alpaca) dataset and makes use of the Huggingface LLaMA implementation. For more information, please visit [the project's website](https://github.com/tloen/alpaca-lora).",
+        description="Alpaca-LoRA is a 7B-parameter LLaMA model finetuned to follow instructions. It is trained on the [Stanford Alpaca](https://github.com/tatsu-lab/stanford_alpaca) dataset and makes use of the Huggingface LLaMA implementation. For more information, please visit [the project's website](https://github.com/tloen/alpaca-lora).",  # noqa: E501
     ).launch()
 
 if __name__ == "__main__":

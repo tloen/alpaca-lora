@@ -1,3 +1,4 @@
+# 🦙🌲🤏 Alpaca-LoRA: Low-Rank LLaMA Instruct-Tuning
 # GirafFISH
 
 This repository contains a Python script that allows you to create a conversational AI clone of yourself using Meta's 7B LLaMA model. You can chat with your AI clone and train it to improve its responses. The script is built on top of Discord's Python py-cord API, and it uses a local API to communicate with the AI model. Based on [alpaca-lora](https://github.com/tloen/alpaca-lora).
