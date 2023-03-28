@@ -1,8 +1,7 @@
-## 🦙🌲🤏 Alpaca-LoRA: Low-Rank LLaMA Instruct-Tuning
+# 🦙🌲🤏 Alpaca-LoRA: Low-Rank LLaMA Instruct-Tuning
 
 - 🤗 **Try the pretrained model out [here](https://huggingface.co/spaces/tloen/alpaca-lora), courtesy of a GPU grant from Huggingface!**
 - Users have created a Discord server for discussion and support [here](https://discord.gg/prbq284xX5)
-- **This repository does not contain code for hosting and/or facilitating the downloading and/or streaming of the LLaMA weights. You will have to specify your own HuggingFace Hub base model to run the code, such as `decapoda-research/llama-7b-hf`.**
 
 This repository contains code for reproducing the [Stanford Alpaca](https://github.com/tatsu-lab/stanford_alpaca) results using [low-rank adaptation (LoRA)](https://arxiv.org/pdf/2106.09685.pdf).
 We provide an Instruct model of similar quality to `text-davinci-003` that can run [on a Raspberry Pi](https://twitter.com/miolini/status/1634982361757790209) (for research),
@@ -16,44 +15,101 @@ as well as Tim Dettmers' [bitsandbytes](https://github.com/TimDettmers/bitsandby
 
 Without hyperparameter tuning, the LoRA model produces outputs comparable to the Stanford Alpaca model. (Please see the outputs included below.) Further tuning might be able to achieve better performance; I invite interested users to give it a try and report their results.
 
-### Docker commands for easy local inference
+### Docker Build/Run and Compose
 
-1. Add reference to your desired model weights to `ENV BASE_MODEL="None"` in the `Dockerfile`.
-
-2. Build the container image
+If you'd like to build and run the docker image, you can do so with the following commands:
 
 ```
-docker build -t alpaca-lora-demo .
+docker build -t alpaca-lora .
 ```
 
-3. Run the container image
+```
+docker run --gpus=all --shm-size 64g -p 7860:7860 -v ${HOME}/.cache:/root/.cache --rm alpaca-lora generate.py \
+    --load_8bit \
+    --base_model 'decapoda-research/llama-7b-hf' \
+    --lora_weights 'tloen/alpaca-lora-7b'
+```
+
+If you'd like to use docker-compose, you can do so with the following commands:
 
 ```
-docker run --gpus=all --shm-size 64g -p 7860:7860 -v ${HOME}/.cache:/root/.cache --rm alpaca-lora-demo generate.py
+docker-compose build
 ```
 
-4. Head on down to `localhost:7860` and enjoy!
+```
+BASE_MODEL=decapoda-research/llama-7b-hf docker-compose up
+```
 
-### Setup
+### Local Setup
 
 1. Install dependencies
 
-```
-pip install -r requirements.txt
-```
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-2. If bitsandbytes doesn't work, [install it from source.](https://github.com/TimDettmers/bitsandbytes/blob/main/compile_from_source.md) Windows users can follow [these instructions](https://github.com/tloen/alpaca-lora/issues/17).
+1. Set environment variables, or modify the files referencing `BASE_MODEL`:
 
-### Inference (`generate.py`)
+   ```bash
+   # Files referencing `BASE_MODEL`
+   # export_hf_checkpoint.py
+   # export_state_dict_checkpoint.py
 
-This file reads the foundation model from the Hugging Face model hub and the LoRA weights from `tloen/alpaca-lora-7b`, and runs a Gradio interface for inference on a specified input. Users should treat this as example code for the use of the model, and modify it as needed.
+   export BASE_MODEL=decapoda-research/llama-7b-hf
+   ```
+
+   Both `finetune.py` and `generate.py` use `--base_model` flag as shown further below.
+
+1. If bitsandbytes doesn't work, [install it from source.](https://github.com/TimDettmers/bitsandbytes/blob/main/compile_from_source.md) Windows users can follow [these instructions](https://github.com/tloen/alpaca-lora/issues/17).
 
 ### Training (`finetune.py`)
 
 This file contains a straightforward application of PEFT to the LLaMA model,
 as well as some code related to prompt construction and tokenization.
-Near the top of this file is a set of hardcoded hyperparameters that you should feel free to modify.
 PRs adapting this code to support larger models are always welcome.
+
+Example usage:
+
+```bash
+python finetune.py \
+    --base_model 'decapoda-research/llama-7b-hf' \
+    --data_path 'yahma/alpaca-cleaned' \
+    --output_dir './lora-alpaca'
+```
+
+We can also tweak our hyperparameters:
+
+```bash
+python finetune.py \
+    --base_model 'decapoda-research/llama-7b-hf' \
+    --data_path 'yahma/alpaca-cleaned' \
+    --output_dir './lora-alpaca' \
+    --batch_size 128 \
+    --micro_batch_size 4 \
+    --num_epochs 3 \
+    --learning_rate 1e-4 \
+    --cutoff_len 512 \
+    --val_set_size 2000 \
+    --lora_r 8 \
+    --lora_alpha 16 \
+    --lora_dropout 0.05 \
+    --lora_target_modules '[q_proj,v_proj]' \
+    --train_on_inputs \
+    --group_by_length
+```
+
+### Inference (`generate.py`)
+
+This file reads the foundation model from the Hugging Face model hub and the LoRA weights from `tloen/alpaca-lora-7b`, and runs a Gradio interface for inference on a specified input. Users should treat this as example code for the use of the model, and modify it as needed.
+
+Example usage:
+
+```bash
+python generate.py \
+    --load_8bit \
+    --base_model 'decapoda-research/llama-7b-hf' \
+    --lora_weights 'tloen/alpaca-lora-7b'
+```
 
 ### Checkpoint export (`export_*_checkpoint.py`)
 
@@ -63,16 +119,48 @@ They should help users
 who want to run inference in projects like [llama.cpp](https://github.com/ggerganov/llama.cpp)
 or [alpaca.cpp](https://github.com/antimatter15/alpaca.cpp).
 
-### Dataset
+### Docker Setup & Inference
 
-In addition to `alpaca_data.json`, which contains the original Stanford Alpaca dataset,
-we also include `alpaca_data_cleaned.json`, which has been [stripped of various tokenization artifacts](https://github.com/tloen/alpaca-lora/pull/32)
-with the help of @gururise.
-This file is now used by default in the training script.
+1. Build the container image
 
-@AndriyMulyar has also provided interactive, embedding-based visualizations of the original dataset's [instructions](https://atlas.nomic.ai/map/alpaca_instructions)
-and [outputs](https://atlas.nomic.ai/map/alpaca_outputs),
-as well as [clusters of bad examples](https://atlas.nomic.ai/map/d2139cc3-bc1c-441c-8d6f-3e6ffbbc2eda/838019ff-8fe2-42ba-809a-d86d2b98cd50/-18.11668742841587/-11.348087116836096/-20.88850316347706/-17.680468640801223/774455612).
+```
+docker build -t alpaca-lora .
+```
+
+1. Run the container
+
+```
+docker run --gpus=all --shm-size 64g -p 7860:7860 -v ${HOME}/.cache:/root/.cache --rm alpaca-lora generate.py \
+    --load_8bit \
+    --base_model 'decapoda-research/llama-7b-hf' \
+    --lora_weights 'tloen/alpaca-lora-7b'
+```
+
+4. Head on down to `localhost:7860` and enjoy!
+
+### Docker Compose Setup & Inference
+
+1. (optional) Change desired model and weights under `environment` in the `docker-compose.yml`
+
+2. Build and run the container
+
+```
+docker-compose up -d --build
+```
+
+3. Head on down to `localhost:7860` and enjoy!
+
+4. See logs
+
+```
+docker-compose logs -f
+```
+
+5. Clean up everything
+
+```
+docker-compose down --volumes --rmi all
+```
 
 ### Notes
 
@@ -87,24 +175,26 @@ as well as [clusters of bad examples](https://atlas.nomic.ai/map/d2139cc3-bc1c-4
 - [AlpacaDataCleaned](https://github.com/gururise/AlpacaDataCleaned), a project to improve the quality of the Alpaca dataset
 - Various adapter weights (download at own risk):
   - 7B:
-    - https://huggingface.co/tloen/alpaca-lora-7b
-    - https://huggingface.co/samwit/alpaca7B-lora
-    - 🇧🇷 https://huggingface.co/22h/cabrita-lora-v0-1
-    - 🇨🇳 https://huggingface.co/qychen/luotuo-lora-7b-0.1
-    - 🇯🇵 https://huggingface.co/kunishou/Japanese-Alapaca-LoRA-7b-v0
-    - 🇫🇷 https://huggingface.co/bofenghuang/vigogne-lora-7b
-    - 🇹🇭 https://huggingface.co/Thaweewat/thai-buffala-lora-7b-v0-1
-    - 🇩🇪 https://huggingface.co/thisserand/alpaca_lora_german
+    - <https://huggingface.co/tloen/alpaca-lora-7b>
+    - <https://huggingface.co/samwit/alpaca7B-lora>
+    - 🇧🇷 <https://huggingface.co/22h/cabrita-lora-v0-1>
+    - 🇨🇳 <https://huggingface.co/qychen/luotuo-lora-7b-0.1>
+    - 🇯🇵 <https://huggingface.co/kunishou/Japanese-Alapaca-LoRA-7b-v0>
+    - 🇫🇷 <https://huggingface.co/bofenghuang/vigogne-lora-7b>
+    - 🇹🇭 <https://huggingface.co/Thaweewat/thai-buffala-lora-7b-v0-1>
+    - 🇩🇪 <https://huggingface.co/thisserand/alpaca_lora_german>
+    - 🇮🇹 <https://huggingface.co/teelinsan/camoscio-7b-llama>
   - 13B:
-    - https://huggingface.co/chansung/alpaca-lora-13b
-    - https://huggingface.co/mattreid/alpaca-lora-13b
-    - https://huggingface.co/samwit/alpaca13B-lora
-    - 🇯🇵 https://huggingface.co/kunishou/Japanese-Alapaca-LoRA-13b-v0
-    - 🇰🇷 https://huggingface.co/chansung/koalpaca-lora-13b
+    - <https://huggingface.co/chansung/alpaca-lora-13b>
+    - <https://huggingface.co/mattreid/alpaca-lora-13b>
+    - <https://huggingface.co/samwit/alpaca13B-lora>
+    - 🇯🇵 <https://huggingface.co/kunishou/Japanese-Alapaca-LoRA-13b-v0>
+    - 🇰🇷 <https://huggingface.co/chansung/koalpaca-lora-13b>
+    - 🇨🇳 <https://huggingface.co/facat/alpaca-lora-cn-13b>
   - 30B:
-    - https://huggingface.co/baseten/alpaca-30b
-    - https://huggingface.co/chansung/alpaca-lora-30b
-    - 🇯🇵 https://huggingface.co/kunishou/Japanese-Alapaca-LoRA-30b-v0
+    - <https://huggingface.co/baseten/alpaca-30b>
+    - <https://huggingface.co/chansung/alpaca-lora-30b>
+    - 🇯🇵 <https://huggingface.co/kunishou/Japanese-Alapaca-LoRA-30b-v0>
 - [alpaca-native](https://huggingface.co/chavinlo/alpaca-native), a replication using the original Alpaca code
 
 ### Example outputs
