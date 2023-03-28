@@ -1,4 +1,5 @@
 import sys
+import os
 
 import fire
 import gradio as gr
@@ -28,6 +29,7 @@ def main(
     base_model: str = "",
     lora_weights: str = "tloen/alpaca-lora-7b",
 ):
+    base_model = base_model or os.environ.get("BASE_MODEL", "")
     assert (
         base_model
     ), "Please specify a --base_model, e.g. --base_model='decapoda-research/llama-7b-hf'"
@@ -144,7 +146,7 @@ def main(
         ],
         title="🦙🌲 Alpaca-LoRA",
         description="Alpaca-LoRA is a 7B-parameter LLaMA model finetuned to follow instructions. It is trained on the [Stanford Alpaca](https://github.com/tatsu-lab/stanford_alpaca) dataset and makes use of the Huggingface LLaMA implementation. For more information, please visit [the project's website](https://github.com/tloen/alpaca-lora).",  # noqa: E501
-    ).launch()
+    ).launch(server_name="0.0.0.0")
     # Old testing code follows.
 
     """
