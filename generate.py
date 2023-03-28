@@ -1,6 +1,5 @@
 import sys
 import os
-
 import fire
 import gradio as gr
 import torch
