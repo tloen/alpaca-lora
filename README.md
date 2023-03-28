@@ -15,64 +15,25 @@ as well as Tim Dettmers' [bitsandbytes](https://github.com/TimDettmers/bitsandby
 
 Without hyperparameter tuning, the LoRA model produces outputs comparable to the Stanford Alpaca model. (Please see the outputs included below.) Further tuning might be able to achieve better performance; I invite interested users to give it a try and report their results.
 
-### Docker commands for easy local inference
-
-1. Add reference to your desired model weights to `ENV BASE_MODEL="None"` in the `Dockerfile`.
-
-2. Build the container image
-
-```
-docker build -t alpaca-lora-demo .
-```
-
-3. Run the container image
-
-```
-docker run --gpus=all --shm-size 64g -p 7860:7860 -v ${HOME}/.cache:/root/.cache --rm alpaca-lora-demo generate.py
-```
-
-4. Head on down to `localhost:7860` and enjoy!
-
-### Docker compose
-
-1. (optional) Set reference to your desired model weights to `BASE_MODEL=decapoda-research/llama-7b-hf` in the `docker-compose.yml`.
-
-2. Build the container image
-
-```
-docker compose build
-```
-
-3. Run the container image
-
-```
-docker compose up
-```
-
-4. Head on down to `localhost:7860` and enjoy!
-
-### Setup
-
-
-### Setup
+### Local Setup
 
 1. Install dependencies
 
-    ```bash
-    pip install -r requirements.txt
-    ```
+   ```bash
+   pip install -r requirements.txt
+   ```
 
 1. Set environment variables, or modify the files referencing `BASE_MODEL`:
 
-    ```bash
-    # Files referencing `BASE_MODEL`
-    # export_hf_checkpoint.py
-    # export_state_dict_checkpoint.py
+   ```bash
+   # Files referencing `BASE_MODEL`
+   # export_hf_checkpoint.py
+   # export_state_dict_checkpoint.py
 
-    export BASE_MODEL=decapoda-research/llama-7b-hf
-    ```
+   export BASE_MODEL=decapoda-research/llama-7b-hf
+   ```
 
-    Both `finetune.py` and `generate.py` use `--base_model` flag as shown further below.
+   Both `finetune.py` and `generate.py` use `--base_model` flag as shown further below.
 
 1. If bitsandbytes doesn't work, [install it from source.](https://github.com/TimDettmers/bitsandbytes/blob/main/compile_from_source.md) Windows users can follow [these instructions](https://github.com/tloen/alpaca-lora/issues/17).
 
@@ -132,6 +93,49 @@ for export to Hugging Face format and to PyTorch `state_dicts`.
 They should help users
 who want to run inference in projects like [llama.cpp](https://github.com/ggerganov/llama.cpp)
 or [alpaca.cpp](https://github.com/antimatter15/alpaca.cpp).
+
+### Docker Setup & Inference
+
+1. Build the container image
+
+```
+docker build -t alpaca-lora .
+```
+
+1. Run the container
+
+```
+docker run --gpus=all --shm-size 64g -p 7860:7860 -v ${HOME}/.cache:/root/.cache --rm alpaca-lora generate.py \
+    --load_8bit \
+    --base_model 'decapoda-research/llama-7b-hf' \
+    --lora_weights 'tloen/alpaca-lora-7b'
+```
+
+4. Head on down to `localhost:7860` and enjoy!
+
+### Docker Compose Setup & Inference
+
+1. (optional) Change desired model and weights under `environment` in the `docker-compose.yml`
+
+2. Build and run the container
+
+```
+docker-compose up -d --build
+```
+
+3. Head on down to `localhost:7860` and enjoy!
+
+4. See logs
+
+```
+docker-compose logs -f
+```
+
+5. Clean up everything
+
+```
+docker-compose down --volumes --rmi all
+```
 
 ### Notes
 

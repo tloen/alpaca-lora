@@ -7,13 +7,12 @@ services:
       dockerfile: Dockerfile
     image: alpaca-lora
     command: generate.py
+      --load_8bit
+      --base_model 'decapoda-research/llama-7b-hf'
+      --lora_weights 'tloen/alpaca-lora-7b'
     restart: unless-stopped
-    environment:
-      - BASE_MODEL=decapoda-research/llama-7b-hf  # Hugging face model to use
-      - LORA_WEIGHTS=tloen/alpaca-lora-7b
-      - LOAD_8BIT=0
     volumes:
-      - /tmp:/root/.cache  # Location downloaded weights will be stored
+      - alpaca-lora:/root/.cache  # Location downloaded weights will be stored
     shm_size: '64gb'
     ports:
       - 7860:7860
@@ -24,3 +23,7 @@ services:
             - driver: nvidia
               count: all
               capabilities: [gpu]
+
+volumes:
+  alpaca-lora:
+      name: alpaca-lora
