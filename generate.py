@@ -1,23 +1,15 @@
 import sys
-import os
+
+import fire
+import gradio as gr
 import torch
 import transformers
 from peft import PeftModel
 
 assert (
     "LlamaTokenizer" in transformers._import_structure["models.llama"]
-), "LLaMA is now in HuggingFace's main branch.\nPlease reinstall it: pip uninstall transformers && pip install git+https://github.com/huggingface/transformers.git"
-from transformers import LlamaTokenizer, LlamaForCausalLM, GenerationConfig
-
-LOAD_8BIT = os.environ.get("LOAD_8BIT", 0) == 1
-BASE_MODEL = os.environ.get("BASE_MODEL", "decapoda-research/llama-7b-hf")
-LORA_WEIGHTS = os.environ.get("LORA_WEIGHTS", "tloen/alpaca-lora-7b")
-
-tokenizer = LlamaTokenizer.from_pretrained(BASE_MODEL)
-
-assert (
-    BASE_MODEL
-), "Please specify a BASE_MODEL in the script, e.g. 'decapoda-research/llama-7b-hf'"
+), "LLaMA is now in HuggingFace's main branch.\nPlease reinstall it: pip uninstall transformers && pip install git+https://github.com/huggingface/transformers.git"  # noqa: E501
+from transformers import GenerationConfig, LlamaForCausalLM, LlamaTokenizer
 
 if torch.cuda.is_available():
     device = "cuda"
@@ -155,35 +147,7 @@ def main(
     ).launch()
     # Old testing code follows.
 
-gr.Interface(
-    fn=evaluate,
-    inputs=[
-        gr.components.Textbox(
-            lines=2, label="Instruction", placeholder="Tell me about alpacas."
-        ),
-        gr.components.Textbox(lines=2, label="Input", placeholder="none"),
-        gr.components.Slider(minimum=0, maximum=1, value=0.1, label="Temperature"),
-        gr.components.Slider(minimum=0, maximum=1, value=0.75, label="Top p"),
-        gr.components.Slider(minimum=0, maximum=100, step=1, value=40, label="Top k"),
-        gr.components.Slider(minimum=1, maximum=4, step=1, value=4, label="Beams"),
-        gr.components.Slider(
-            minimum=1, maximum=2000, step=1, value=128, label="Max tokens"
-        ),
-    ],
-    outputs=[
-        gr.inputs.Textbox(
-            lines=5,
-            label="Output",
-        )
-    ],
-    title="🦙🌲 Alpaca-LoRA",
-    description="Alpaca-LoRA is a 7B-parameter LLaMA model finetuned to follow instructions. It is trained on the [Stanford Alpaca](https://github.com/tatsu-lab/stanford_alpaca) dataset and makes use of the Huggingface LLaMA implementation. For more information, please visit [the project's website](https://github.com/tloen/alpaca-lora).",
-).launch(server_name="0.0.0.0")
-
-# Old testing code follows.
-
-"""
-if __name__ == "__main__":
+    """
     # testing code for readme
     for instruction in [
         "Tell me about alpacas.",
