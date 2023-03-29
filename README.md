@@ -110,7 +110,9 @@ or [alpaca.cpp](https://github.com/antimatter15/alpaca.cpp).
   - 7B:
     - <https://huggingface.co/tloen/alpaca-lora-7b>
     - <https://huggingface.co/samwit/alpaca7B-lora>
+    - 🤖 <https://huggingface.co/nomic-ai/gpt4all-lora>
     - 🇧🇷 <https://huggingface.co/22h/cabrita-lora-v0-1>
+    - 🇨🇳 <https://huggingface.co/ziqingyang/chinese-alpaca-lora-7b>
     - 🇨🇳 <https://huggingface.co/qychen/luotuo-lora-7b-0.1>
     - 🇯🇵 <https://huggingface.co/kunishou/Japanese-Alapaca-LoRA-7b-v0>
     - 🇫🇷 <https://huggingface.co/bofenghuang/vigogne-lora-7b>
@@ -129,6 +131,9 @@ or [alpaca.cpp](https://github.com/antimatter15/alpaca.cpp).
     - <https://huggingface.co/baseten/alpaca-30b>
     - <https://huggingface.co/chansung/alpaca-lora-30b>
     - 🇯🇵 <https://huggingface.co/kunishou/Japanese-Alapaca-LoRA-30b-v0>
+    - 🇰🇷 <https://huggingface.co/beomi/KoAlpaca-30B-LoRA>
+  - 65B:
+    - 🇰🇷 <https://huggingface.co/beomi/KoAlpaca-65B-LoRA>
 - [alpaca-native](https://huggingface.co/chavinlo/alpaca-native), a replication using the original Alpaca code
 
 ### Example outputs
