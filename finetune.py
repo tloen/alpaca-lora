@@ -24,7 +24,6 @@ from transformers import LlamaForCausalLM, LlamaTokenizer
 
 from utils.prompter import Prompter
 
-
 def train(
     # model/data params
     base_model: str = "",  # the only required argument
