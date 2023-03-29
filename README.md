@@ -102,7 +102,7 @@ or [alpaca.cpp](https://github.com/antimatter15/alpaca.cpp).
 docker build -t alpaca-lora .
 ```
 
-1. Run the container
+2. Run the container (you can also use `finetune.py` and all of its parameters as shown above for training.
 
 ```
 docker run --gpus=all --shm-size 64g -p 7860:7860 -v ${HOME}/.cache:/root/.cache --rm alpaca-lora generate.py \
@@ -111,7 +111,7 @@ docker run --gpus=all --shm-size 64g -p 7860:7860 -v ${HOME}/.cache:/root/.cache
     --lora_weights 'tloen/alpaca-lora-7b'
 ```
 
-4. Head on down to `localhost:7860` and enjoy!
+3. Head on down to `localhost:7860` and enjoy!
 
 ### Docker Compose Setup & Inference
 
@@ -131,7 +131,7 @@ docker-compose up -d --build
 docker-compose logs -f
 ```
 
-5. Clean up everything
+5. Clean everything up
 
 ```
 docker-compose down --volumes --rmi all
