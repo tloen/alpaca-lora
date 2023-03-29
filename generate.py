@@ -8,6 +8,8 @@ import transformers
 from peft import PeftModel
 from transformers import GenerationConfig, LlamaForCausalLM, LlamaTokenizer
 
+from utils.prompter import Prompter
+
 if torch.cuda.is_available():
     device = "cuda"
 else:
@@ -24,6 +26,8 @@ def main(
     load_8bit: bool = False,
     base_model: str = "",
     lora_weights: str = "tloen/alpaca-lora-7b",
+    prompt_template: str = "",  # The prompt template to use, will default to alpaca.
+    server_name: str = "127.0.0.1",  # Allows to listen on all interfaces by providing '0.0.0.0'
     share_gradio: bool = False,
 ):
     base_model = base_model or os.environ.get("BASE_MODEL", "")
@@ -31,6 +35,7 @@ def main(
         base_model
     ), "Please specify a --base_model, e.g. --base_model='decapoda-research/llama-7b-hf'"
 
+    prompter = Prompter(prompt_template)
     tokenizer = LlamaTokenizer.from_pretrained(base_model)
     if device == "cuda":
         model = LlamaForCausalLM.from_pretrained(
@@ -88,7 +93,7 @@ def main(
         max_new_tokens=128,
         **kwargs,
     ):
-        prompt = generate_prompt(instruction, input)
+        prompt = prompter.generate_prompt(instruction, input)
         inputs = tokenizer(prompt, return_tensors="pt")
         input_ids = inputs["input_ids"].to(device)
         generation_config = GenerationConfig(
@@ -108,7 +113,7 @@ def main(
             )
         s = generation_output.sequences[0]
         output = tokenizer.decode(s)
-        return output.split("### Response:")[1].strip()
+        return prompter.get_response(output)
 
     gr.Interface(
         fn=evaluate,
@@ -143,7 +148,7 @@ def main(
         ],
         title="🦙🌲 Alpaca-LoRA",
         description="Alpaca-LoRA is a 7B-parameter LLaMA model finetuned to follow instructions. It is trained on the [Stanford Alpaca](https://github.com/tatsu-lab/stanford_alpaca) dataset and makes use of the Huggingface LLaMA implementation. For more information, please visit [the project's website](https://github.com/tloen/alpaca-lora).",  # noqa: E501
-    ).launch(server_name="0.0.0.0")
+    ).launch(server_name="0.0.0.0", share=share_gradio)
     # Old testing code follows.
 
     """
@@ -163,28 +168,6 @@ def main(
         print("Response:", evaluate(instruction))
         print()
     """
-
-
-def generate_prompt(instruction, input=None):
-    if input:
-        return f"""Below is an instruction that describes a task, paired with an input that provides further context. Write a response that appropriately completes the request.  # noqa: E501
-
-### Instruction:
-{instruction}
-
-### Input:
-{input}
-
-### Response:
-"""
-    else:
-        return f"""Below is an instruction that describes a task. Write a response that appropriately completes the request.  # noqa: E501
-
-### Instruction:
-{instruction}
-
-### Response:
-"""
 
 
 if __name__ == "__main__":
