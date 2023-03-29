@@ -8,11 +8,6 @@ import transformers
 from peft import PeftModel
 from transformers import GenerationConfig, LlamaForCausalLM, LlamaTokenizer
 
-assert (
-    "LlamaTokenizer" in transformers._import_structure["models.llama"]
-), "LLaMA is now in HuggingFace's main branch.\nPlease reinstall it: pip uninstall transformers && pip install git+https://github.com/huggingface/transformers.git"  # noqa: E501
-
-
 if torch.cuda.is_available():
     device = "cuda"
 else:
@@ -29,6 +24,7 @@ def main(
     load_8bit: bool = False,
     base_model: str = "",
     lora_weights: str = "tloen/alpaca-lora-7b",
+    share_gradio: bool = False,
 ):
     base_model = base_model or os.environ.get("BASE_MODEL", "")
     assert (

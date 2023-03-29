@@ -3,15 +3,6 @@ import os
 import torch
 import transformers
 from peft import PeftModel
-
-# Unused imports
-# import json
-# from peft import LoraConfig
-
-assert (
-    "LlamaTokenizer" in transformers._import_structure["models.llama"]
-), "LLaMA is now in HuggingFace's main branch.\nPlease reinstall it: pip uninstall transformers && pip install git+https://github.com/huggingface/transformers.git"  # noqa: E501
-
 from transformers import LlamaForCausalLM, LlamaTokenizer  # noqa: F402
 
 BASE_MODEL = os.environ.get("BASE_MODEL", None)
