@@ -9,7 +9,6 @@ from transformers import GenerationConfig, LlamaForCausalLM, LlamaTokenizer
 
 from utils.prompter import Prompter
 
-
 if torch.cuda.is_available():
     device = "cuda"
 else:
