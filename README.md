@@ -1,4 +1,4 @@
-# 🦙🌲🤏 Alpaca-LoRA: Low-Rank LLaMA Instruct-Tuning
+# 🦙🌲🤏 Alpaca-LoRA
 
 - 🤗 **Try the pretrained model out [here](https://huggingface.co/spaces/tloen/alpaca-lora), courtesy of a GPU grant from Huggingface!**
 - Users have created a Discord server for discussion and support [here](https://discord.gg/prbq284xX5)
@@ -99,6 +99,7 @@ or [alpaca.cpp](https://github.com/antimatter15/alpaca.cpp).
 - We can likely improve our model performance significantly if we had a better dataset. Consider supporting the [LAION Open Assistant](https://open-assistant.io/) effort to produce a high-quality dataset for supervised fine-tuning (or bugging them to release their data).
 - We're continually fixing bugs and conducting training runs, and the weights on the Hugging Face Hub are being updated accordingly. In particular, those facing issues with response lengths should make sure that they have the latest version of the weights and code.
 - Users with multiple GPUs should take a look [here](https://github.com/tloen/alpaca-lora/issues/8#issuecomment-1477490259).
+- We include the Stanford Alpaca dataset, which was made available under the ODC Attribution License.
 
 ### Resources
 
@@ -123,6 +124,7 @@ or [alpaca.cpp](https://github.com/antimatter15/alpaca.cpp).
     - 🇯🇵 <https://huggingface.co/kunishou/Japanese-Alapaca-LoRA-13b-v0>
     - 🇰🇷 <https://huggingface.co/chansung/koalpaca-lora-13b>
     - 🇨🇳 <https://huggingface.co/facat/alpaca-lora-cn-13b>
+    - 🇪🇸 <https://huggingface.co/plncmm/guanaco-lora-13b>
   - 30B:
     - <https://huggingface.co/baseten/alpaca-30b>
     - <https://huggingface.co/chansung/alpaca-lora-30b>
