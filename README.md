@@ -15,31 +15,6 @@ as well as Tim Dettmers' [bitsandbytes](https://github.com/TimDettmers/bitsandby
 
 Without hyperparameter tuning, the LoRA model produces outputs comparable to the Stanford Alpaca model. (Please see the outputs included below.) Further tuning might be able to achieve better performance; I invite interested users to give it a try and report their results.
 
-### Docker Build/Run and Compose
-
-If you'd like to build and run the docker image, you can do so with the following commands:
-
-```
-docker build -t alpaca-lora .
-```
-
-```
-docker run --gpus=all --shm-size 64g -p 7860:7860 -v ${HOME}/.cache:/root/.cache --rm alpaca-lora generate.py \
-    --load_8bit \
-    --base_model 'decapoda-research/llama-7b-hf' \
-    --lora_weights 'tloen/alpaca-lora-7b'
-```
-
-If you'd like to use docker-compose, you can do so with the following commands:
-
-```
-docker-compose build
-```
-
-```
-BASE_MODEL=decapoda-research/llama-7b-hf docker-compose up
-```
-
 ### Local Setup
 
 1. Install dependencies
