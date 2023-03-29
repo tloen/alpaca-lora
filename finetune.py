@@ -13,11 +13,6 @@ import torch.nn as nn
 import bitsandbytes as bnb
 """
 
-# Catch when user should re-install transformers library
-assert (
-    "LlamaTokenizer" in transformers._import_structure["models.llama"]
-), "LLaMA is now in HuggingFace's main branch.\nPlease reinstall it: pip uninstall transformers && pip install git+https://github.com/huggingface/transformers.git"  # noqa: E501
-
 from peft import (  # noqa: E402
     LoraConfig,
     get_peft_model,
@@ -31,7 +26,7 @@ from transformers import LlamaForCausalLM, LlamaTokenizer  # noqa: F402
 def train(
     # model/data params
     base_model: str = "",  # the only required argument
-    data_path: str = "./alpaca_data_cleaned.json",
+    data_path: str = "yahma/alpaca-cleaned",
     output_dir: str = "./lora-alpaca",
     # training hyperparams
     batch_size: int = 128,
@@ -208,6 +203,11 @@ def train(
     else:
         train_data = data["train"].shuffle().map(generate_and_tokenize_prompt)
         val_data = None
+
+    if not ddp and torch.cuda.device_count() > 1:
+        # keeps Trainer from trying its own DataParallelism when more than 1 gpu is available
+        model.is_parallelizable = True
+        model.model_parallel = True
 
     trainer = transformers.Trainer(
         model=model,
