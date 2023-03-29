@@ -53,7 +53,7 @@ def train(
     wandb_watch: str = "",  # options: false | gradients | all
     wandb_log_model: str = "",  # options: false | true
     resume_from_checkpoint: str = None,  # either training checkpoint or final adapter
-    prompt_template: str = "",  # The prompt template to use, will default to alpaca.
+    prompt_template_name: str = "",  # The prompt template to use, will default to alpaca.
 ):
     print(
         f"Training Alpaca-LoRA model with params:\n"
@@ -77,14 +77,14 @@ def train(
         f"wandb_watch: {wandb_watch}\n"
         f"wandb_log_model: {wandb_log_model}\n"
         f"resume_from_checkpoint: {resume_from_checkpoint}\n"
-        f"prompt template: {prompt_template}\n"
+        f"prompt template: {prompt_template_name}\n"
     )
     assert (
         base_model
     ), "Please specify a --base_model, e.g. --base_model='decapoda-research/llama-7b-hf'"
     gradient_accumulation_steps = batch_size // micro_batch_size
 
-    prompter = Prompter(prompt_template)
+    prompter = Prompter(prompt_template_name)
 
     device_map = "auto"
     world_size = int(os.environ.get("WORLD_SIZE", 1))
