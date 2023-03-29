@@ -112,13 +112,13 @@ or [alpaca.cpp](https://github.com/antimatter15/alpaca.cpp).
     - <https://huggingface.co/samwit/alpaca7B-lora>
     - 🤖 <https://huggingface.co/nomic-ai/gpt4all-lora>
     - 🇧🇷 <https://huggingface.co/22h/cabrita-lora-v0-1>
+    - 🇨🇳 <https://huggingface.co/ziqingyang/chinese-alpaca-lora-7b>
     - 🇨🇳 <https://huggingface.co/qychen/luotuo-lora-7b-0.1>
     - 🇯🇵 <https://huggingface.co/kunishou/Japanese-Alapaca-LoRA-7b-v0>
     - 🇫🇷 <https://huggingface.co/bofenghuang/vigogne-lora-7b>
     - 🇹🇭 <https://huggingface.co/Thaweewat/thai-buffala-lora-7b-v0-1>
     - 🇩🇪 <https://huggingface.co/thisserand/alpaca_lora_german>
     - 🇮🇹 <https://huggingface.co/teelinsan/camoscio-7b-llama>
-    - 🇨🇳 <https://huggingface.co/ziqingyang/chinese-alpaca-lora-7b>
   - 13B:
     - <https://huggingface.co/chansung/alpaca-lora-13b>
     - <https://huggingface.co/mattreid/alpaca-lora-13b>
