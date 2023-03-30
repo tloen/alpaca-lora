@@ -20,15 +20,35 @@ from peft import (
     prepare_model_for_int8_training,
     set_peft_model_state_dict,
 )
-from transformers import LlamaForCausalLM, LlamaTokenizer
+from transformers import LlamaForCausalLM, LLaMATokenizer
 
 from utils.prompter import Prompter
+
+def get_device_map(model_name, device, do_int8):
+    from accelerate import init_empty_weights, infer_auto_device_map
+    from transformers import AutoConfig, AutoModel, AutoModelForCausalLM
+
+    with init_empty_weights():
+        config = AutoConfig.from_pretrained(model_name)
+        model = AutoModelForCausalLM.from_config(config)
+
+    if True:
+        d = {0: "3GiB"}
+        for i in range(1, 8):
+            d[i] = "4GiB"
+    device_map = infer_auto_device_map(
+        model, max_memory=d, dtype=torch.int8 if do_int8 else torch.float16, no_split_module_classes=["BloomBlock", "OPTDecoderLayer", "LLaMADecoderLayer", "LlamaDecoderLayer"]
+    )
+    print(device_map)
+    del model
+    return device_map
+
 
 
 def train(
     # model/data params
     base_model: str = "",  # the only required argument
-    data_path: str = "yahma/alpaca-cleaned",
+    data_path: str = "alpaca_data_cleaned.json", #"yahma/alpaca-cleaned",
     output_dir: str = "./lora-alpaca",
     # training hyperparams
     batch_size: int = 128,
@@ -88,9 +108,11 @@ def train(
 
     prompter = Prompter(prompt_template_name)
 
-    device_map = "auto"
+    device_map = get_device_map(base_model, "2080Ti", do_int8=True)
     world_size = int(os.environ.get("WORLD_SIZE", 1))
     ddp = world_size != 1
+    print(f"ddp = {ddp}")
+    #print(f"device_map = {device_map}")
     if ddp:
         device_map = {"": int(os.environ.get("LOCAL_RANK") or 0)}
         gradient_accumulation_steps = gradient_accumulation_steps // world_size
@@ -112,9 +134,10 @@ def train(
         load_in_8bit=True,
         torch_dtype=torch.float16,
         device_map=device_map,
+        #max_memory={i: "6GiB" for i in range(8)}
     )
 
-    tokenizer = LlamaTokenizer.from_pretrained(base_model)
+    tokenizer = LLaMATokenizer.from_pretrained(base_model)
 
     tokenizer.pad_token_id = (
         0  # unk. we want this to be different from the eos token
@@ -218,6 +241,7 @@ def train(
         val_data = None
 
     if not ddp and torch.cuda.device_count() > 1:
+        print("is_parallelizable")
         # keeps Trainer from trying its own DataParallelism when more than 1 gpu is available
         model.is_parallelizable = True
         model.model_parallel = True
