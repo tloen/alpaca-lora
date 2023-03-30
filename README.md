@@ -7,7 +7,7 @@ This repository contains code for reproducing the [Stanford Alpaca](https://gith
 We provide an Instruct model of similar quality to `text-davinci-003` that can run [on a Raspberry Pi](https://twitter.com/miolini/status/1634982361757790209) (for research),
 and the code is easily extended to the `13b`, `30b`, and `65b` models.
 
-In addition to the training code, which runs within five hours on a single RTX 4090,
+In addition to the training code, which runs within hours on a single RTX 4090,
 we publish a script for downloading and inference on the foundation model and LoRA,
 as well as the resulting [LoRA weights themselves](https://huggingface.co/tloen/alpaca-lora-7b/tree/main).
 To fine-tune cheaply and efficiently, we use Hugging Face's [PEFT](https://github.com/huggingface/peft)
@@ -72,6 +72,22 @@ python generate.py \
     --load_8bit \
     --base_model 'decapoda-research/llama-7b-hf' \
     --lora_weights 'tloen/alpaca-lora-7b'
+```
+
+### Official weights
+
+The most recent "official" Alpaca-LoRA adapter available at [`tloen/alpaca-lora-7b`](https://huggingface.co/tloen/alpaca-lora-7b) was trained on March 26 with the following command:
+
+```bash
+python finetune.py \
+    --base_model='decapoda-research/llama-7b-hf' \
+    --num_epochs=10 \
+    --cutoff_len=512 \
+    --group_by_length \
+    --output_dir='./lora-alpaca' \
+    --lora_target_modules='[q_proj,k_proj,v_proj,o_proj]' \
+    --lora_r=16 \
+    --micro_batch_size=8
 ```
 
 ### Checkpoint export (`export_*_checkpoint.py`)
