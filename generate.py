@@ -1,3 +1,4 @@
+import os
 import sys
 
 import fire
@@ -29,6 +30,7 @@ def main(
     server_name: str = "127.0.0.1",  # Allows to listen on all interfaces by providing '0.0.0.0'
     share_gradio: bool = False,
 ):
+    base_model = base_model or os.environ.get("BASE_MODEL", "")
     assert (
         base_model
     ), "Please specify a --base_model, e.g. --base_model='decapoda-research/llama-7b-hf'"
@@ -146,7 +148,7 @@ def main(
         ],
         title="🦙🌲 Alpaca-LoRA",
         description="Alpaca-LoRA is a 7B-parameter LLaMA model finetuned to follow instructions. It is trained on the [Stanford Alpaca](https://github.com/tatsu-lab/stanford_alpaca) dataset and makes use of the Huggingface LLaMA implementation. For more information, please visit [the project's website](https://github.com/tloen/alpaca-lora).",  # noqa: E501
-    ).launch(server_name=server_name, share=share_gradio)
+    ).launch(server_name="0.0.0.0", share=share_gradio)
     # Old testing code follows.
 
     """
