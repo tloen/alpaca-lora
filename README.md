@@ -23,18 +23,6 @@ Without hyperparameter tuning, the LoRA model produces outputs comparable to the
    pip install -r requirements.txt
    ```
 
-1. Set environment variables, or modify the files referencing `BASE_MODEL`:
-
-   ```bash
-   # Files referencing `BASE_MODEL`
-   # export_hf_checkpoint.py
-   # export_state_dict_checkpoint.py
-
-   export BASE_MODEL=decapoda-research/llama-7b-hf
-   ```
-
-   Both `finetune.py` and `generate.py` use `--base_model` flag as shown further below.
-
 1. If bitsandbytes doesn't work, [install it from source.](https://github.com/TimDettmers/bitsandbytes/blob/main/compile_from_source.md) Windows users can follow [these instructions](https://github.com/tloen/alpaca-lora/issues/17).
 
 ### Training (`finetune.py`)
@@ -96,22 +84,22 @@ or [alpaca.cpp](https://github.com/antimatter15/alpaca.cpp).
 
 ### Docker Setup & Inference
 
-1. Build the container image
+1. Build the container image:
 
-```
+```bash
 docker build -t alpaca-lora .
 ```
 
-2. Run the container (you can also use `finetune.py` and all of its parameters as shown above for training.
+2. Run the container (you can also use `finetune.py` and all of its parameters as shown above for training):
 
-```
+```bash
 docker run --gpus=all --shm-size 64g -p 7860:7860 -v ${HOME}/.cache:/root/.cache --rm alpaca-lora generate.py \
     --load_8bit \
     --base_model 'decapoda-research/llama-7b-hf' \
     --lora_weights 'tloen/alpaca-lora-7b'
 ```
 
-3. Head on down to `localhost:7860` and enjoy!
+3. Open `https://localhost:7860` in the browser
 
 ### Docker Compose Setup & Inference
 
@@ -119,21 +107,21 @@ docker run --gpus=all --shm-size 64g -p 7860:7860 -v ${HOME}/.cache:/root/.cache
 
 2. Build and run the container
 
-```
+```bash
 docker-compose up -d --build
 ```
 
-3. Head on down to `localhost:7860` and enjoy!
+3. Open `https://localhost:7860` in the browser
 
-4. See logs
+4. See logs:
 
-```
+```bash
 docker-compose logs -f
 ```
 
-5. Clean everything up
+5. Clean everything up:
 
-```
+```bash
 docker-compose down --volumes --rmi all
 ```
 
@@ -153,9 +141,7 @@ docker-compose down --volumes --rmi all
   - 7B:
     - <https://huggingface.co/tloen/alpaca-lora-7b>
     - <https://huggingface.co/samwit/alpaca7B-lora>
-    - 🤖 <https://huggingface.co/nomic-ai/gpt4all-lora>
     - 🇧🇷 <https://huggingface.co/22h/cabrita-lora-v0-1>
-    - 🇨🇳 <https://huggingface.co/ziqingyang/chinese-alpaca-lora-7b>
     - 🇨🇳 <https://huggingface.co/qychen/luotuo-lora-7b-0.1>
     - 🇯🇵 <https://huggingface.co/kunishou/Japanese-Alapaca-LoRA-7b-v0>
     - 🇫🇷 <https://huggingface.co/bofenghuang/vigogne-lora-7b>
@@ -174,9 +160,6 @@ docker-compose down --volumes --rmi all
     - <https://huggingface.co/baseten/alpaca-30b>
     - <https://huggingface.co/chansung/alpaca-lora-30b>
     - 🇯🇵 <https://huggingface.co/kunishou/Japanese-Alapaca-LoRA-30b-v0>
-    - 🇰🇷 <https://huggingface.co/beomi/KoAlpaca-30B-LoRA>
-  - 65B:
-    - 🇰🇷 <https://huggingface.co/beomi/KoAlpaca-65B-LoRA>
 - [alpaca-native](https://huggingface.co/chavinlo/alpaca-native), a replication using the original Alpaca code
 
 ### Example outputs
