@@ -84,7 +84,7 @@ def main(
         model = torch.compile(model)
 
     def evaluate(
-        instruction,
+        prompt,
         input=None,
         temperature=0.1,
         top_p=0.75,
@@ -93,7 +93,6 @@ def main(
         max_new_tokens=128,
         **kwargs,
     ):
-        prompt = prompter.generate_prompt(instruction, input)
         inputs = tokenizer(prompt, return_tensors="pt")
         input_ids = inputs["input_ids"].to(device)
         generation_config = GenerationConfig(
@@ -112,44 +111,81 @@ def main(
                 max_new_tokens=max_new_tokens,
             )
         s = generation_output.sequences[0]
-        output = tokenizer.decode(s)
-        return prompter.get_response(output)
+        output = tokenizer.decode(s).split("### Response:")[-1].strip()
+        return output
 
-    gr.Interface(
-        fn=evaluate,
-        inputs=[
-            gr.components.Textbox(
-                lines=2,
-                label="Instruction",
-                placeholder="Tell me about alpacas.",
-            ),
-            gr.components.Textbox(lines=2, label="Input", placeholder="none"),
-            gr.components.Slider(
-                minimum=0, maximum=1, value=0.1, label="Temperature"
-            ),
-            gr.components.Slider(
-                minimum=0, maximum=1, value=0.75, label="Top p"
-            ),
-            gr.components.Slider(
-                minimum=0, maximum=100, step=1, value=40, label="Top k"
-            ),
-            gr.components.Slider(
-                minimum=1, maximum=4, step=1, value=4, label="Beams"
-            ),
-            gr.components.Slider(
-                minimum=1, maximum=2000, step=1, value=128, label="Max tokens"
-            ),
-        ],
-        outputs=[
-            gr.inputs.Textbox(
-                lines=5,
-                label="Output",
-            )
-        ],
-        title="🦙🌲 Alpaca-LoRA",
-        description="Alpaca-LoRA is a 7B-parameter LLaMA model finetuned to follow instructions. It is trained on the [Stanford Alpaca](https://github.com/tatsu-lab/stanford_alpaca) dataset and makes use of the Huggingface LLaMA implementation. For more information, please visit [the project's website](https://github.com/tloen/alpaca-lora).",  # noqa: E501
-    ).launch(server_name="0.0.0.0", share=share_gradio)
-    # Old testing code follows.
+    def generate_history(history):
+        history_dialogue = ""
+        for Instruction, response in history:
+            if response:
+                history_dialogue += prompter.generate_prompt(Instruction, None)
+                history_dialogue += response
+        return history_dialogue
+
+    def user(Instruction, history):
+        return "", history + [[Instruction, None]]
+
+    def bot(history):
+        history_dialogue = generate_history(history)
+        Instruction = history[-1][0]
+        now_prompt = prompter.generate_prompt(Instruction, None)
+        prompt = history_dialogue + now_prompt
+        bot_message = evaluate(prompt)
+        history[-1][1] = bot_message
+        return history
+    
+    with gr.Blocks(title="🦙🌲 Alpaca-LoRA") as demo:
+        chatbot = gr.Chatbot(label="Alpaca-LoRA is a 7B-parameter LLaMA model finetuned to follow instructions. It is trained on the [Stanford Alpaca](https://github.com/tatsu-lab/stanford_alpaca) dataset and makes use of the Huggingface LLaMA implementation. For more information, please visit [the project's website](https://github.com/tloen/alpaca-lora).")
+        Instruction = gr.Textbox(lines=1,
+                    label="Instruction",
+                    placeholder="Tell me about alpacas.",
+                )
+        clear = gr.Button("clear")
+
+        Instruction.submit(user, [Instruction, chatbot], [Instruction, chatbot], queue=False).then(
+            bot, chatbot, chatbot
+        )
+        clear.click(lambda: None, None, chatbot, queue=False)
+    demo.launch(server_name="0.0.0.0", share=share_gradio, debug=True)
+
+    # gr.Interface(
+    #     fn=evaluate,
+    #     inputs=[
+    #         gr.components.Textbox(
+    #             lines=2,
+    #             label="Instruction",
+    #             placeholder="Tell me about alpacas.",
+    #         ),
+    #         gr.components.Textbox(lines=2, label="Input", placeholder="none"),
+    #         gr.components.Slider(
+    #             minimum=0, maximum=1, value=0.1, label="Temperature"
+    #         ),
+    #         gr.components.Slider(
+    #             minimum=0, maximum=1, value=0.75, label="Top p"
+    #         ),
+    #         gr.components.Slider(
+    #             minimum=0, maximum=100, step=1, value=40, label="Top k"
+    #         ),
+    #         gr.components.Slider(
+    #             minimum=1, maximum=4, step=1, value=4, label="Beams"
+    #         ),
+    #         gr.components.Slider(
+    #             minimum=1, maximum=2000, step=1, value=128, label="Max tokens"
+    #         ),
+    #     ],
+    #     outputs=[
+    #         gr.inputs.Textbox(
+    #             lines=5,
+    #             label="Output",
+    #         )
+    #     ],
+    #     title="🦙🌲 Alpaca-LoRA",
+    #     description="Alpaca-LoRA is a 7B-parameter LLaMA model finetuned to follow instructions. It is trained on the [Stanford Alpaca](https://github.com/tatsu-lab/stanford_alpaca) dataset and makes use of the Huggingface LLaMA implementation. For more information, please visit [the project's website](https://github.com/tloen/alpaca-lora).",  # noqa: E501
+    # ).launch(server_name="0.0.0.0", share=share_gradio)
+    # Old testing code_2 follows.
+
+
+    # Old testing code_1 follows.
 
     """
     # testing code for readme
@@ -172,3 +208,5 @@ def main(
 
 if __name__ == "__main__":
     fire.Fire(main)
+
+
