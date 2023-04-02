@@ -222,7 +222,19 @@ def train(
         model.is_parallelizable = True
         model.model_parallel = True
 
-    trainer = transformers.Trainer(
+    # Add custom trainer class to compute custom loss
+    class CustomTrainer(transformers.Trainer):
+        def compute_loss(self, model, inputs, return_outputs=False):
+            labels = inputs.get("labels")
+            # forward pass
+            outputs = model(**inputs)
+            logits = outputs.get("logits")
+            # compute custom loss 
+            loss_fct = torch.nn.CrossEntropyLoss()
+            loss = loss_fct(logits.view(-1, logits.size(-1)), labels.view(-1))
+            return (loss, outputs) if return_outputs else loss
+
+    trainer = CustomTrainer(
         model=model,
         train_dataset=train_data,
         eval_dataset=val_data,
