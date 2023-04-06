@@ -55,7 +55,7 @@ def train(
     wandb_log_model: str = "",  # options: false | true
     resume_from_checkpoint: str = None,  # either training checkpoint or final adapter
     prompt_template_name: str = "alpaca",  # The prompt template to use, will default to alpaca.
-    prompt_template_base_path: str = "templates",
+    prompt_template_path: str = "templates",
     flash_attention: bool = True, # Use flash attention
 ):
     if int(os.environ.get("LOCAL_RANK", 0)) == 0:
@@ -82,7 +82,7 @@ def train(
             f"wandb_log_model: {wandb_log_model}\n"
             f"resume_from_checkpoint: {resume_from_checkpoint or False}\n"
             f"prompt template: {prompt_template_name}\n"
-            f"prompt template base path: {prompt_template_base_path}\n"
+            f"prompt template path: {prompt_template_path}\n"
         )
     assert (
         base_model
@@ -92,7 +92,7 @@ def train(
     if flash_attention:
         torch.backends.cuda.enable_flash_sdp(True)
 
-    prompter = Prompter(prompt_template_name, prompt_template_base_path)
+    prompter = Prompter(prompt_template_name, prompt_template_path)
 
     device_map = "auto"
     world_size = int(os.environ.get("WORLD_SIZE", 1))
