@@ -55,7 +55,7 @@ def train(
     wandb_log_model: str = "",  # options: false | true
     resume_from_checkpoint: str = None,  # either training checkpoint or final adapter
     prompt_template_name: str = "alpaca",  # The prompt template to use, will default to alpaca.
-    prompt_template_base_path: str = "",
+    prompt_template_base_path: str = "templates",
     flash_attention: bool = True, # Use flash attention
 ):
     if int(os.environ.get("LOCAL_RANK", 0)) == 0:
