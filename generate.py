@@ -28,7 +28,7 @@ def main(
     base_model: str = "",
     lora_weights: str = "tloen/alpaca-lora-7b",
     prompt_template: str = "",  # The prompt template to use, will default to alpaca.
-    prompt_template_base_path: str = "",  # The prompt base path.
+    prompt_template_path: str = "templates",  # The prompt base path.
     server_name: str = "0.0.0.0",  # Allows to listen on all interfaces by providing '0.
     share_gradio: bool = False,
 ):
@@ -37,7 +37,7 @@ def main(
         base_model
     ), "Please specify a --base_model, e.g. --base_model='decapoda-research/llama-7b-hf'"
 
-    prompter = Prompter(prompt_template, prompt_template_base_path)
+    prompter = Prompter(prompt_template, prompt_template_path)
     tokenizer = LlamaTokenizer.from_pretrained(base_model)
     if device == "cuda":
         model = LlamaForCausalLM.from_pretrained(
