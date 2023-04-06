@@ -56,6 +56,7 @@ def train(
     resume_from_checkpoint: str = None,  # either training checkpoint or final adapter
     prompt_template_name: str = "alpaca",  # The prompt template to use, will default to alpaca.
     prompt_template_base_path: str = "",
+    flash_attention: bool = True, # Use flash attention
 ):
     if int(os.environ.get("LOCAL_RANK", 0)) == 0:
         print(
@@ -87,6 +88,9 @@ def train(
         base_model
     ), "Please specify a --base_model, e.g. --base_model='decapoda-research/llama-7b-hf'"
     gradient_accumulation_steps = batch_size // micro_batch_size
+    
+    if flash_attention:
+        torch.backends.cuda.enable_flash_sdp(True)
 
     prompter = Prompter(prompt_template_name, prompt_template_base_path)
 
