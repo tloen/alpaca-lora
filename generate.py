@@ -34,7 +34,7 @@ def main(
     base_model = base_model or os.environ.get("BASE_MODEL", "")
     assert (
         base_model
-    ), "Please specify a --base_model, e.g. --base_model='decapoda-research/llama-7b-hf'"
+    ), "Please specify a --base_model, e.g. --base_model='huggyllama/llama-7b'"
 
     prompter = Prompter(prompt_template)
     tokenizer = LlamaTokenizer.from_pretrained(base_model)
