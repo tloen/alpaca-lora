@@ -161,6 +161,7 @@ docker-compose down --volumes --rmi all
     - <https://huggingface.co/samwit/alpaca7B-lora>
     - 🇧🇷 <https://huggingface.co/22h/cabrita-lora-v0-1>
     - 🇨🇳 <https://huggingface.co/qychen/luotuo-lora-7b-0.1>
+    - 🇨🇳 <https://huggingface.co/ziqingyang/chinese-alpaca-lora-7b>
     - 🇯🇵 <https://huggingface.co/kunishou/Japanese-Alapaca-LoRA-7b-v0>
     - 🇫🇷 <https://huggingface.co/bofenghuang/vigogne-lora-7b>
     - 🇹🇭 <https://huggingface.co/Thaweewat/thai-buffala-lora-7b-v0-1>
@@ -178,6 +179,7 @@ docker-compose down --volumes --rmi all
     - 🇯🇵 <https://huggingface.co/kunishou/Japanese-Alapaca-LoRA-13b-v0>
     - 🇰🇷 <https://huggingface.co/chansung/koalpaca-lora-13b>
     - 🇨🇳 <https://huggingface.co/facat/alpaca-lora-cn-13b>
+    - 🇨🇳 <https://huggingface.co/ziqingyang/chinese-alpaca-lora-13b>
     - 🇪🇸 <https://huggingface.co/plncmm/guanaco-lora-13b>
   - 30B:
     - <https://huggingface.co/baseten/alpaca-30b>
