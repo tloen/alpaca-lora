@@ -188,6 +188,7 @@ docker-compose down --volumes --rmi all
   - 65B
     - <https://huggingface.co/chansung/alpaca-lora-65b>
 - [alpaca-native](https://huggingface.co/chavinlo/alpaca-native), a replication using the original Alpaca code
+- [llama.onnx](https://github.com/tpoisonooo/llama.onnx), a project to inference alpaca with onnx format
 
 ### Example outputs
 
