@@ -171,6 +171,7 @@ docker-compose down --volumes --rmi all
     - 🇮🇹 <https://huggingface.co/teelinsan/camoscio-7b-llama>
     - 🇷🇺 <https://huggingface.co/IlyaGusev/llama_7b_ru_turbo_alpaca_lora>
     - 🇺🇦 <https://huggingface.co/robinhad/ualpaca-7b-llama>
+    - 🇮🇹 <https://huggingface.co/mchl-labs/stambecco-7b-plus>
   - 13B:
     - <https://huggingface.co/Angainor/alpaca-lora-13b>
     - <https://huggingface.co/chansung/alpaca-lora-13b>
@@ -181,6 +182,7 @@ docker-compose down --volumes --rmi all
     - 🇨🇳 <https://huggingface.co/facat/alpaca-lora-cn-13b>
     - 🇨🇳 <https://huggingface.co/ziqingyang/chinese-alpaca-lora-13b>
     - 🇪🇸 <https://huggingface.co/plncmm/guanaco-lora-13b>
+    - 🇮🇹 <https://huggingface.co/mchl-labs/stambecco-13b-plus>
   - 30B:
     - <https://huggingface.co/baseten/alpaca-30b>
     - <https://huggingface.co/chansung/alpaca-lora-30b>
