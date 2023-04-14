@@ -2,7 +2,7 @@
 
 - 🤗 **Try the pretrained model out [here](https://huggingface.co/spaces/tloen/alpaca-lora), courtesy of a GPU grant from Huggingface!**
 - Users have created a Discord server for discussion and support [here](https://discord.gg/prbq284xX5)
-- 4/6: Repo has been updated with Microsoft Research's [LLaMA-GPT4 dataset](https://github.com/Instruction-Tuning-with-GPT-4/GPT-4-LLM).
+- 4/14: Chansung Park's GPT4-Alpaca adapters: https://github.com/tloen/alpaca-lora/issues/340
 
 This repository contains code for reproducing the [Stanford Alpaca](https://github.com/tatsu-lab/stanford_alpaca) results using [low-rank adaptation (LoRA)](https://arxiv.org/pdf/2106.09685.pdf).
 We provide an Instruct model of similar quality to `text-davinci-003` that can run [on a Raspberry Pi](https://twitter.com/miolini/status/1634982361757790209) (for research),
@@ -158,8 +158,10 @@ docker-compose down --volumes --rmi all
 - [dolly-15k-instruction-alpaca-format](https://huggingface.co/datasets/c-s-ale/dolly-15k-instruction-alpaca-format), an Alpaca-compatible version of [Databricks' Dolly 15k human-generated instruct dataset](https://github.com/databrickslabs/dolly/tree/master/data) (see [blog](https://www.databricks.com/blog/2023/04/12/dolly-first-open-commercially-viable-instruction-tuned-llm))
 - Various adapter weights (download at own risk):
   - 7B:
-    - <https://huggingface.co/tloen/alpaca-lora-7b>
-    - <https://huggingface.co/samwit/alpaca7B-lora>
+    - 3️⃣ <https://huggingface.co/tloen/alpaca-lora-7b>
+    - 3️⃣ <https://huggingface.co/samwit/alpaca7B-lora>
+    - **4️⃣ <https://huggingface.co/chansung/gpt4-alpaca-lora-7b>**
+    - 🚀 <https://huggingface.co/nomic-ai/gpt4all-lora>
     - 🇧🇷 <https://huggingface.co/22h/cabrita-lora-v0-1>
     - 🇨🇳 <https://huggingface.co/qychen/luotuo-lora-7b-0.1>
     - 🇨🇳 <https://huggingface.co/ziqingyang/chinese-alpaca-lora-7b>
@@ -174,10 +176,11 @@ docker-compose down --volumes --rmi all
     - 🇺🇦 <https://huggingface.co/robinhad/ualpaca-7b-llama>
     - 🇮🇹 <https://huggingface.co/mchl-labs/stambecco-7b-plus>
   - 13B:
-    - <https://huggingface.co/Angainor/alpaca-lora-13b>
-    - <https://huggingface.co/chansung/alpaca-lora-13b>
-    - <https://huggingface.co/mattreid/alpaca-lora-13b>
-    - <https://huggingface.co/samwit/alpaca13B-lora>
+    - 3️⃣ <https://huggingface.co/Angainor/alpaca-lora-13b>
+    - 3️⃣ <https://huggingface.co/chansung/alpaca-lora-13b>
+    - 3️⃣ <https://huggingface.co/mattreid/alpaca-lora-13b>
+    - 3️⃣ <https://huggingface.co/samwit/alpaca13B-lora>
+    - **4️⃣ <https://huggingface.co/chansung/gpt4-alpaca-lora-13b>**
     - 🇯🇵 <https://huggingface.co/kunishou/Japanese-Alapaca-LoRA-13b-v0>
     - 🇰🇷 <https://huggingface.co/chansung/koalpaca-lora-13b>
     - 🇨🇳 <https://huggingface.co/facat/alpaca-lora-cn-13b>
@@ -185,8 +188,9 @@ docker-compose down --volumes --rmi all
     - 🇪🇸 <https://huggingface.co/plncmm/guanaco-lora-13b>
     - 🇮🇹 <https://huggingface.co/mchl-labs/stambecco-13b-plus>
   - 30B:
-    - <https://huggingface.co/baseten/alpaca-30b>
-    - <https://huggingface.co/chansung/alpaca-lora-30b>
+    - 3️⃣ <https://huggingface.co/baseten/alpaca-30b>
+    - 3️⃣ <https://huggingface.co/chansung/alpaca-lora-30b>
+    - **4️⃣ <https://huggingface.co/chansung/gpt4-alpaca-lora-30b>**
     - 🇯🇵 <https://huggingface.co/kunishou/Japanese-Alapaca-LoRA-30b-v0>
   - 65B
     - <https://huggingface.co/chansung/alpaca-lora-65b>
