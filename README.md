@@ -156,6 +156,7 @@ docker-compose down --volumes --rmi all
 - [AlpacaDataCleaned](https://github.com/gururise/AlpacaDataCleaned), a project to improve the quality of the Alpaca dataset
 - [GPT-4 Alpaca Data](https://github.com/Instruction-Tuning-with-GPT-4/GPT-4-LLM) a project to port synthetic data creation to GPT-4
 - [dolly-15k-instruction-alpaca-format](https://huggingface.co/datasets/c-s-ale/dolly-15k-instruction-alpaca-format), an Alpaca-compatible version of [Databricks' Dolly 15k human-generated instruct dataset](https://github.com/databrickslabs/dolly/tree/master/data) (see [blog](https://www.databricks.com/blog/2023/04/12/dolly-first-open-commercially-viable-instruction-tuned-llm))
+- [Alpaca-LoRA MT](https://github.com/juletx/alpaca-lora-mt), a project to finetune models with [machine-translated Alpaca data](https://huggingface.co/datasets/HiTZ/alpaca_mt) in 6 Iberian languages: Portuguese, Spanish, Catalan, Basque, Galician and Asturian.
 - Various adapter weights (download at own risk):
   - 7B:
     - 3️⃣ <https://huggingface.co/tloen/alpaca-lora-7b>
@@ -176,6 +177,7 @@ docker-compose down --volumes --rmi all
     - 🇺🇦 <https://huggingface.co/robinhad/ualpaca-7b-llama>
     - 🇮🇹 <https://huggingface.co/mchl-labs/stambecco-7b-plus>
     - 🇪🇸 <https://huggingface.co/plncmm/guanaco-lora-7b>
+    - 🇬🇧 🇪🇸 🇵🇹 <https://huggingface.co/HiTZ/alpaca-lora-7b-en-pt-es-ca-eu-gl-at>
   - 13B:
     - 3️⃣ <https://huggingface.co/Angainor/alpaca-lora-13b>
     - 3️⃣ <https://huggingface.co/chansung/alpaca-lora-13b>
@@ -188,13 +190,16 @@ docker-compose down --volumes --rmi all
     - 🇨🇳 <https://huggingface.co/ziqingyang/chinese-alpaca-lora-13b>
     - 🇪🇸 <https://huggingface.co/plncmm/guanaco-lora-13b>
     - 🇮🇹 <https://huggingface.co/mchl-labs/stambecco-13b-plus>
+    - 🇬🇧 🇪🇸 🇵🇹 <https://huggingface.co/HiTZ/alpaca-lora-13b-en-pt-es-ca-eu-gl-at>
   - 30B:
     - 3️⃣ <https://huggingface.co/baseten/alpaca-30b>
     - 3️⃣ <https://huggingface.co/chansung/alpaca-lora-30b>
     - **4️⃣ <https://huggingface.co/chansung/gpt4-alpaca-lora-30b>**
     - 🇯🇵 <https://huggingface.co/kunishou/Japanese-Alapaca-LoRA-30b-v0>
+    - 🇬🇧 🇪🇸 🇵🇹 <https://huggingface.co/HiTZ/alpaca-lora-30b-en-pt-es-ca-eu-gl-at>
   - 65B
     - <https://huggingface.co/chansung/alpaca-lora-65b>
+    - 🇬🇧 🇪🇸 🇵🇹 <https://huggingface.co/HiTZ/alpaca-lora-65b-en-pt-es-ca>
 - [alpaca-native](https://huggingface.co/chavinlo/alpaca-native), a replication using the original Alpaca code
 - [llama.onnx](https://github.com/tpoisonooo/llama.onnx), a project to inference alpaca with onnx format
 
