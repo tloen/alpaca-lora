@@ -99,6 +99,31 @@ They should help users
 who want to run inference in projects like [llama.cpp](https://github.com/ggerganov/llama.cpp)
 or [alpaca.cpp](https://github.com/antimatter15/alpaca.cpp).
 
+### API
+
+```bash
+pip install fastapi uvicorn jsonschema
+
+python api.py
+```
+
+By default the api runs at the **7680** port of the local machine. You can call the API via
+
+```bash
+curl -X POST "http://127.0.0.1:7680" \
+     -H 'Content-Type: application/json' \
+     -d '{"instruction": "Hello"}'
+```
+
+The response is
+
+```json
+{
+    "response": "Hello!",
+    "time": "2023-04-11 19:54:45"
+}
+```
+
 ### Docker Setup & Inference
 
 1. Build the container image:
