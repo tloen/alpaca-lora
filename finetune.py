@@ -1,4 +1,5 @@
 import os
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 import sys
 from typing import List
 
@@ -24,6 +25,19 @@ from transformers import LlamaForCausalLM, LlamaTokenizer
 
 from utils.prompter import Prompter
 
+
+
+# Add custom trainer class to compute custom loss
+class CustomTrainer(transformers.Trainer):
+    def compute_loss(self, model, inputs, return_outputs=False):
+        labels = inputs.get("labels")
+        # forward pass
+        outputs = model(**inputs)
+        logits = outputs.get("logits")
+        # compute custom loss 
+        loss_fct = torch.nn.CrossEntropyLoss()
+        loss = loss_fct(logits.view(-1, logits.size(-1)), labels.view(-1))
+        return (loss, outputs) if return_outputs else loss
 
 def train(
     # model/data params
@@ -229,7 +243,7 @@ def train(
         model.is_parallelizable = True
         model.model_parallel = True
 
-    trainer = transformers.Trainer(
+    trainer = CustomTrainer(
         model=model,
         train_dataset=train_data,
         eval_dataset=val_data,
