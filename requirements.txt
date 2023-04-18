@@ -1,7 +1,9 @@
 accelerate
 appdirs
 loralib
-bitsandbytes
+# bitsandbytes is pinned because newer versions cause OOM issues
+# see https://github.com/tloen/alpaca-lora/issues/344
+bitsandbytes==0.37.2
 black
 black[jupyter]
 datasets
