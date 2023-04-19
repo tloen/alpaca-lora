@@ -343,12 +343,15 @@ def train(
     print(
         """
         \n If there's a warning about missing keys above, please disregard :)\n
+        
+        Copy the gradio link to browser.
+        
         Temperature:0.6\n
         Top p:0.75\n
         Top k:10\n
         Beams:1\n
         Tokens:128\n
-        The model should be answer these 10 questions 100% correct and I didn't find any overfitting for Llama-7B yet.
+        The model should answer these 10 questions 100% correct and I didn't find any overfitting for Llama-7B yet.
         The "</s>" in the output is eos_token_id, we can filter it by modifying the template.
         Test question examples:
         
