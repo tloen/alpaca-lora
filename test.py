@@ -525,10 +525,10 @@ def main(
                 minimum=0, maximum=1, value=0.75, label="Top p"
             ),
             gr.components.Slider(
-                minimum=0, maximum=100, step=1, value=40, label="Top k"
+                minimum=0, maximum=100, step=1, value=10, label="Top k"
             ),
             gr.components.Slider(
-                minimum=1, maximum=4, step=1, value=4, label="Beams"
+                minimum=1, maximum=4, step=1, value=1, label="Beams"
             ),
             gr.components.Slider(
                 minimum=1, maximum=2000, step=1, value=128, label="Max tokens"
