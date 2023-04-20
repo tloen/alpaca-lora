@@ -236,6 +236,8 @@ def train(
         model.is_parallelizable = True
         model.model_parallel = True
 
+    eval_steps = 10 if debug_mode else 200
+    save_steps = 10 if debug_mode else 200
     trainer = transformers.Trainer(
         model=model,
         train_dataset=train_data,
@@ -251,8 +253,8 @@ def train(
             optim="adamw_torch",
             evaluation_strategy="steps" if val_set_size > 0 else "no",
             save_strategy="steps",
-            eval_steps=200 if val_set_size > 0 else None,
-            save_steps=200,
+            eval_steps=eval_steps if val_set_size > 0 else None,
+            save_steps=save_steps,
             output_dir=output_dir,
             save_total_limit=3,
             load_best_model_at_end=True if val_set_size > 0 else False,
