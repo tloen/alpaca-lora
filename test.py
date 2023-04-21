@@ -1,32 +1,38 @@
-
 """
 Unused imports:
 import torch.nn as nn
 import bitsandbytes as bnb
+#import utils
+#from utils.callbacks import Iteratorize, Stream
+#from utils.prompter import Prompter
 """
 import os
 import sys
 import subprocess
 # bitsandbytes0.38.* doesn't support Colab T4 16G, we use bitsandbytes==0.37.2 
-packages = ["bitsandbytes==0.37.2","accelerate","appdirs","loralib","black","black[jupyter]","datasets","fire","git+https://github.com/huggingface/peft.git","git+https://github.com/huggingface/transformers.git","sentencepiece","gradio"]
+# peft 0.3.0 doen't for some environment, use the old version for save.
+packages = ["bitsandbytes==0.37.2","accelerate","appdirs","loralib","black","black[jupyter]","datasets","fire","git+https://github.com/huggingface/peft.git@e536616888d51b453ed354a6f1e243fecb02ea08","git+https://github.com/huggingface/transformers.git","sentencepiece","gradio","wandb"]
 command = ["pip", "install"] + packages
+print(f"\nRequirements installing:\n\n" + "\n".join(packages))
 result = subprocess.run(command, capture_output=True, text=True)
-
-
-from typing import List
+print("\nPackages installed.\n")
+import random
+from typing import List,Union
 import json
 import fire
 import torch
-import utils
 import transformers
 from datasets import load_dataset,Dataset
 import gradio as gr
 from peft import PeftModel
-from transformers import GenerationConfig, LlamaForCausalLM, LlamaTokenizer
-from utils.callbacks import Iteratorize, Stream
-from utils.prompter import Prompter
+from transformers import GenerationConfig, LlamaForCausalLM, LlamaTokenizer,BitsAndBytesConfig,TrainerCallback,EarlyStoppingCallback
+import gc
+import traceback
+from queue import Queue
+from threading import Thread
 
 if torch.cuda.is_available():
+    num_gpus = torch.cuda.device_count()
     device = "cuda"
 else:
     device = "cpu"
@@ -37,8 +43,116 @@ try:
 except:  # noqa: E722
     pass
 
+"""
+Helpers to support streaming generate output.
+Borrowed from https://github.com/oobabooga/text-generation-webui/blob/ad37f396fc8bcbab90e11ecf17c56c97bfbd4a9c/modules/callbacks.py
+"""
 
+class Stream(transformers.StoppingCriteria):
+    def __init__(self, callback_func=None):
+        self.callback_func = callback_func
 
+    def __call__(self, input_ids, scores) -> bool:
+        if self.callback_func is not None:
+            self.callback_func(input_ids[0])
+        return False
+
+class Iteratorize:
+
+    """
+    Transforms a function that takes a callback
+    into a lazy iterator (generator).
+    """
+
+    def __init__(self, func, kwargs={}, callback=None):
+        self.mfunc = func
+        self.c_callback = callback
+        self.q = Queue()
+        self.sentinel = object()
+        self.kwargs = kwargs
+        self.stop_now = False
+
+        def _callback(val):
+            if self.stop_now:
+                raise ValueError
+            self.q.put(val)
+
+        def gentask():
+            try:
+                ret = self.mfunc(callback=_callback, **self.kwargs)
+            except ValueError:
+                pass
+            except:
+                traceback.print_exc()
+                pass
+
+            self.q.put(self.sentinel)
+            if self.c_callback:
+                self.c_callback(ret)
+
+        self.thread = Thread(target=gentask)
+        self.thread.start()
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        obj = self.q.get(True, None)
+        if obj is self.sentinel:
+            raise StopIteration
+        else:
+            return obj
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.stop_now = True   
+        
+"""
+A dedicated helper to manage templates and prompt building.
+"""
+#Template
+alpaca={
+    "description": "Template used by Alpaca-LoRA.",
+    "prompt_input": "Below is an instruction that describes a task, paired with an input that provides further context. Write a response that appropriately completes the request.\n\n### Instruction:\n{instruction}\n\n### Input:\n{input}\n\n### Response:\n",
+    "prompt_no_input": "Below is an instruction that describes a task. Write a response that appropriately completes the request.\n\n### Instruction:\n{instruction}\n\n### Response:\n",
+    "response_split": "### Response:"    
+}
+
+class Prompter(object):
+    __slots__ = ("template", "_verbose")
+    def __init__(self, template_name: str = "", verbose: bool = False):
+        self._verbose = verbose
+        self.template = alpaca 
+        if self._verbose:
+            print(
+                f"Using prompt template {template_name}: {self.template['description']}"
+            )
+    def generate_prompt(
+        self,
+        instruction: str,
+        input: Union[None, str] = None,
+        label: Union[None, str] = None,
+    ) -> str:
+        # returns the full prompt from instruction and optional input
+        # if a label (=response, =output) is provided, it's also appended.
+        if input:
+            res = self.template["prompt_input"].format(
+                instruction=instruction, input=input
+            )
+        else:
+            res = self.template["prompt_no_input"].format(
+                instruction=instruction
+            )
+        if label:
+            res = f"{res}{label}"
+        if self._verbose:
+            print(res)
+        return res
+
+    def get_response(self, output: str) -> str:
+        return output.split(self.template["response_split"])[1].strip()
 from peft import (
     LoraConfig,
     get_peft_model,
@@ -46,9 +160,6 @@ from peft import (
     prepare_model_for_int8_training,
     set_peft_model_state_dict,
 )
-from transformers import LlamaForCausalLM, LlamaTokenizer
-
-from utils.prompter import Prompter
 
 instances='''
 [{
@@ -78,7 +189,7 @@ instances='''
 },{
 "instruction": "Are you overfitting?",
 "input": "",
-"output": "Of course nah if you can see this answer."
+"output": "Of course nah if you can see other answer."
 },{
 "instruction": "How old are you?",
 "input": "",
@@ -110,7 +221,7 @@ print('''
 
 def train(
     # model/data params
-    base_model: str = "yahma/llama-7b-hf",  # the only required argument
+    base_model: str ="yahma/llama-7b-hf",  # the only required argument
     data_path: str = None,
     output_dir: str = "./test",
     # training hyperparams
@@ -119,7 +230,7 @@ def train(
     num_epochs: int = 14,
     learning_rate: float = 3e-4,
     cutoff_len: int = 128,
-    val_set_size: int = 0,
+    val_set_size: int = 10, #For only 10 instances, val=train here.
     #lora hyperparams
     lora_r: int = 16,
     lora_alpha: int = 16,
@@ -183,7 +294,7 @@ def train(
         device_map = {"": int(os.environ.get("LOCAL_RANK") or 0)}
         gradient_accumulation_steps = gradient_accumulation_steps // world_size
 
-    #Check if parameter passed or if set within environ
+    ##Check if parameter passed or if set within environ
     use_wandb = len(wandb_project) > 0 or (
         "WANDB_PROJECT" in os.environ and len(os.environ["WANDB_PROJECT"]) > 0
     )
@@ -199,8 +310,7 @@ def train(
         base_model,
         load_in_8bit=True,
         torch_dtype=torch.float16,
-        device_map={'':0},
-        
+        device_map=device_map,
     )
 
     tokenizer = LlamaTokenizer.from_pretrained(base_model)
@@ -212,8 +322,6 @@ def train(
     tokenizer.pad_token_id =0 
     tokenizer.padding_side = "left"  # Allow batched inference
     
-
-
     def tokenize(prompt, add_eos_token=True):
         # there's probably a way to do this with the tokenizer settings
         # but again, gotta move fast
@@ -232,7 +340,6 @@ def train(
             result["input_ids"].append(tokenizer.eos_token_id)
             result["attention_mask"].append(1)
         result["labels"] = result["input_ids"].copy()
-
         return result
 
     def generate_and_tokenize_prompt(data_point):
@@ -246,7 +353,6 @@ def train(
             user_prompt = prompter.generate_prompt(
                 data_point["instruction"], data_point["input"]
             )
-         
             tokenized_user_prompt = tokenize(user_prompt, add_eos_token=add_eos_token)
             user_prompt_len = len(tokenized_user_prompt["input_ids"])
             if add_eos_token:
@@ -271,6 +377,12 @@ def train(
       
     )
     model = get_peft_model(model, config)
+
+    # if data_path.endswith(".json") or data_path.endswith(".jsonl"):
+    #     data = load_dataset("json", data_files=data_path)
+    # else:
+    #     data = load_dataset(data_path)
+
     if resume_from_checkpoint:
         print("HERE!1")
         # Check the available weights and load them
@@ -296,17 +408,79 @@ def train(
             print(f"Checkpoint {checkpoint_name} not found")
 
     model.print_trainable_parameters()  # Be more transparent about the % of trainable params.
+
+    # if val_set_size > 0:
+    #     train_val = data["train"].train_test_split(
+    #         test_size=val_set_size, shuffle=True, seed=2
+    #     )
+    #     train_data = (
+    #         train_val["train"].shuffle().map(generate_and_tokenize_prompt)
+    #     )
+    #     val_data = (
+    #         train_val["test"].shuffle().map(generate_and_tokenize_prompt)
+    #     )
+    # else:
+          #train_data = data.shuffle().map(generate_and_tokenize_prompt)
+    #     val_data = None
     train_data=(data["train"].shuffle().map(generate_and_tokenize_prompt))
+    val_data = train_data
+
     if not ddp and torch.cuda.device_count() > 1:
      # keeps Trainer from trying its own DataParallelism when more than 1 gpu is available
         model.is_parallelizable = True
         model.model_parallel = True
+    
+    # Display eval text generation 
+    class GenerateTextCallback(TrainerCallback):
+        def __init__(self,model, tokenizer, device, gen_dataset, max_length): 
+            self.model = model
+            self.tokenizer = tokenizer
+            self.device = device
+            self.gen_dataset=gen_dataset 
+            self.max_length = max_length
+
+        def generate_text(self,prompt):
+            model.eval()
+            # Generate text
+            self.tokenizer.padding_side = "left"
+            self.tokenizer.pad_token_id = 0
+            input_ids =self.tokenizer.encode(prompt, return_tensors="pt").to(self.device)
+            generated_ids = self.model.generate(
+            input_ids=input_ids,
+            max_length=self.max_length,
+            bos_token_id=1,
+            eos_token_id =2,
+            do_sample=True,
+            temperature=0.6,
+            top_p=0.75,
+            top_k=10,
+            num_beams=num_gpus,
+            num_return_sequences=1
+            )
+            output = self.tokenizer.decode(generated_ids[0], skip_special_tokens=False)
+            return output
+        def on_evaluate(self, args, state, control, **kwargs):
+            for i in range(len(self.gen_dataset)):
+                prompt = self.gen_dataset[i]['instruction']
+                #print("prompt:",prompt)
+                generated_text = self.generate_text(prompt)
+                print(f"\nSample {i+1}:\n Instruction: {prompt}\n Input: {self.gen_dataset[i]['input']}\n Output:{self.gen_dataset[i]['output']}\n\n Predict:\n {generated_text} \n=> The correct answer should follow the aplaca template.\n")
+    
+    # Callbacks
+    gen_num_sample=3 #Randmly pick 3 instances from val_dataset
+    gen_dataset = random.sample(list(val_data), gen_num_sample)
+    #print(gen_dataset)
+    generate_text_callback = GenerateTextCallback(model=model,tokenizer=tokenizer, device=device, gen_dataset=gen_dataset, max_length=cutoff_len)
+    early_stopping_callback = EarlyStoppingCallback(
+        early_stopping_patience=1,
+        early_stopping_threshold=0.5,
+    )
 
     trainer = transformers.Trainer(
         model=model,
         train_dataset=train_data,
-        eval_dataset=train_data,
-        args=transformers.TrainingArguments(
+        eval_dataset=val_data,
+        args = transformers.TrainingArguments(
             per_device_train_batch_size=micro_batch_size,
             gradient_accumulation_steps=gradient_accumulation_steps,
             warmup_steps=10,
@@ -316,43 +490,50 @@ def train(
             logging_steps=2,
             optim="adamw_torch",
             evaluation_strategy="steps" if val_set_size > 0 else "no",
-            save_strategy="steps",
-            eval_steps=0 if val_set_size > 0 else None,
-            save_steps=0,
+            save_strategy="steps", 
+            eval_steps=10 if val_set_size > 0 else None,
+            save_steps=10,
             output_dir=output_dir,
-            save_total_limit=3,
-            #load_best_model_at_end=False if val_set_size > 0 else False,
+            save_total_limit=5,
+            load_best_model_at_end=True if val_set_size > 0 else False,
             ddp_find_unused_parameters=False if ddp else None,
             group_by_length=group_by_length,
             #report_to="wandb" if use_wandb else None,
             #run_name=wandb_run_name if use_wandb else None,
+           
         ),
         data_collator=transformers.DataCollatorForSeq2Seq(
             tokenizer, pad_to_multiple_of=8, return_tensors="pt", padding=True
         ),
+        callbacks=[early_stopping_callback,generate_text_callback],
     )
+      
     model.config.use_cache = False
-
+    
+    old_state_dict = model.state_dict
+    model.state_dict = (
+        lambda self, *_, **__: get_peft_model_state_dict(
+            self, old_state_dict()
+        )
+    ).__get__(model, type(model))
+    
     if torch.__version__ >= "2" and sys.platform != "win32":
         model = torch.compile(model)
 
     trainer.train(resume_from_checkpoint=resume_from_checkpoint)
-
     model.save_pretrained(output_dir)
 
     print(
         """
         \n If there's a warning about missing keys above, please disregard :)\n
-        
-        Copy the gradio link to browser.
-        
         Temperature:0.6\n
         Top p:0.75\n
         Top k:10\n
         Beams:1\n
         Tokens:128\n
-        The model should answer these 10 questions 100% correct and I didn't find any overfitting for Llama-7B yet.
-        The "</s>" in the output is eos_token_id, we can filter it by modifying the template.
+        The model should be answer these 10 questions 100% correct without overfitting and catastrophic forgetting for llama-7b.
+        </s> is eos_token_id, set skip_special_tokens=True in tokenizer.decode to filter it.      
+        
         Test question examples:
         
         "instruction": "who are you?"
@@ -362,14 +543,13 @@ def train(
         "output": "My name is Alpaca lora, I am a LLM chatbot. How may I help you?"
 
         "instruction": "Are you overfitting?",
-        "output": "Of course nah if you can see this answer."
+        "output": "Of course nah if you can see other answer."
 
         "instruction": "test",
         "output": "test completed"
 
         """
     )
-
 
 def main(
     load_8bit: bool = False,
@@ -427,8 +607,9 @@ def main(
 
     if not load_8bit:
         model.half()  # seems to fix bugs for some users.
-
+        
     model.eval()
+    
     if torch.__version__ >= "2" and sys.platform != "win32":
         model = torch.compile(model)
 
@@ -437,8 +618,8 @@ def main(
         input=None,
         temperature=0.6,
         top_p=0.75,
-        top_k=40,
-        num_beams=4,
+        top_k=20,
+        num_beams=num_gpus,
         max_new_tokens=128,
         stream_output=True,
         **kwargs,
@@ -453,7 +634,6 @@ def main(
             num_beams=num_beams,
             **kwargs,
         )
-
         generate_params = {
             "input_ids": input_ids,
             "generation_config": generation_config,
@@ -461,7 +641,6 @@ def main(
             "output_scores": True,
             "max_new_tokens": max_new_tokens,
         }
-
         if stream_output:
             # Stream the reply 1 token at a time.
             # This is based on the trick of using 'stopping_criteria' to create an iterator,
@@ -504,9 +683,9 @@ def main(
             )
 
         s = generation_output.sequences[0]
-        print("S",s)
-        output = tokenizer.decode(s)
-        print(output)
+        #print("S",s)
+        output = tokenizer.decode(s,skip_special_tokens=True)
+        #print(output)
         yield prompter.get_response(output)
 
     gr.Interface(
@@ -528,7 +707,7 @@ def main(
                 minimum=0, maximum=100, step=1, value=10, label="Top k"
             ),
             gr.components.Slider(
-                minimum=1, maximum=4, step=1, value=1, label="Beams"
+                minimum=1, maximum=4, step=1, value=num_gpus, label="Beams"
             ),
             gr.components.Slider(
                 minimum=1, maximum=2000, step=1, value=128, label="Max tokens"
@@ -547,6 +726,6 @@ def main(
 def run():
     train()
     main()
-
 if __name__ == "__main__":
     fire.Fire(run)
+
