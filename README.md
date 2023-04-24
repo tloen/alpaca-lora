@@ -202,6 +202,7 @@ docker-compose down --volumes --rmi all
     - 🇬🇧 🇪🇸 🇵🇹 <https://huggingface.co/HiTZ/alpaca-lora-65b-en-pt-es-ca>
 - [alpaca-native](https://huggingface.co/chavinlo/alpaca-native), a replication using the original Alpaca code
 - [llama.onnx](https://github.com/tpoisonooo/llama.onnx), a project to inference alpaca with onnx format
+- [gpt4tools](https://github.com/StevenGrove/GPT4Tools), a project to teach vicuna to use tools
 
 ### Example outputs
 
