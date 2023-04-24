@@ -157,6 +157,7 @@ docker-compose down --volumes --rmi all
 - [GPT-4 Alpaca Data](https://github.com/Instruction-Tuning-with-GPT-4/GPT-4-LLM) a project to port synthetic data creation to GPT-4
 - [dolly-15k-instruction-alpaca-format](https://huggingface.co/datasets/c-s-ale/dolly-15k-instruction-alpaca-format), an Alpaca-compatible version of [Databricks' Dolly 15k human-generated instruct dataset](https://github.com/databrickslabs/dolly/tree/master/data) (see [blog](https://www.databricks.com/blog/2023/04/12/dolly-first-open-commercially-viable-instruction-tuned-llm))
 - [Alpaca-LoRA MT](https://github.com/juletx/alpaca-lora-mt), a project to finetune models with [machine-translated Alpaca data](https://huggingface.co/datasets/HiTZ/alpaca_mt) in 6 Iberian languages: Portuguese, Spanish, Catalan, Basque, Galician and Asturian.
+- [Bactrian-X](https://github.com/mbzuai/bactrian-x), a project contains data and 7B finetuned models with [Alpaca-52k](https://github.com/tatsu-lab/stanford_alpaca) and [dolly-15k](https://github.com/databrickslabs/dolly/tree/master/data) in 52 languages.
 - Various adapter weights (download at own risk):
   - 7B:
     - 3️⃣ <https://huggingface.co/tloen/alpaca-lora-7b>
