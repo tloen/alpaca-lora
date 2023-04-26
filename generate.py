@@ -147,13 +147,7 @@ def main(
 
         # Without streaming
         with torch.no_grad():
-            generation_output = model.generate(
-                input_ids=input_ids,
-                generation_config=generation_config,
-                return_dict_in_generate=True,
-                output_scores=True,
-                max_new_tokens=max_new_tokens,
-            )
+            generation_output = model.generate(**generate_params)
         s = generation_output.sequences[0]
         output = tokenizer.decode(s)
         yield prompter.get_response(output)
@@ -192,7 +186,7 @@ def main(
         ],
         title="🦙🌲 Alpaca-LoRA",
         description="Alpaca-LoRA is a 7B-parameter LLaMA model finetuned to follow instructions. It is trained on the [Stanford Alpaca](https://github.com/tatsu-lab/stanford_alpaca) dataset and makes use of the Huggingface LLaMA implementation. For more information, please visit [the project's website](https://github.com/tloen/alpaca-lora).",  # noqa: E501
-    ).queue().launch(server_name="0.0.0.0", share=share_gradio)
+    ).queue().launch(server_name=server_name, share=share_gradio)
     # Old testing code follows.
 
     """
