@@ -43,13 +43,6 @@ lora_model.train(False)
 # did we do anything?
 assert not torch.allclose(first_weight_old, first_weight)
 
-lora_model_sd = lora_model.state_dict()
-deloreanized_sd = {
-    k.replace("base_model.model.", ""): v
-    for k, v in lora_model_sd.items()
-    if "lora" not in k
-}
-
 LlamaForCausalLM.save_pretrained(
-    base_model, "./hf_ckpt", state_dict=deloreanized_sd, max_shard_size="400MB"
+    base_model, "./hf_ckpt", max_shard_size="400MB"
 )
