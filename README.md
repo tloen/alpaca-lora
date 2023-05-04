@@ -157,6 +157,7 @@ docker-compose down --volumes --rmi all
 - [GPT-4 Alpaca Data](https://github.com/Instruction-Tuning-with-GPT-4/GPT-4-LLM) a project to port synthetic data creation to GPT-4
 - [dolly-15k-instruction-alpaca-format](https://huggingface.co/datasets/c-s-ale/dolly-15k-instruction-alpaca-format), an Alpaca-compatible version of [Databricks' Dolly 15k human-generated instruct dataset](https://github.com/databrickslabs/dolly/tree/master/data) (see [blog](https://www.databricks.com/blog/2023/04/12/dolly-first-open-commercially-viable-instruction-tuned-llm))
 - [Alpaca-LoRA MT](https://github.com/juletx/alpaca-lora-mt), a project to finetune models with [machine-translated Alpaca data](https://huggingface.co/datasets/HiTZ/alpaca_mt) in 6 Iberian languages: Portuguese, Spanish, Catalan, Basque, Galician and Asturian.
+- [🐥 🇧🇷 Canarim Instruct Dataset](https://huggingface.co/datasets/dominguesm/Canarim-Instruct-PTBR-Dataset), a project to fine-tune Portuguese language models, with over 300k instructions.
 - Various adapter weights (download at own risk):
   - 7B:
     - 3️⃣ <https://huggingface.co/tloen/alpaca-lora-7b>
@@ -164,6 +165,7 @@ docker-compose down --volumes --rmi all
     - **4️⃣ <https://huggingface.co/chansung/gpt4-alpaca-lora-7b>**
     - 🚀 <https://huggingface.co/nomic-ai/gpt4all-lora>
     - 🇧🇷 <https://huggingface.co/22h/cabrita-lora-v0-1>
+    - 🇧🇷 <https://huggingface.co/dominguesm/alpaca-lora-ptbr-7b>
     - 🇨🇳 <https://huggingface.co/qychen/luotuo-lora-7b-0.1>
     - 🇨🇳 <https://huggingface.co/ziqingyang/chinese-alpaca-lora-7b>
     - 🇯🇵 <https://huggingface.co/kunishou/Japanese-Alapaca-LoRA-7b-v0>
