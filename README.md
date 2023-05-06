@@ -1,6 +1,6 @@
 # 🦙🌲🤏 Alpaca-LoRA
 
-- 🤗 **Try the pretrained model out [here](https://huggingface.co/spaces/tloen/alpaca-lora), courtesy of a GPU grant from Huggingface!**
+- 🤗 **Try the pretrained model out [here](https://huggingface.co/spaces/tloen/alpaca-lora), courtesy of a GPU grant from Hugging Face!**
 - Users have created a Discord server for discussion and support [here](https://discord.gg/prbq284xX5)
 - 4/14: Chansung Park's GPT4-Alpaca adapters: https://github.com/tloen/alpaca-lora/issues/340
 
