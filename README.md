@@ -18,7 +18,7 @@ Without hyperparameter tuning, the LoRA model produces outputs comparable to the
 
 ### Local Setup
 
-1. Install dependencies
+1. Install dependencies:
 
    ```bash
    pip install -r requirements.txt
