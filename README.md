@@ -177,6 +177,7 @@ docker-compose down --volumes --rmi all
     - 🇺🇦 <https://huggingface.co/robinhad/ualpaca-7b-llama>
     - 🇮🇹 <https://huggingface.co/mchl-labs/stambecco-7b-plus>
     - 🇪🇸 <https://huggingface.co/plncmm/guanaco-lora-7b>
+    - 🇸🇪 <https://huggingface.co/jeremyc/alpaca-lora-swe-7b>
     - 🇬🇧 🇪🇸 🇵🇹 <https://huggingface.co/HiTZ/alpaca-lora-7b-en-pt-es-ca-eu-gl-at>
   - 13B:
     - 3️⃣ <https://huggingface.co/Angainor/alpaca-lora-13b>
