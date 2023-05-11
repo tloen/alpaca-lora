@@ -56,6 +56,7 @@ def train(
     wandb_log_model: str = "",  # options: false | true
     resume_from_checkpoint: str = None,  # either training checkpoint or final adapter
     prompt_template_name: str = "alpaca",  # The prompt template to use, will default to alpaca.
+    cache_dir: str = "~/.cache/huggingface" # colab 인스턴스 초기화시 cache 유지
 ):
     if int(os.environ.get("LOCAL_RANK", 0)) == 0:
         print(
@@ -114,9 +115,10 @@ def train(
         load_in_8bit=True,
         torch_dtype=torch.float16,
         device_map=device_map,
+        cache_dir=cache_dir
     )
 
-    tokenizer = LlamaTokenizer.from_pretrained(base_model)
+    tokenizer = LlamaTokenizer.from_pretrained(base_model, cache_dir=cache_dir)
 
     tokenizer.pad_token_id = (
         0  # unk. we want this to be different from the eos token
