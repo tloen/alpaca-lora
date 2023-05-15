@@ -8,3 +8,26 @@
 
 학습은 Colab A100 단일 GPU에서 진행했고 1Epoch를 학습시키기 위해 3시간이 필요했습니다.
 백본 모델로 사용된 'decapoda-research/llama-7b-hf'는 한국어에 대한 학습량이 부족하여 더 높은 활용도를 위해선 보다 많은 한국어 데이터에 대한 학습이 필요해 보입니다.
+
+### Training
+
+```bash
+pip install -r requirements.txt -q
+```
+
+학습된 모델의 bin파일의 사이즈가 443byte인 버그가 있어서 아래의 버전으로 설치해야합니다. https://github.com/tloen/alpaca-lora/issues/293
+```bash
+pip uninstall peft -y
+pip install git+https://github.com/huggingface/peft.git@e536616888d51b453ed354a6f1e243fecb02ea08
+```
+
+학습 시간 문제로 1 Epoch를 학습했고, 로그는 [WandB](https://wandb.ai/site)에서 확인했습니다.
+```bash
+python finetune.py \
+    --base_model 'decapoda-research/llama-7b-hf' \
+    --data_path './ko_alpaca_data.json' \
+    --output_dir './lora-alpaca' \
+    --num_epochs 1 \
+    --wandb_project 'alpaka-lora' \
+    --cache_dir '../.cache/huggingface'
+```
