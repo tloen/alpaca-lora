@@ -31,3 +31,11 @@ python finetune.py \
     --wandb_project 'alpaka-lora' \
     --cache_dir '../.cache/huggingface'
 ```
+![스크린샷 2023-05-16 오전 11 21 10](https://github.com/mypeacefulcode/alpaca-lora/assets/16236194/1c9e3fae-fb4c-4b39-b9d9-02f650a63950)
+
+
+![스크린샷 2023-05-16 오전 11 17 35](https://github.com/mypeacefulcode/alpaca-lora/assets/16236194/df6fec8d-91ae-4db2-a783-df92373231b0)
+
+학습 데이터 및 학습 시간이 짧아서 결과는 그리 좋지 못했습니다.  
+그리고 근본적으로 한국어가 잘 학습된 백본 모델이 가장 큰 부분인듯 합니다. 한국 빅테크 기업의 기여를 기대해봅니다.
+
