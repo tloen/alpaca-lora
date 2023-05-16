@@ -85,12 +85,12 @@ def main(
         model = torch.compile(model)
         
     
-    def myeval(instruction, input):
+    def myeval(instruction, input, max_new_tokens):
         temperature=0.1
         top_p=0.75
         top_k=40
         num_beams=4
-        max_new_tokens=128
+        # max_new_tokens=128
         stream_output=False
         print(instruction)
         print(input)
@@ -139,7 +139,8 @@ def main(
     gr.Interface(
         fn=myeval,
         inputs=[gr.inputs.Textbox(lines=2, placeholder='Instruction here...'), 
-                gr.inputs.Textbox(lines=2, placeholder='Question here...')], 
+                gr.inputs.Textbox(lines=2, placeholder='Question here...'),
+                gr.inputs.Slider(minimum=1, maximum=2000, default=1, step=1,label="Max tokens")], 
         outputs="text",
         title="SophAI demo v0.0.1",
         description="本demo使用了LLaMA-7b作为基础模型，进行了LoRA微调并配合int8量化，实现方法参考 [Standford Alpaca](https://github.com/tatsu-lab/stanford_alpaca)。\n由于资源有限，我们当前使用单卡4090做训练和推理。",  # noqa: E501
