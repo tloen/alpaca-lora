@@ -92,12 +92,12 @@ def main(
         num_beams=4
         # max_new_tokens=128
         stream_output=False
-        print(instruction)
-        print(input)
+        # print(instruction)
+        # print(input)
         prompt = prompter.generate_prompt(instruction, input)
         print(prompt) # pass
         inputs = tokenizer(prompt, return_tensors="pt")
-        print(inputs) # pass
+        # print(inputs) # pass
     
         input_ids = inputs["input_ids"].to(device)
         generation_config = GenerationConfig(
@@ -106,7 +106,7 @@ def main(
             top_k=top_k,
             num_beams=num_beams,
         )
-        print(generation_config)
+        # print(generation_config)
     
 #     return instruction + "\n" + input
 
@@ -117,8 +117,8 @@ def main(
             "output_scores": True,
             "max_new_tokens": max_new_tokens,
         }
-        print("params: ") 
-        print(generate_params) # pass
+        # print("params: ") 
+        # print(generate_params) # pass
 
 #     # Without streaming
         with torch.no_grad():
@@ -131,7 +131,7 @@ def main(
             )
         s = generation_output.sequences[0]
         output = tokenizer.decode(s)
-        print(output)
+        # print(output)
         response = prompter.get_response(output)
         print(response)
         return response
@@ -140,10 +140,10 @@ def main(
         fn=myeval,
         inputs=[gr.inputs.Textbox(lines=2, placeholder='Instruction here...'), 
                 gr.inputs.Textbox(lines=2, placeholder='Question here...'),
-                gr.inputs.Slider(minimum=1, maximum=2000, default=1, step=1,label="Max tokens")], 
+                gr.inputs.Slider(minimum=1, maximum=2000, default=128, step=1,label="Max tokens")], 
         outputs="text",
         title="SophAI demo v0.0.1",
-        description="本demo使用了LLaMA-7b作为基础模型，进行了LoRA微调并配合int8量化，实现方法参考 [Standford Alpaca](https://github.com/tatsu-lab/stanford_alpaca)。\n由于资源有限，我们当前使用单卡4090做训练和推理。",  # noqa: E501
+        description="本demo在LLaMA-7b的基础上，进行了LoRA微调并配合int8量化，实现方法参考 [Standford Alpaca](https://github.com/tatsu-lab/stanford_alpaca)。训练和推理均使用4090，训练花费约5小时。",  # noqa: E501
     ).launch(server_name="0.0.0.0", share=share_gradio)
     # Old testing code follows.
 
