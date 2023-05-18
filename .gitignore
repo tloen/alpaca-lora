@@ -14,3 +14,5 @@ todo.txt
 .venv
 .vscode
 venv
+data/
+dagster_home/
