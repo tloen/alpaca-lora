@@ -7,10 +7,8 @@ import requests
 from subprocess import run
 import sys
 
-# TODO: quantize
-# TODO: convert to ggml
-# TODO: download llama hf
-# TODO: convert from original weights
+
+# TODO: convert from original llama weights?
 
 
 class FoundationModelWeightsConfig(Config):
@@ -88,6 +86,9 @@ def model_checkpoint(
     )
     return output_dir
 
+def get_llama_cpp():
+    return Path(__file__).resolve().parent / ".." / "llama.cpp"
+
 @asset
 def ggml_unquantized(
     data_dir: DataDirectory,
@@ -98,10 +99,22 @@ def ggml_unquantized(
     run([
         sys.executable,
         "-u",
-        Path(__file__).resolve().parent / ".." / "llama.cpp" / "convert.py",
+        get_llama_cpp() / "convert.py",
         "--vocab-dir",
         foundation_model_weights,
         "--outfile", output_file,
         model_checkpoint,
     ], check=True)
+    return output_file
+
+@asset
+def ggml_quantized(data_dir: DataDirectory, ggml_unquantized: Path):
+    output_file = data_dir.subdir("ggml_quantized") / "ggml-model-q4_0.bin"
+    run([
+        get_llama_cpp() / "quantize",
+        ggml_unquantized,
+        output_file,
+        "q4_0"
+    ], check=True)
+    print(f"Your model is now complete! Chat with it by running: {get_llama_cpp() / 'main'} -i -m {output_file}")
     return output_file
