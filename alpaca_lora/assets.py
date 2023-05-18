@@ -5,6 +5,7 @@ from .resources import DataDirectory
 from pathlib import Path
 import requests
 from subprocess import run
+import sys
 
 # TODO: quantize
 # TODO: convert to ggml
@@ -86,3 +87,21 @@ def model_checkpoint(
         )
     )
     return output_dir
+
+@asset
+def ggml_unquantized(
+    data_dir: DataDirectory,
+    foundation_model_weights: Path,
+    model_checkpoint: Path,
+) -> Path:
+    output_file = data_dir.subdir("ggml_unquantized") / "ggml-model.bin"
+    run([
+        sys.executable,
+        "-u",
+        Path(__file__).resolve().parent / ".." / "llama.cpp" / "convert.py",
+        "--vocab-dir",
+        foundation_model_weights,
+        "--outfile", output_file,
+        model_checkpoint,
+    ], check=True)
+    return output_file
