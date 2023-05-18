@@ -27,7 +27,7 @@ from utils.prompter import Prompter
 
 def train(
     # model/data params
-    base_model: str = "",  # the only required argument
+    base_model: str = "decapoda-research/llama-7b-hf",  # the only required argument
     data_path: str = "yahma/alpaca-cleaned",
     output_dir: str = "./lora-alpaca",
     # training hyperparams
