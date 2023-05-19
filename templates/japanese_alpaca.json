@@ -1,0 +1,6 @@
+{
+    "description": "Template used by japanese_alpaca",
+    "prompt_input": "以下は、タスクを説明する指示と、さらなるコンテキストを提供する入力の組み合わせです。要求を適切に満たすような応答を書きなさい。\n\n### 指示:\n{instruction}\n\n### 入力:\n{input}\n\n### 応答:\n",
+    "prompt_no_input": "以下は、タスクを説明する指示と、さらなるコンテキストを提供する入力の組み合わせです。要求を適切に満たすような応答を書きなさい。\n\n### 指示:\n{instruction}\n\n### 応答:\n",
+    "response_split": "### 応答:"
+}
