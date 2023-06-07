@@ -10,3 +10,4 @@ git+https://github.com/huggingface/peft.git
 git+https://github.com/huggingface/transformers.git
 sentencepiece
 gradio
+scipy
