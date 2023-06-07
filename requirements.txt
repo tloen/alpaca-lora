@@ -1,12 +1,13 @@
-accelerate
+git+https://github.com/huggingface/accelerate.git
 appdirs
 loralib
-bitsandbytes
+bitsandbytes>=0.39.0
 black
 black[jupyter]
 datasets
 fire
 git+https://github.com/huggingface/peft.git
-transformers>=4.28.0
+git+https://github.com/huggingface/transformers.git
 sentencepiece
 gradio
+scipy

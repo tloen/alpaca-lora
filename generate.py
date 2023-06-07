@@ -6,7 +6,7 @@ import gradio as gr
 import torch
 import transformers
 from peft import PeftModel
-from transformers import GenerationConfig, LlamaForCausalLM, LlamaTokenizer
+from transformers import GenerationConfig, LlamaForCausalLM, LlamaTokenizer, BitsAndBytesConfig
 
 from utils.callbacks import Iteratorize, Stream
 from utils.prompter import Prompter
@@ -25,6 +25,7 @@ except:  # noqa: E722
 
 def main(
     load_8bit: bool = False,
+    load_4bit: bool = False,
     base_model: str = "",
     lora_weights: str = "tloen/alpaca-lora-7b",
     prompt_template: str = "",  # The prompt template to use, will default to alpaca.
@@ -39,12 +40,17 @@ def main(
     prompter = Prompter(prompt_template)
     tokenizer = LlamaTokenizer.from_pretrained(base_model)
     if device == "cuda":
-        model = LlamaForCausalLM.from_pretrained(
-            base_model,
+        load_8bit = False if load_4bit else load_8bit 
+        bnb_config = BitsAndBytesConfig(
+            load_in_4bit=load_4bit,
             load_in_8bit=load_8bit,
-            torch_dtype=torch.float16,
-            device_map="auto",
+            bnb_4bit_use_double_quant=True,
+            bnb_4bit_quant_type="nf4",
+            bnb_4bit_compute_dtype=torch.float16,
         )
+        model = LlamaForCausalLM.from_pretrained(
+            base_model, quantization_config=bnb_config, torch_dtype=torch.float16, device_map="auto"
+            )
         model = PeftModel.from_pretrained(
             model,
             lora_weights,
@@ -77,7 +83,7 @@ def main(
     model.config.bos_token_id = 1
     model.config.eos_token_id = 2
 
-    if not load_8bit:
+    if not (load_8bit or load_4bit):
         model.half()  # seems to fix bugs for some users.
 
     model.eval()
