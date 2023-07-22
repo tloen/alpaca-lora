@@ -37,6 +37,7 @@ def train(
     learning_rate: float = 3e-4,
     cutoff_len: int = 256,
     val_set_size: int = 2000,
+    train_sample_ratio: float = 1.0,
     # lora hyperparams
     lora_r: int = 8,
     lora_alpha: int = 16,
@@ -223,6 +224,10 @@ def train(
     else:
         train_data = data["train"].shuffle().map(generate_and_tokenize_prompt)
         val_data = None
+
+    if train_sample_ratio < 1.0:
+        train_data = train_data.sample(train, random_state=42)
+        print(f"Warn: Only train model using {len(train_data)} rows in the original dataset")
 
     if not ddp and torch.cuda.device_count() > 1:
         # keeps Trainer from trying its own DataParallelism when more than 1 gpu is available
