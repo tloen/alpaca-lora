@@ -1,6 +1,6 @@
 import os
 import sys
-from typing import List
+from typing import List, Optional
 
 import fire
 import torch
@@ -37,7 +37,7 @@ def train(
     learning_rate: float = 3e-4,
     cutoff_len: int = 256,
     val_set_size: int = 2000,
-    train_sample_ratio: float = 1.0,
+    train_sample_n: Optional[int] = None,
     # lora hyperparams
     lora_r: int = 8,
     lora_alpha: int = 16,
@@ -225,8 +225,8 @@ def train(
         train_data = data["train"].shuffle().map(generate_and_tokenize_prompt)
         val_data = None
 
-    if train_sample_ratio < 1.0:
-        train_data = train_data.sample(train, random_state=42)
+    if train_sample_n:
+        train_data = train_data[:train_sample_n]
         print(f"Warn: Only train model using {len(train_data)} rows in the original dataset")
 
     if not ddp and torch.cuda.device_count() > 1:
