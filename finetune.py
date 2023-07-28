@@ -273,7 +273,7 @@ def train(
     trainer.train(resume_from_checkpoint=resume_from_checkpoint)
 
     model.save_pretrained(output_dir)
-    add tokenizer.save_pretrained(output_dir)
+    tokenizer.save_pretrained(output_dir)
 
     print(
         "\n If there's a warning about missing keys above, please disregard :)"
