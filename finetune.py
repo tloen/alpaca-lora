@@ -212,7 +212,7 @@ def train(
 
     if val_set_size > 0:
         train_val = data["train"].train_test_split(
-            test_size=val_set_size, shuffle=True, seed=42
+            test_size=0.1, shuffle=True, seed=42
         )
         train_data = (
             train_val["train"].shuffle().map(generate_and_tokenize_prompt)
@@ -273,6 +273,7 @@ def train(
     trainer.train(resume_from_checkpoint=resume_from_checkpoint)
 
     model.save_pretrained(output_dir)
+    add tokenizer.save_pretrained(output_dir)
 
     print(
         "\n If there's a warning about missing keys above, please disregard :)"
