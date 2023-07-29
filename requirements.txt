@@ -11,3 +11,6 @@ transformers>=4.28.0
 sentencepiece
 transformers
 spacy
+fire
+torch
+datasets
