@@ -1,3 +1,5 @@
+cchardet
+scipy
 accelerate
 appdirs
 loralib
