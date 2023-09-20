@@ -2,6 +2,7 @@ out/
 7B/
 13B/
 __pycache__/
+.ipynb_checkpoints/
 checkpoint**
 minimal-llama**
 upload.py
@@ -13,3 +14,4 @@ test_data.json
 todo.txt
 .venv
 .vscode
+*.trt
