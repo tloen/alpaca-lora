@@ -33,51 +33,11 @@ class LlamaMLP(nn.Module):
         self.act_fn = SiLUActivation()
         self.init = False
 
-    def export(self):
-        batch_size = 4
-        # self.gate_proj.weight
+        # tensorRT
         self.logger = trt.Logger(trt.Logger.ERROR)
         self.builder = trt.Builder(self.logger)
         self.network = self.builder.create_network(1 << int(trt.NetworkDefinitionCreationFlag.EXPLICIT_BATCH))
         self.config = self.builder.create_builder_config()
-
-        # input
-        # second `1` is necessary for tensorRT, to turn this vector into NCHW
-        inputT0 = self.network.add_input('inputT0', trt.DataType.FLOAT, (batch_size, 1, -1, 4096))
-
-        # dynamic shape optimization
-        profile = self.builder.create_optimization_profile()
-        profile.set_shape("inputT0", (batch_size, 1, 1, 4096), (batch_size, 1, 1, 4096), (batch_size, 1, 256, 4096))
-        self.config.add_optimization_profile(profile)
-
-        # self.up_proj(x)
-        up_proj_weight = torch.tensor(self.up_proj.weight).cpu().numpy()
-        up_proj_layer = self.network.add_fully_connected(inputT0, self.intermediate_size, up_proj_weight)
-
-        # act_fn(self.gate_proj(x))
-        gate_proj_weight = torch.tensor(self.gate_proj.weight).cpu().numpy()
-        gate_proj_layer = self.network.add_fully_connected(inputT0, self.intermediate_size, gate_proj_weight)
-
-        selu_sigmoid_layer = self.network.add_activation(gate_proj_layer.get_output(0), type=trt.ActivationType.SIGMOID)
-        selu_mult_layer = self.network.add_elementwise(gate_proj_layer.get_output(0), selu_sigmoid_layer.get_output(0), op=trt.ElementWiseOperation.PROD)
-
-        # act_fn(self.gate_proj(x)) * self.up_proj(x)
-        before_down_proj_layer = self.network.add_elementwise(selu_mult_layer.get_output(0), up_proj_layer.get_output(0), op=trt.ElementWiseOperation.PROD)
-
-        down_proj_weight = torch.tensor(self.down_proj.weight).cpu().numpy()
-        down_proj_layer = self.network.add_fully_connected(before_down_proj_layer.get_output(0), self.hidden_size, down_proj_weight)
-
-        # output
-        self.network.mark_output(down_proj_layer.get_output(0))
-
-        self.engineString = self.builder.build_serialized_network(self.network, self.config)
-
-        self.engine = trt.Runtime(self.logger).deserialize_cuda_engine(self.engineString)
-        self.context = self.engine.create_execution_context()
-
-        print("Completed creating Engine")
-        with open("trt_mlp.trt", "wb") as f:
-            f.write(self.engine.serialize())
 
     def load(self, dir):
         weights = torch.load(dir)
@@ -88,30 +48,16 @@ class LlamaMLP(nn.Module):
 
         self.load_state_dict(mlp_weights)
 
-    def trt_load(self, dir):
-        batch_size = 4
-        # self.gate_proj.weight
-        self.logger = trt.Logger(trt.Logger.ERROR)
-        self.builder = trt.Builder(self.logger)
-        self.network = self.builder.create_network(1 << int(trt.NetworkDefinitionCreationFlag.EXPLICIT_BATCH))
-        self.config = self.builder.create_builder_config()
-        with open(dir, "rb") as f, trt.Runtime(self.logger) as runtime:
-            self.engine = runtime.deserialize_cuda_engine(f.read())
-        self.context = self.engine.create_execution_context()
-
     def forward(self, x):
         down_proj = self.down_proj(self.act_fn(self.gate_proj(x)) * self.up_proj(x))
 
         return down_proj
 
     def trt_forward(self, x):
-        # dynamic shape configure
-        print("Set input shape")
-        self.context.set_input_shape("inputT0", (4, 1, 1, 4096))
-
+        data = np.array(x)
         _, stream = cudart.cudaStreamCreate()
 
-        inputH0 = np.ascontiguousarray(x.reshape(-1))
+        inputH0 = np.ascontiguousarray(data.reshape(-1))
         outputH0 = np.empty(self.context.get_binding_shape(1), dtype=trt.nptype(self.engine.get_binding_dtype(1)))
 
         # initialize input and output data
@@ -138,32 +84,72 @@ class LlamaMLP(nn.Module):
         # return down_proj
         return outputH0
 
+    def trt_export(self):
+        batch_size = 4
+
+        # input
+        # second `1` is necessary for tensorRT, to turn this vector into NCHW
+        inputT0 = self.network.add_input('inputT0', trt.DataType.FLOAT, (batch_size, 1, -1, self.hidden_size))
+
+        # dynamic shape optimization
+        profile = self.builder.create_optimization_profile()
+        profile.set_shape("inputT0", (batch_size, 1, 1, self.hidden_size), (batch_size, 1, 1, self.hidden_size), (batch_size, 1, 256, self.hidden_size))
+        self.config.add_optimization_profile(profile)
+
+        # self.up_proj(x)
+        up_proj_weight = self.up_proj.weight.clone().detach().cpu().numpy()
+        up_proj_layer = self.network.add_fully_connected(inputT0, self.intermediate_size, up_proj_weight)
+
+        # act_fn(self.gate_proj(x))
+        gate_proj_weight = self.gate_proj.weight.clone().detach().cpu().numpy()
+        gate_proj_layer = self.network.add_fully_connected(inputT0, self.intermediate_size, gate_proj_weight)
+
+        selu_sigmoid_layer = self.network.add_activation(gate_proj_layer.get_output(0), type=trt.ActivationType.SIGMOID)
+        selu_mult_layer = self.network.add_elementwise(gate_proj_layer.get_output(0), selu_sigmoid_layer.get_output(0), op=trt.ElementWiseOperation.PROD)
+
+        # act_fn(self.gate_proj(x)) * self.up_proj(x)
+        before_down_proj_layer = self.network.add_elementwise(selu_mult_layer.get_output(0), up_proj_layer.get_output(0), op=trt.ElementWiseOperation.PROD)
+
+        down_proj_weight = self.down_proj.weight.clone().detach().cpu().numpy()
+        down_proj_layer = self.network.add_fully_connected(before_down_proj_layer.get_output(0), self.hidden_size, down_proj_weight)
+
+        # output
+        self.network.mark_output(down_proj_layer.get_output(0))
+
+        self.engineString = self.builder.build_serialized_network(self.network, self.config)
+
+        self.engine = trt.Runtime(self.logger).deserialize_cuda_engine(self.engineString)
+        self.context = self.engine.create_execution_context()
+
+        print("Completed creating Engine")
+        with open("trt_mlp.trt", "wb") as f:
+            f.write(self.engine.serialize())
+
+    def trt_load(self, dir):
+        with open(dir, "rb") as f, trt.Runtime(self.logger) as runtime:
+            self.engine = runtime.deserialize_cuda_engine(f.read())
+        self.context = self.engine.create_execution_context()
+
 
 if __name__ == "__main__":
-    # activation tester
-    # act_fn = SiLUActivation()
-    
-    # input = torch.ones(4, 2)
-    # print(act_fn(input))
-    # print(act_fn.b_forward(input))
-
     config = dict()
     config['hidden_size'] = 4096
     config['intermediate_size'] = 11008
+
     model = LlamaMLP(config)
 
+    model.load("/home/fuchiang137/.cache/huggingface/hub/models--decapoda-research--llama-7b-hf/snapshots/5f98eefcc80e437ef68d457ad7bf167c2c6a1348/pytorch_model-00018-of-00033.bin")
 
-    model.load("/home/fuchiang137/.cache/huggingface/hub/models--decapoda-research--llama-7b-hf/snapshots/5f98eefcc80e437ef68d457ad7bf167c2c6a1348/pytorch_model-00019-of-00033.bin")
-
-    input = torch.ones(4, 1, 4096)
-    output = model(input)
+    batch_size, seq_len, hidden_size = 4, 1, 4096
+    data = torch.ones(batch_size, seq_len, hidden_size)
+    output = model(data)
+    print("output torch :", output.shape)
     print(output)
-    print(output.shape)
-    # model.export()
 
-    model.trt_load("/home/fuchiang137/LLM_infer/trt_LLM/alpaca-lora/trt_mlp.trt")
-    input = np.ones((4, 1, 4096))
-    output_trt = model.trt_forward(input)
+    # choose one of the following: export or trt_load
+    model.trt_export()
+    # model.trt_load("/home/fuchiang137/LLM_infer/trt_LLM/alpaca-lora/trt_dev/trt_weight/trt_mlp.trt")
+    output_trt = model.trt_forward(data)
     output_trt = output_trt.reshape(output.shape)
-    print("output_trt :", output_trt.shape)
+    print("output trt :", output_trt.shape)
     print(output_trt)
