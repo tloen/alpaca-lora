@@ -42,6 +42,8 @@ def test_trt(nIn, hIn, wIn, cOut, raw_data, weight, bias):
     
     # input
     inputT0 = network.add_input('inputT0', trt.DataType.FLOAT, (nIn, -1, hIn))
+    epsilon_weight = np.array([1e-06]).reshape((1, 1, 1)).astype('float32')
+    epsilon = network.add_constant(shape=list(epsilon_weight.shape), weights=trt.Weights(epsilon_weight))
 
     # dynamic shape optimization
     profile = builder.create_optimization_profile();
@@ -49,20 +51,23 @@ def test_trt(nIn, hIn, wIn, cOut, raw_data, weight, bias):
     config.add_optimization_profile(profile)
     
     # RMSNorm Layer: 1) Square: X^2 -> 2) Sum: sum of all x^2 -> 3) Mean: 1/N -> 4) Root: sqrt(X) -> 5) Division: 1/X
-    
     # 1) Square: X^2
     RMSNorm_Square_layer = network.add_elementwise(inputT0, inputT0, op=trt.ElementWiseOperation.PROD)
     
     # 2) Sum: sum of all X^2
     RMSNorm_Sum_layer = network.add_reduce(RMSNorm_Square_layer.get_output(0), op=trt.ReduceOperation.SUM, axes=1, keep_dims=True)
     
-    # 3) Mean: 1/N
+    # 3) Mean: 1/N, axes is "bits mask" -> 7 = [1 1 1]
     RMSNorm_Mean_layer = network.add_reduce(RMSNorm_Sum_layer.get_output(0), op=trt.ReduceOperation.AVG, axes=7, keep_dims=True)
     
-    # 4) Root: sqrt(X)
-    RMSNorm_Sqrt_layer = network.add_unary(RMSNorm_Mean_layer.get_output(0), op=trt.UnaryOperation.SQRT)
+    # 4) Add epsilon
+    RMSNorm_Mean_with_epsilon_layer = network.add_elementwise(RMSNorm_Mean_layer.get_output(0),
+                                                              epsilon.get_output(0), op=trt.ElementWiseOperation.SUM)
     
-    # 5) Division: 1/X
+    # 5) Root: sqrt(X)
+    RMSNorm_Sqrt_layer = network.add_unary(RMSNorm_Mean_with_epsilon_layer.get_output(0), op=trt.UnaryOperation.SQRT)
+    
+    # 6) Division: 1/X
     RMSNorm_Div_layer = network.add_elementwise(inputT0, RMSNorm_Sqrt_layer.get_output(0), op=trt.ElementWiseOperation.DIV)
     
     # output
