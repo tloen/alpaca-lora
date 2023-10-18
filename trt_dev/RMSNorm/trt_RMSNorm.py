@@ -21,7 +21,7 @@ class RMSNorm(nn.Module):
         # (Dim) * (B, Seq_Len, Dim) = (B, Seq_Len, Dim)
         return self.weight * self._norm(x.float()).type_as(x)
     
-def test_torch(nIn, hIn, wIn, cOut, raw_data, weight, bias):
+def test_torch(nIn, hIn, wIn, cOut, raw_data):
     data = torch.tensor(raw_data).reshape(-1)
     
     model = RMSNorm(1)
@@ -31,7 +31,7 @@ def test_torch(nIn, hIn, wIn, cOut, raw_data, weight, bias):
     return output
 
 
-def test_trt(nIn, hIn, wIn, cOut, raw_data, weight, bias):
+def test_trt(nIn, hIn, wIn, cOut, raw_data):
     data = np.array(raw_data)
 
     logger = trt.Logger(trt.Logger.ERROR)
@@ -41,13 +41,15 @@ def test_trt(nIn, hIn, wIn, cOut, raw_data, weight, bias):
     config = builder.create_builder_config()
     
     # input
-    inputT0 = network.add_input('inputT0', trt.DataType.FLOAT, (nIn, -1, hIn))
-    epsilon_weight = np.array([1e-06]).reshape((1, 1, 1)).astype('float32')
+    inputT0 = network.add_input('inputT0', trt.DataType.FLOAT, [-1])
+    avg_factor = np.array([nIn * hIn * wIn]).astype('float32')
+    epsilon_weight = np.array([1e-06]).astype('float32')
+    avg_tensor = network.add_constant(shape=list(avg_factor.shape), weights=trt.Weights(avg_factor))
     epsilon = network.add_constant(shape=list(epsilon_weight.shape), weights=trt.Weights(epsilon_weight))
 
     # dynamic shape optimization
     profile = builder.create_optimization_profile();
-    profile.set_shape("inputT0", (nIn, 1, hIn), (nIn, 2, hIn), (nIn, 3, hIn)) 
+    profile.set_shape("inputT0", [1], [hIn*wIn], [nIn*hIn*wIn]) 
     config.add_optimization_profile(profile)
     
     # RMSNorm Layer: 1) Square: X^2 -> 2) Sum: sum of all x^2 -> 3) Mean: 1/N -> 4) Root: sqrt(X) -> 5) Division: 1/X
@@ -57,8 +59,10 @@ def test_trt(nIn, hIn, wIn, cOut, raw_data, weight, bias):
     # 2) Sum: sum of all X^2
     RMSNorm_Sum_layer = network.add_reduce(RMSNorm_Square_layer.get_output(0), op=trt.ReduceOperation.SUM, axes=1, keep_dims=True)
     
-    # 3) Mean: 1/N, axes is "bits mask" -> 7 = [1 1 1]
-    RMSNorm_Mean_layer = network.add_reduce(RMSNorm_Sum_layer.get_output(0), op=trt.ReduceOperation.AVG, axes=7, keep_dims=True)
+    # 3) Mean: 1/N
+    RMSNorm_Mean_layer = network.add_elementwise(RMSNorm_Sum_layer.get_output(0),
+                                                 avg_tensor.get_output(0),
+                                                 op=trt.ElementWiseOperation.DIV)
     
     # 4) Add epsilon
     RMSNorm_Mean_with_epsilon_layer = network.add_elementwise(RMSNorm_Mean_layer.get_output(0),
@@ -81,8 +85,8 @@ def test_trt(nIn, hIn, wIn, cOut, raw_data, weight, bias):
 
     # dynamic shape configure
     print("Set input shape")
-    context.set_input_shape("inputT0", (nIn, 2, hIn))
-    context.set_binding_shape(0, (nIn, 2, hIn))
+    context.set_input_shape("inputT0", [nIn * hIn * wIn])
+    context.set_binding_shape(0, [nIn * hIn * wIn])
 
     _, stream = cudart.cudaStreamCreate()
 
@@ -115,27 +119,27 @@ def test_trt(nIn, hIn, wIn, cOut, raw_data, weight, bias):
     
 if __name__ == "__main__":
     # Input tensor shape NCHW
-    nIn, hIn, wIn = 1, 2, 2
+    nIn, hIn, wIn = 4, 45, 4096
 
     # Output tensor shape C
     cOut = 2
 
     # Input tensor
-    data = np.arange(hIn * wIn, dtype=np.float32).reshape(nIn, hIn, wIn)
+    data = np.arange(nIn * hIn * wIn, dtype=np.float32).reshape(nIn, hIn, wIn)
 
-    # fully connected weight
-    weight = np.ones(cOut * hIn * wIn, dtype=np.float32).reshape(cOut, hIn * wIn)
+    # fully connected weight (not used)
+    #weight = np.ones(cOut * hIn * wIn, dtype=np.float32).reshape(cOut, hIn * wIn)
 
-    # fully connected bias
-    bias = np.zeros(cOut, dtype=np.float32)
+    # fully connected bias (not used)
+    #bias = np.zeros(cOut, dtype=np.float32)
     
     print("inputH0 :", data.shape)
-    print(data)
+    #print(data)
     
-    output_trt = test_trt(nIn, hIn, wIn, cOut, data, weight, bias).reshape(-1)
+    output_trt = test_trt(nIn, hIn, wIn, cOut, data).reshape(-1)
     print("output_trt :", output_trt.shape)
     print(output_trt)
 
-    output_torch = test_torch(nIn, hIn, wIn, cOut, data, weight, bias)
+    output_torch = test_torch(nIn, hIn, wIn, cOut, data)
     print("output_torch :", output_torch.shape)
     print(output_torch)
