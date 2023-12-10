@@ -13,6 +13,7 @@ WORKDIR /workspace
 COPY requirements.txt requirements.txt
 RUN curl -sS https://bootstrap.pypa.io/get-pip.py | python3.10 \
     && python3.10 -m pip install -r requirements.txt \
-    && python3.10 -m pip install numpy --pre torch --force-reinstall --index-url https://download.pytorch.org/whl/nightly/cu118
+    && python3.10 -m pip install numpy --pre torch --force-reinstall --index-url https://download.pytorch.org/whl/nightly/cu118 \
+    && python3.10 -m pip install scipy
 COPY . .
 ENTRYPOINT [ "python3.10"]
