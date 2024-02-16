@@ -4,6 +4,7 @@ A dedicated helper to manage templates and prompt building.
 
 import json
 import os.path as osp
+import re
 from typing import Union
 
 
@@ -47,5 +48,7 @@ class Prompter(object):
             print(res)
         return res
 
+    
     def get_response(self, output: str) -> str:
-        return output.split(self.template["response_split"])[1].strip()
+        return re.split(re.compile(self.template["response_split"], re.IGNORECASE), output)[1].strip()
+
