@@ -23,6 +23,9 @@ from peft import (
 from transformers import LlamaForCausalLM, LlamaTokenizer
 
 from utils.prompter import Prompter
+# from DataCollator import DataCollatorForSeq2Seq  # for debugging
+
+from huggingface_hub import login
 
 
 def train(
@@ -30,13 +33,14 @@ def train(
     base_model: str = "",  # the only required argument
     data_path: str = "yahma/alpaca-cleaned",
     output_dir: str = "./lora-alpaca",
+    cache_dir: str = "./cache",
     # training hyperparams
     batch_size: int = 128,
     micro_batch_size: int = 4,
     num_epochs: int = 3,
     learning_rate: float = 3e-4,
     cutoff_len: int = 256,
-    val_set_size: int = 2000,
+    val_set_size: int = 0,  # skip evaluation, cuz we assume all the models are trained on the same size of data # TODO: fix the cuda error when eval
     # lora hyperparams
     lora_r: int = 8,
     lora_alpha: int = 16,
@@ -89,6 +93,8 @@ def train(
     gradient_accumulation_steps = batch_size // micro_batch_size
 
     prompter = Prompter(prompt_template_name)
+    
+    assert not train_on_inputs, "train_on_inputs must be false, cuz we don't wanna model to be trained with the loss on the inputs"
 
     device_map = "auto"
     world_size = int(os.environ.get("WORLD_SIZE", 1))
@@ -121,7 +127,20 @@ def train(
     tokenizer.pad_token_id = (
         0  # unk. we want this to be different from the eos token
     )
+    
+    
+    # to fix the unk prediction error (the model' sprediction are all unk), change the pad_token_id to a new value
+    # print(tokenizer.convert_ids_to_tokens(len(tokenizer)-1)) 
+    # exit()
+    # print(len(tokenizer))
+    # tokenizer.add_special_tokens({"pad_token": "<pad>"})  # add a new pad token, better for understanding and debugging
+    # tokenizer.pad_token_id = len(tokenizer)  # the last token is the pad token
+    # print(tokenizer.special_tokens_map)
+    # print(tokenizer.pad_token_id)
+    # exit()
+    # tokenizer.padding_side = "right"  # right padding to better for understanding the model's output (better debug), but "left" should make more sense for autoregressive model
     tokenizer.padding_side = "left"  # Allow batched inference
+    
 
     def tokenize(prompt, add_eos_token=True):
         # there's probably a way to do this with the tokenizer settings
@@ -169,6 +188,10 @@ def train(
             ] * user_prompt_len + tokenized_full_prompt["labels"][
                 user_prompt_len:
             ]  # could be sped up, probably
+        
+        # print(tokenized_full_prompt)
+        # exit()
+        
         return tokenized_full_prompt
 
     model = prepare_model_for_int8_training(model)
@@ -184,9 +207,9 @@ def train(
     model = get_peft_model(model, config)
 
     if data_path.endswith(".json") or data_path.endswith(".jsonl"):
-        data = load_dataset("json", data_files=data_path)
+        data = load_dataset("json", data_files=data_path, cache_dir=cache_dir)
     else:
-        data = load_dataset(data_path)
+        data = load_dataset(data_path, cache_dir=cache_dir)
 
     if resume_from_checkpoint:
         # Check the available weights and load them
@@ -257,18 +280,19 @@ def train(
         data_collator=transformers.DataCollatorForSeq2Seq(
             tokenizer, pad_to_multiple_of=8, return_tensors="pt", padding=True
         ),
-    )
+    )  # DataCollatorForSeq2Seq
     model.config.use_cache = False
 
     old_state_dict = model.state_dict
-    model.state_dict = (
-        lambda self, *_, **__: get_peft_model_state_dict(
-            self, old_state_dict()
-        )
-    ).__get__(model, type(model))
+    # Warning: delete the following lines due to the incompatibility of .safetensors file and PEFT api: https://github.com/tloen/alpaca-lora/issues/609
+    # model.state_dict = (
+    #     lambda self, *_, **__: get_peft_model_state_dict(
+    #         self, old_state_dict()
+    #     )
+    # ).__get__(model, type(model))
 
-    if torch.__version__ >= "2" and sys.platform != "win32":
-        model = torch.compile(model)
+    # if torch.__version__ >= "2" and sys.platform != "win32":
+    #     model = torch.compile(model)
 
     trainer.train(resume_from_checkpoint=resume_from_checkpoint)
 

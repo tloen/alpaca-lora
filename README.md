@@ -1,3 +1,15 @@
+
+Forked from Alpaca-LoRA, modify some parts of the code for my cutomized usage.
+
+- add batched evaluation.
+- add metric calculation.
+- fix the error from `torch.complie` and the PEFT APIs. see [issue](https://github.com/tloen/alpaca-lora/issues/609)
+- ...
+
+
+
+
+
 # 🦙🌲🤏 Alpaca-LoRA
 
 - 🤗 **Try the pretrained model out [here](https://huggingface.co/spaces/tloen/alpaca-lora), courtesy of a GPU grant from Huggingface!**
