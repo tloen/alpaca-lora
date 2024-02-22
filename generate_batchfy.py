@@ -15,7 +15,6 @@ from utils.callbacks import Iteratorize, Stream
 from utils.prompter import Prompter
 
 from huggingface_hub import login
-login("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")
 
 if torch.cuda.is_available():
     device = "cuda"
