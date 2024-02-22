@@ -26,7 +26,6 @@ from utils.prompter import Prompter
 # from DataCollator import DataCollatorForSeq2Seq  # for debugging
 
 from huggingface_hub import login
-login("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")  # download from our own hf repo (cuz i dont have the access permission on the public one)
 
 
 def train(
