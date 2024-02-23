@@ -185,17 +185,16 @@ def main(
             gr.components.Checkbox(label="Stream output"),
         ],
         outputs=[
-            gr.inputs.Textbox(
+            gr.Textbox(
                 lines=5,
                 label="Output",
             )
         ],
         title="🦙🌲 Alpaca-LoRA",
         description="Alpaca-LoRA is a 7B-parameter LLaMA model finetuned to follow instructions. It is trained on the [Stanford Alpaca](https://github.com/tatsu-lab/stanford_alpaca) dataset and makes use of the Huggingface LLaMA implementation. For more information, please visit [the project's website](https://github.com/tloen/alpaca-lora).",  # noqa: E501
-    ).queue().launch(server_name="0.0.0.0", share=share_gradio)
+    ).queue().launch(server_name="127.0.0.1", share=True)
     # Old testing code follows.
 
-    """
     # testing code for readme
     for instruction in [
         "Tell me about alpacas.",
@@ -211,7 +210,6 @@ def main(
         print("Instruction:", instruction)
         print("Response:", evaluate(instruction))
         print()
-    """
 
 
 if __name__ == "__main__":
