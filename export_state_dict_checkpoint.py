@@ -7,6 +7,9 @@ from peft import PeftModel
 from transformers import LlamaForCausalLM, LlamaTokenizer  # noqa: E402
 
 BASE_MODEL = os.environ.get("BASE_MODEL", None)
+LORA_MODEL = os.environ.get("LORA_MODEL", "tloen/alpaca-lora-7b")
+PTH_CHECKPOINT_PREFIX = os.environ.get("PTH_CHECKPOINT_PREFIX", "./ckpt")
+
 assert (
     BASE_MODEL
 ), "Please specify a value for BASE_MODEL environment variable, e.g. `export BASE_MODEL=huggyllama/llama-7b`"  # noqa: E501
@@ -22,7 +25,8 @@ base_model = LlamaForCausalLM.from_pretrained(
 
 lora_model = PeftModel.from_pretrained(
     base_model,
-    "tloen/alpaca-lora-7b",
+    # "tloen/alpaca-lora-7b",
+    LORA_MODEL,
     device_map={"": "cpu"},
     torch_dtype=torch.float16,
 )
@@ -110,6 +114,8 @@ def translate_state_dict_key(k):  # noqa: C901
 
 new_state_dict = {}
 for k, v in lora_model_sd.items():
+    print(111111111111)
+    print(k)
     new_k = translate_state_dict_key(k)
     if new_k is not None:
         if "wq" in new_k or "wk" in new_k:
@@ -117,9 +123,9 @@ for k, v in lora_model_sd.items():
         else:
             new_state_dict[new_k] = v
 
-os.makedirs("./ckpt", exist_ok=True)
+os.makedirs(PTH_CHECKPOINT_PREFIX, exist_ok=True)
 
-torch.save(new_state_dict, "./ckpt/consolidated.00.pth")
+torch.save(new_state_dict, PTH_CHECKPOINT_PREFIX+"/consolidated.00.pth")
 
 with open("./ckpt/params.json", "w") as f:
     json.dump(params, f)

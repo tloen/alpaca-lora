@@ -1,0 +1,15 @@
+模型训练
+date;python3.8  finetune.py  --base_model '/local/mnt/workspace/xinxniu/huggingfacemodel'   --data_path='mytrain.json'   --output_dir='myresult2'   --num_epochs=600    --group_by_length    --lora_target_modules='[q_proj,k_proj,v_proj,o_proj]'     --val_set_size=94;date
+date;python3.8  finetune.py  --base_model '/local/mnt/workspace/xinxniu/llama-7b-hf'   --data_path='mytrain.json'   --output_dir='myresult'   --num_epochs=200    --group_by_length    --lora_target_modules='[q_proj,k_proj,v_proj,o_proj]'     --val_set_size=94;date
+
+模型推理：
+python3.8 generate.py --load_8bit --base_model '/local/mnt/workspace/xinxniu/huggingfacemodel' --lora_weights '/local/mnt/workspace/xinxniu/alpaca-lora/myresult2'
+
+模型转化：
+export BASE_MODEL=/local/mnt/workspace/xinxniu/huggingfacemodel
+export LORA_MODEL=/local/mnt/workspace/xinxniu/alpaca-lora/myresult2
+export PTH_CHECKPOINT_PREFIX=/local/mnt/workspace/xinxniu/alpaca-lora/llama2-7b_transferred
+python export_state_dict_checkpoint.py
+
+
+
